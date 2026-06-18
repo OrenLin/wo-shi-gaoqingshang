@@ -5,7 +5,7 @@ import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.VITE_BASE_URL || '/wo-shi-gaoqingshang/',
+  base: '/wo-shi-gaoqingshang/',
   build: {
     sourcemap: 'hidden',
   },

@@ -20,6 +20,8 @@ export interface Scene {
   emoji: string;
   description: string;
   bgImage: string; // 背景配图
+  bgColor: string; // 背景渐变主色
+  accentColor: string; // 场景强调色
   characters: Character[];
   triggerDialog: string;
   options: Option[];
@@ -32,7 +34,9 @@ export const scenes: Scene[] = [
     title: '年夜饭·七大姑八大姨',
     emoji: '🧨',
     description: '过年回家，年夜饭桌上的灵魂拷问',
-    bgImage: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Japanese+anime+comedy+style+first-person+POV+low+angle+shot+Chinese+New+Year+family+dinner+round+table+scene+players+hands+visible+at+bottom+on+table+left+side+aunt+standing+up+leaning+forward+toward+camera+fake+smile+four+relatives+around+table+all+leaning+forward+watching+camera+some+laughing+some+nodding+dumplings+fish+dishes+fireworks+decorations+on+table+warm+yellow+indoor+lighting+Q+version+cute+chibi+thick+paint+illustration+high+saturation+warm+colors+clean+lines+no+text+comic+speed+lines+for+tension+game+event+card+style+detailed+rich+atmosphere&image_size=landscape_16_9',
+    bgImage: new URL('../assets/bg-family-dinner.svg', import.meta.url).href,
+    bgColor: 'from-red-500/80 via-orange-400/60 to-amber-500/70',
+    accentColor: 'red',
     characters: [
       { name: '大姑', emoji: '👩', description: '催婚主力军' },
       { name: '表姐', emoji: '👱‍♀️', description: '别人家的孩子' },
@@ -77,7 +81,9 @@ export const scenes: Scene[] = [
     title: '职场·老板的送命题',
     emoji: '💼',
     description: '周五下班前的"不着急"任务',
-    bgImage: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Japanese+anime+exaggerated+comedy+style+first-person+POV+low+angle+office+scene+players+hands+holding+backpack+visible+at+bottom+bald+potbellied+middle-aged+boss+in+front+leaning+toward+camera+smiling+fake+smile+asking+about+overtime+right+side+female+colleague+leaning+on+desk+arms+crossed+smirking+watching+drama+background+desks+computers+files+sunset+window+lighting+other+colleagues+peeking+warm+office+lighting+Q+version+cute+chibi+thick+paint+style+clean+lines+high+saturation+no+text+comic+speed+lines+for+impact+game+level+background+detailed+rich+workplace+pressure+atmosphere&image_size=landscape_16_9',
+    bgImage: new URL('../assets/bg-office.svg', import.meta.url).href,
+    bgColor: 'from-orange-500/80 via-amber-400/60 to-yellow-500/70',
+    accentColor: 'orange',
     characters: [
       { name: '王总', emoji: '🤵', description: '笑里藏刀型领导' },
       { name: '李经理', emoji: '👨‍💼', description: '旁边看戏的同事' }
@@ -121,7 +127,9 @@ export const scenes: Scene[] = [
     title: '酒局·被迫营业',
     emoji: '🍻',
     description: '客户敬酒，项目生死未卜',
-    bgImage: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Japanese+anime+comedy+style+first-person+POV+low+angle+Chinese+restaurant+private+room+round+table+scene+players+hands+on+table+visible+at+bottom+center+bald+potbellied+middle-aged+leader+super+close-up+face+close+to+lens+flushed+red+cheeks+from+alcohol+fake+smile+holding+wine+glass+toward+camera+four+drunk+red-faced+business+clients+around+table+all+leaning+forward+raising+glasses+bottles+cheering+hotpot+skewers+beer+dishes+on+table+warm+gold+private+room+lighting+Q+version+cute+chibi+thick+paint+illustration+soft+brushstrokes+warm+colors+no+text+depth+of+field+blur+comic+speed+lines+pressure+tension+game+scene+card+style+rich+detailed+atmosphere&image_size=landscape_16_9',
+    bgImage: new URL('../assets/bg-dinner.svg', import.meta.url).href,
+    bgColor: 'from-amber-600/80 via-orange-500/60 to-red-500/70',
+    accentColor: 'amber',
     characters: [
       { name: '刘总', emoji: '👨', description: '豪爽型客户' },
       { name: '张哥', emoji: '🧔', description: '你的直属领导' }
