@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { audioManager } from '../utils/audioManager';
 import PageTopBar from '../components/ui/PageTopBar';
@@ -21,14 +21,17 @@ export default function Game() {
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [useCustom, setUseCustom] = useState(false);
+  // 控制内容滑入动画的 key（题目变化时切换，触发重渲染+动画）
+  const [contentKey, setContentKey] = useState(0);
 
   const scene = getCurrentScene();
   const qInfo = getCurrentQuestion();
 
-  // 新场景进来重置
+  // 新题目进来：重置状态 + 触发滑入动画
   useEffect(() => {
     setSelectedOption(null);
     setUseCustom(false);
+    setContentKey(k => k + 1);
   }, [scene?.id, qInfo?.question.id]);
 
   if (!scene || !qInfo) {
@@ -41,7 +44,7 @@ export default function Game() {
   }
 
   const question = qInfo.question;
-  const qIndex = qInfo.questionIndex; // 从 0 开始
+  const qIndex = qInfo.questionIndex;
   const totalQs = scene.questions.length;
   const customKey = `${scene.id}:${question.id}`;
 
@@ -67,7 +70,6 @@ export default function Game() {
     ? (customInputs[customKey] ?? '').trim().length > 0
     : !!selectedOption;
 
-  // 题目人物（优先用题目自己的，否则使用场景默认）
   const speaker = question.characters?.[0] ?? scene.characters[0];
 
   return (
@@ -92,8 +94,8 @@ export default function Game() {
         ]}
       />
 
-      <div className="relative z-10 min-h-screen py-5 px-3 md:px-5">
-        <div className="max-w-2xl mx-auto">
+      <div className="relative z-10 min-h-screen py-5 px-3 md:px-5 flex flex-col">
+        <div className="max-w-2xl mx-auto w-full">
           {/* 顶栏 */}
           <PageTopBar
             onBack={() => setPage('select')}
@@ -101,53 +103,60 @@ export default function Game() {
           />
 
           {/* 进度条 */}
-          <div className="mb-5">
+          <div className="mb-4">
             <ProgressBar current={qIndex + 1} total={totalQs} />
           </div>
 
-          {/* 对话气泡 */}
-          <div className="mb-5 animate-pop-in">
-            <BubbleDialog
-              character={speaker}
-              dialog={question.triggerDialog}
-              badge="💬 灵魂拷问"
-            />
-          </div>
+          {/* ===== 答题内容区：每次换题从上往下滑入 ===== */}
+          <div
+            key={contentKey}
+            className="animate-slide-down"
+          >
+            {/* 对话气泡 */}
+            <div className="mb-4">
+              <BubbleDialog
+                character={speaker}
+                dialog={question.triggerDialog}
+                badge="💬 灵魂拷问"
+              />
+            </div>
 
-          {/* 选项 / 自由发挥 切换 */}
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h3 className="text-lg font-black text-white drop-shadow-md flex items-center gap-2"
-                style={{ textShadow: '2px 2px 0 rgba(26,26,46,0.6)' }}>
-              <span>💡</span>
-              你会怎么回应？
-            </h3>
-            <MangaButton
-              variant="secondary"
-              onClick={() => {
-                setUseCustom(!useCustom);
-                setSelectedOption(null);
-              }}
-              className="!py-2 !px-4 !text-xs"
-            >
-              ✍️ {useCustom ? '返回选项' : '自由发挥'}
-            </MangaButton>
-          </div>
+            {/* 选项 / 自由发挥 切换 */}
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className="text-lg font-black text-white drop-shadow-md flex items-center gap-2"
+                  style={{ textShadow: '2px 2px 0 rgba(26,26,46,0.6)' }}>
+                <span>💡</span>
+                你会怎么回应？
+              </h3>
+              <MangaButton
+                variant="secondary"
+                onClick={() => {
+                  audioManager.play('click');
+                  setUseCustom(!useCustom);
+                  setSelectedOption(null);
+                }}
+                className="!py-2 !px-4 !text-xs"
+              >
+                ✍️ {useCustom ? '返回选项' : '自由发挥'}
+              </MangaButton>
+            </div>
 
-          {useCustom ? (
-            <CustomInput
-              value={customInputs[customKey] ?? ''}
-              onChange={(v) => setCustomInput(customKey, v)}
-            />
-          ) : (
-            <OptionList
-              options={question.options}
-              selectedId={selectedOption}
-              onSelect={setSelectedOption}
-            />
-          )}
+            {useCustom ? (
+              <CustomInput
+                value={customInputs[customKey] ?? ''}
+                onChange={(v) => setCustomInput(customKey, v)}
+              />
+            ) : (
+              <OptionList
+                options={question.options}
+                selectedId={selectedOption}
+                onSelect={setSelectedOption}
+              />
+            )}
+          </div>
 
           {/* 提交按钮 */}
-          <div className="mt-6">
+          <div className="mt-5 pb-4">
             <MangaButton
               variant="primary"
               onClick={handleSubmit}

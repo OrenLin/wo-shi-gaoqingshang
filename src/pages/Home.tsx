@@ -28,7 +28,7 @@ export default function Home() {
       {/* 顶部小标识 */}
       <div className="relative z-10">
         <div className="inline-flex items-center gap-2 bg-white border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e]">
-          <span className="font-black text-sm text-[#1a1a2e]">🧠 情商测验 · 2025</span>
+          <span className="font-black text-sm text-[#1a1a2e]">🧠 情商测验 · 2026</span>
         </div>
       </div>
 

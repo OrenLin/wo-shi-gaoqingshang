@@ -4,7 +4,7 @@ import { scenes } from '../data';
 import { levelGradient } from '../data/levels';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
-import AntiKingEffect from '../components/ui/AntiKingEffect';
+import AntiKingToast from '../components/ui/AntiKingToast';
 
 export default function FinalReport() {
   const { getFinalReport, reset } = useGameStore();
@@ -37,7 +37,7 @@ export default function FinalReport() {
 
   return (
     <>
-      {showEffect && <AntiKingEffect onComplete={() => setShowEffect(false)} />}
+      {showEffect && <AntiKingToast auto onClose={() => setShowEffect(false)} />}
 
       <div className="min-h-screen relative overflow-hidden py-8 px-4"
            style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fbbf24 100%)' }}>
@@ -161,16 +161,6 @@ export default function FinalReport() {
                 {report.level.socialCopy}
               </p>
             </div>
-
-            {/* 抗压之王特效入口 */}
-            {isAntiKing && (
-              <div className="mt-4 text-center">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black text-sm px-5 py-2.5 rounded-full border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] animate-bounce cursor-pointer"
-                     onClick={() => setShowEffect(true)}>
-                  ⚡ 点击观看「抗压之王」名场面特效 →
-                </div>
-              </div>
-            )}
           </div>
 
           {/* 按钮区 */}
@@ -186,7 +176,7 @@ export default function FinalReport() {
 
           <div className="mt-6 text-center">
             <span className="inline-flex items-center gap-2 bg-white/80 border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e] text-xs font-black text-[#1a1a2e]">
-              🧠 我是高情商 · 2025 · 拒绝无效社交从我做起
+              🧠 我是高情商 · 2026 · 拒绝无效社交从我做起
             </span>
           </div>
         </div>
