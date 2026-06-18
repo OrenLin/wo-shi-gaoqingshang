@@ -32,7 +32,7 @@ export const scenes: Scene[] = [
     title: '年夜饭·七大姑八大姨',
     emoji: '🧨',
     description: '过年回家，年夜饭桌上的灵魂拷问',
-    bgImage: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800&q=80', // 新年聚餐背景
+    bgImage: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cute%20cartoon%20Chinese%20New%20Year%20family%20dinner%20scene%20with%20grandma%20pointing%20finger%20dumplings%20fish%20dishes%20warm%20yellow%20lighting%20chibi%20style&image_size=landscape_16_9',
     characters: [
       { name: '大姑', emoji: '👩', description: '催婚主力军' },
       { name: '表姐', emoji: '👱‍♀️', description: '别人家的孩子' },
@@ -77,7 +77,7 @@ export const scenes: Scene[] = [
     title: '职场·老板的送命题',
     emoji: '💼',
     description: '周五下班前的"不着急"任务',
-    bgImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80', // 办公室背景
+    bgImage: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cute%20cartoon%20office%20scene%20boss%20standing%20behind%20desk%20sunset%20light%20employee%20holding%20bag%20ready%20to%20leave%20chibi%20style&image_size=landscape_16_9',
     characters: [
       { name: '王总', emoji: '🤵', description: '笑里藏刀型领导' },
       { name: '李经理', emoji: '👨‍💼', description: '旁边看戏的同事' }
@@ -121,7 +121,7 @@ export const scenes: Scene[] = [
     title: '酒局·被迫营业',
     emoji: '🍻',
     description: '客户敬酒，项目生死未卜',
-    bgImage: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80', // 商务聚餐背景
+    bgImage: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cute%20cartoon%20business%20dinner%20party%20scene%20with%20boss%20toasting%20drinks%20hotpot%20barbecue%20dishes%20warm%20lighting%20chibi%20style&image_size=landscape_16_9',
     characters: [
       { name: '刘总', emoji: '👨', description: '豪爽型客户' },
       { name: '张哥', emoji: '🧔', description: '你的直属领导' }
