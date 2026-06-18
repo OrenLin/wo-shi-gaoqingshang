@@ -133,6 +133,13 @@ export default function Home() {
         <p className="mt-5 text-center text-xs font-bold text-[#1a1a2e]/60">
           👇 看看你是 情商之神 还是 社交杀手
         </p>
+
+        {/* 作者署名 */}
+        <div className="mt-6 pb-2 text-center">
+          <span className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-[11px] rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24]">
+            ✏️ 作者 · 森 Sen
+          </span>
+        </div>
       </div>
     </div>
   );
