@@ -70,9 +70,14 @@ export default function App() {
       <button
         onClick={() => {
           // === 关键：在用户手势同步栈内 ===
-          audioManager.userTapped();  // 如果还没解锁，立刻创建 ctx + 播解锁音
-          const muted = audioManager.toggle();
-          track('audio_toggle', { muted: muted ? 'on' : 'off' });
+          if (showAudioHint) {
+            // 用户还没解锁过：只解锁+启动BGM，不要toggle！
+            audioManager.userTapped();
+          } else {
+            // 已解锁：正常切换静音状态
+            const muted = audioManager.toggle();
+            track('audio_toggle', { muted: muted ? 'on' : 'off' });
+          }
         }}
         className={`fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-2 rounded-full
                     border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e]

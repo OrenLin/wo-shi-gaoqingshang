@@ -424,6 +424,19 @@ class AudioManager {
 
   toggle(): boolean {
     this.muted = !this.muted;
+    this.applyMuteState();
+    this.notify();
+    return this.muted;
+  }
+
+  /** 直接设置静音状态（不切换） */
+  setMuted(muted: boolean): void {
+    this.muted = muted;
+    this.applyMuteState();
+    this.notify();
+  }
+
+  private applyMuteState(): void {
     if (this.muted) {
       // 静音：停 BGM，快速淡出
       if (this.bgmRafId != null) {
@@ -444,11 +457,11 @@ class AudioManager {
         this.masterGain.gain.setValueAtTime(1.0, this.ctx.currentTime);
       }
       this.bgmEnabled = true;
-      // 需要重新触发用户手势来启动 BGM
-      this.unlockByUserGesture();
+      // 如果音频已解锁但 BGM 没在播，立刻启动
+      if (this.audioReady && !this.bgmPlaying) {
+        this.startBGMSchedule();
+      }
     }
-    this.notify();
-    return this.muted;
   }
 
   /** 页面切后台回来：尝试恢复 BGM（需用户已交互） */
