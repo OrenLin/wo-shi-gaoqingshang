@@ -49,7 +49,7 @@ export default function Game() {
   const customKey = `${scene.id}:${question.id}`;
 
   const handleSubmit = () => {
-    audioManager.ensureReady();
+    audioManager.userTapped();
     if (useCustom) {
       const text = customInputs[customKey] ?? '';
       if (text.trim().length > 0) {
@@ -132,6 +132,7 @@ export default function Game() {
               <MangaButton
                 variant="secondary"
                 onClick={() => {
+                  audioManager.userTapped();
                   audioManager.play('click');
                   setUseCustom(!useCustom);
                   setSelectedOption(null);

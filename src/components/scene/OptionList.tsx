@@ -22,7 +22,11 @@ export default function OptionList({ options, selectedId, onSelect, disabled }: 
           <button
             key={opt.id}
             disabled={disabled}
-            onClick={() => { audioManager.play('select'); onSelect(opt.id); }}
+            onClick={() => {
+              audioManager.userTapped();
+              audioManager.play('select');
+              onSelect(opt.id);
+            }}
             className={`relative w-full text-left p-4 rounded-[22px] transition-all duration-200
                         border-[3px] border-[#1a1a2e] overflow-hidden
                         ${isSelected

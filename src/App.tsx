@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Analytics, track } from '@vercel/analytics/react';
 import { useGameStore } from './store/gameStore';
 import { audioManager } from './utils/audioManager';
@@ -11,35 +11,30 @@ import FinalReport from './pages/FinalReport';
 export default function App() {
   const { currentPage } = useGameStore();
 
+  // 订阅音频管理器状态变化（用于刷新按钮图标）
+  const [audioTick, setAudioTick] = useState(0);
+  useEffect(() => {
+    return audioManager.subscribe(() => setAudioTick((n) => n + 1));
+  }, []);
+
   // ======================================================================
-  //  iOS Safari 关键：必须在用户手势的同步调用栈内
-  //  创建 + resume AudioContext。首次任意点击/触摸即启动 BGM。
-  //  BGM 通过 setInterval 持续调度，页面可见性变化时自动恢复。
+  //  iOS / 微信音频解锁方案（四层保险）：
+  //    1. audioManager.init() → 安装全局 touchstart/click 监听（一次性自动解绑）
+  //    2. 微信环境 → 自动尝试 JSBridge 解锁
+  //    3. 用户点击页面右上角"🔊 开启声音"按钮 → 同步栈内触发解锁 + BGM
+  //    4. 页面切后台 → 恢复可见时尝试恢复 BGM
   // ======================================================================
   useEffect(() => {
-    const initAudio = () => {
-      audioManager.ensureReady();
-      audioManager.startBGM();
-    };
-    document.addEventListener('click', initAudio, { once: true });
-    document.addEventListener('touchstart', initAudio, { once: true });
-    document.addEventListener('keydown', initAudio, { once: true });
+    audioManager.init();
 
-    // 页面切换到后台后再回来，确保 AudioContext 恢复
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        audioManager.ensureReady();
-        if (!audioManager.isMuted && !audioManager.isBgmPlaying) {
-          audioManager.startBGM();
-        }
+        audioManager.onPageVisible();
       }
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
-      document.removeEventListener('click', initAudio);
-      document.removeEventListener('touchstart', initAudio);
-      document.removeEventListener('keydown', initAudio);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
@@ -60,25 +55,52 @@ export default function App() {
     }
   };
 
+  // 音频按钮显示的文字 & 状态
+  // —— audioTick 确保状态变化时按钮重新渲染
+  const audioState = audioManager.state;
+  const showAudioHint = !audioState.interacted; // 用户还没触过 → 显示提示
+
   return (
     <div className="App">
       {renderPage()}
       {/* Vercel Analytics：自动统计访问者与页面浏览 */}
       <Analytics />
 
-      {/* 全局静音按钮 —— 每次点击都调用 ensureReady（避免 iOS 首次点击不认） */}
+      {/* 全局音频控制按钮 —— 始终可见，用户点击即同步栈内解锁音频 */}
       <button
         onClick={() => {
-          audioManager.ensureReady();
-          const muted = audioManager.toggleMute();
+          // === 关键：在用户手势同步栈内 ===
+          audioManager.userTapped();  // 如果还没解锁，立刻创建 ctx + 播解锁音
+          const muted = audioManager.toggle();
           track('audio_toggle', { muted: muted ? 'on' : 'off' });
         }}
-        className="fixed bottom-4 right-4 z-50 w-10 h-10 rounded-full bg-white border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e]
-                   flex items-center justify-center text-lg font-black transition-transform active:scale-90
-                   hover:scale-105"
-        title={audioManager.isMuted ? '点击开启声音' : '点击静音'}
+        className={`fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-2 rounded-full
+                    border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e]
+                    font-black text-xs md:text-sm
+                    transition-transform active:scale-90 hover:scale-105
+                    ${showAudioHint
+                      ? 'bg-yellow-300 animate-wiggle'
+                      : audioState.muted
+                        ? 'bg-white'
+                        : 'bg-emerald-300'}`}
+        title={audioState.muted ? '点击开启声音' : '点击静音'}
       >
-        {audioManager.isMuted ? '🔇' : '🔊'}
+        {showAudioHint ? (
+          <>
+            <span className="text-base">🔊</span>
+            <span className="hidden sm:inline text-[#1a1a2e]">点我开声音</span>
+          </>
+        ) : audioState.muted ? (
+          <>
+            <span className="text-base">🔇</span>
+            <span className="hidden sm:inline text-[#1a1a2e]">静音中</span>
+          </>
+        ) : (
+          <>
+            <span className="text-base animate-pulse">🎵</span>
+            <span className="hidden sm:inline text-[#1a1a2e]">声音已开</span>
+          </>
+        )}
       </button>
     </div>
   );

@@ -12,12 +12,10 @@ export default function Home() {
   const handleStart = () => {
     // ======================================================================
     // ⚠️ iOS 关键：必须在用户手势的"同一同步调用栈"内创建并播放声音
-    // 这里按顺序调用：1) ensureReady → 创建ctx + 立即播1ms解锁音
-    //                2) startBGM   → 调度BGM循环
-    //                3) 播一个"点击"音效（让用户立刻听到反馈）
+    //   userTapped() → 创建ctx + 播C6-E6可听到的解锁音 + 自动启动BGM
+    //   play('click') → 播放选中音效作为额外反馈
     // ======================================================================
-    audioManager.ensureReady();
-    audioManager.startBGM();
+    audioManager.userTapped();
     audioManager.play('click');
 
     const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '匿名高手';
@@ -25,7 +23,7 @@ export default function Home() {
     track('game_started', {
       codename: name,
       timestamp: new Date().toISOString(),
-      audio: audioManager.isUnlocked ? 'unlocked' : 'pending',
+      audio: audioManager.state.ready ? 'unlocked' : 'pending',
     });
     setPage('select');
   };
@@ -134,10 +132,13 @@ export default function Home() {
           👇 看看你是 情商之神 还是 社交杀手
         </p>
 
-        {/* 作者署名 */}
-        <div className="mt-6 pb-2 text-center">
+        {/* 作者署名 + 版本号 */}
+        <div className="mt-6 pb-2 text-center flex flex-col items-center gap-2">
           <span className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-[11px] rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24]">
-            ✏️ 作者 · 森 Sen
+            ✏️ 作者 · 森 SEN
+          </span>
+          <span className="inline-flex items-center gap-1 bg-white text-[#1a1a2e]/70 font-black text-[10px] rounded-full px-3 py-1 border-[2px] border-[#1a1a2e]/30">
+            v1.2.0 · 2026
           </span>
         </div>
       </div>
