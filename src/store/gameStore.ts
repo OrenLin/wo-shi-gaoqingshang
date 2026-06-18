@@ -38,6 +38,10 @@ interface GameState {
   currentPage: PageName;
   setPage: (page: PageName) => void;
 
+  // 用户代号（首页输入）
+  codename: string;
+  setCodename: (name: string) => void;
+
   // 场景进度
   currentSceneIndex: number;
   currentQuestionIndex: number;
@@ -83,6 +87,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   // ---------- 路由 ----------
   currentPage: 'home',
   setPage: (page) => set({ currentPage: page }),
+
+  // ---------- 用户代号 ----------
+  codename: '',
+  setCodename: (name) => set({ codename: name }),
 
   // ---------- 场景进度 ----------
   currentSceneIndex: 0,

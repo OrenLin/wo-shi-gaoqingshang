@@ -1,16 +1,33 @@
+import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { audioManager } from '../utils/audioManager';
+import { track } from '@vercel/analytics/react';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 
 export default function Home() {
-  const { setPage } = useGameStore();
+  const { setPage, setCodename } = useGameStore();
+  const [codename, setCodenameInput] = useState('');
+
+  const handleStart = () => {
+    const trimmed = codename.trim();
+    const name = trimmed.length > 0 ? trimmed.slice(0, 20) : '匿名高手';
+    audioManager.ensureReady();      // 同步初始化 AudioContext（iOS 关键）
+    audioManager.startBGM();          // 启动背景音乐（持续播放）
+    setCodename(name);
+    // 📊 Vercel Analytics 追踪事件（可在项目面板查看）
+    track('game_started', {
+      codename: name,
+      timestamp: new Date().toISOString(),
+    });
+    setPage('select');
+  };
 
   return (
     <div
       className="min-h-screen relative overflow-hidden flex flex-col items-center justify-between py-12 px-5"
       style={{ background: 'linear-gradient(180deg, #fef3c7 0%, #fde68a 55%, #fbbf24 100%)' }}
     >
-      {/* 斜条纹背景 */}
       <div className="absolute inset-0 manga-stripes opacity-30 pointer-events-none" />
 
       <FloatingEmojis
@@ -39,11 +56,11 @@ export default function Home() {
           <div className="absolute -bottom-4 -right-4 w-14 h-14 bg-sky-400 rounded-full opacity-60 animate-spin-slow -z-10"
                style={{ animationDirection: 'reverse' }} />
 
-          <div className="text-6xl md:text-7xl font-black text-[#1a1a2e] leading-none animate-wiggle"
+          <div className="text-5xl md:text-6xl font-black text-[#1a1a2e] leading-none animate-wiggle"
                style={{ textShadow: '4px 4px 0 #fbbf24, 8px 8px 0 rgba(26,26,46,0.2)', WebkitTextStroke: '2px #1a1a2e' }}>
             我是
           </div>
-          <div className="mt-2 text-7xl md:text-8xl font-black leading-none animate-wiggle"
+          <div className="mt-1 text-6xl md:text-7xl font-black leading-none animate-wiggle"
                style={{
                  background: 'linear-gradient(135deg, #f472b6 0%, #fb923c 50%, #facc15 100%)',
                  WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
@@ -53,7 +70,6 @@ export default function Home() {
             高情商
           </div>
 
-          {/* 贴纸 */}
           <div className="absolute -top-3 -right-6 md:-right-12 bg-red-500 text-white font-black text-xs md:text-sm rounded-2xl px-3 py-1.5 border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] animate-wiggle rotate-[12deg]"
                style={{ animationDelay: '0.5s' }}>
             🔥 火爆全网
@@ -61,7 +77,7 @@ export default function Home() {
         </div>
 
         {/* 副标题 */}
-        <div className="mt-8 inline-block relative">
+        <div className="mt-6 inline-block relative">
           <div className="relative bg-white border-[3px] border-[#1a1a2e] rounded-2xl px-5 py-3 shadow-[5px_5px_0_0_#1a1a2e]">
             <p className="text-sm md:text-base font-black text-[#1a1a2e]">
               测测你的社死等级 <span className="text-pink-500">·</span> 整顿职场 <span className="text-pink-500">·</span> 拒绝内耗
@@ -70,15 +86,35 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 底部按钮 */}
+      {/* 代号输入 + 开始按钮 */}
       <div className="relative z-10 w-full max-w-md">
+        <div className="bg-white rounded-2xl border-[4px] border-[#1a1a2e] shadow-[6px_6px_0_0_#1a1a2e] p-5 mb-4 relative">
+          <div className="absolute -top-3 left-4 bg-pink-500 text-white font-black text-xs rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]">
+            👤 给自己起个代号
+          </div>
+          <input
+            type="text"
+            value={codename}
+            onChange={(e) => setCodenameInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleStart(); }}
+            placeholder="例：整顿职场哥 / 高情商大师 / 匿名高手"
+            maxLength={20}
+            className="w-full text-xl md:text-2xl font-black text-[#1a1a2e] placeholder:text-[#1a1a2e]/30
+                       bg-yellow-50 border-[3px] border-[#1a1a2e] rounded-2xl px-4 py-3 mt-2
+                       outline-none focus:bg-yellow-100 transition-colors text-center"
+          />
+          <div className="mt-2 text-right text-xs font-bold text-[#1a1a2e]/50">
+            {codename.length}/20 字符
+          </div>
+        </div>
+
         <MangaButton
           variant="primary"
-          onClick={() => setPage('select')}
+          onClick={handleStart}
           className="w-full !py-5 !text-xl"
         >
           <span className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>🎯</span>
-          开始挑战 →
+          {codename.trim().length > 0 ? '带着代号开始挑战 →' : '开始挑战（匿名高手）'}
         </MangaButton>
 
         <div className="mt-4 text-center">
