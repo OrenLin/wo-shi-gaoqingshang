@@ -1,5 +1,6 @@
 // 评分引擎
-import { getLevel, Level } from '../data/scenes';
+import { getLevel } from '../data/levels';
+import type { Level } from '../data/types';
 
 export interface ScoringResult {
   score: number;
