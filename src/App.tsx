@@ -10,18 +10,22 @@ import FinalReport from './pages/FinalReport';
 export default function App() {
   const { currentPage } = useGameStore();
 
-  // 首次用户交互时初始化音频（浏览器限制：需要用户手势才能播放音频）
+  // ======================================================================
+  //  iOS Safari 关键：必须在用户手势（click/touch）的同步调用栈内
+  //  创建 + resume AudioContext。首次任意点击都会同步启动音频。
+  // ======================================================================
   useEffect(() => {
-    const handleFirstInteraction = () => {
-      audioManager.startBGM();
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('touchstart', handleFirstInteraction);
+    const initAudio = () => {
+      audioManager.ensureReady();      // 同步：创建/恢复 AudioContext（iOS 核心）
+      audioManager.startBGM();          // 同步：调度 BGM 音符
     };
-    document.addEventListener('click', handleFirstInteraction);
-    document.addEventListener('touchstart', handleFirstInteraction);
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('touchstart', initAudio, { once: true });
+    document.addEventListener('keydown', initAudio, { once: true });
     return () => {
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('touchstart', handleFirstInteraction);
+      document.removeEventListener('click', initAudio);
+      document.removeEventListener('touchstart', initAudio);
+      document.removeEventListener('keydown', initAudio);
     };
   }, []);
 
@@ -40,13 +44,16 @@ export default function App() {
     <div className="App">
       {renderPage()}
 
-      {/* 全局静音按钮 */}
+      {/* 全局静音按钮 —— 每次点击都调用 ensureReady（避免 iOS 首次点击不认） */}
       <button
-        onClick={() => audioManager.toggleMute()}
+        onClick={() => {
+          audioManager.ensureReady();
+          audioManager.toggleMute();
+        }}
         className="fixed bottom-4 right-4 z-50 w-10 h-10 rounded-full bg-white border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e]
                    flex items-center justify-center text-lg font-black transition-transform active:scale-90
                    hover:scale-105"
-        title={audioManager.isMuted ? '开启声音' : '静音'}
+        title={audioManager.isMuted ? '点击开启声音' : '点击静音'}
       >
         {audioManager.isMuted ? '🔇' : '🔊'}
       </button>
