@@ -49,6 +49,7 @@ export default function Game() {
   const customKey = `${scene.id}:${question.id}`;
 
   const handleSubmit = () => {
+    audioManager.ensureReady();
     if (useCustom) {
       const text = customInputs[customKey] ?? '';
       if (text.trim().length > 0) {

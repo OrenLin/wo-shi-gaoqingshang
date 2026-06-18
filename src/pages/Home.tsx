@@ -10,15 +10,22 @@ export default function Home() {
   const [codename, setCodenameInput] = useState('');
 
   const handleStart = () => {
-    const trimmed = codename.trim();
-    const name = trimmed.length > 0 ? trimmed.slice(0, 20) : '匿名高手';
-    audioManager.ensureReady();      // 同步初始化 AudioContext（iOS 关键）
-    audioManager.startBGM();          // 启动背景音乐（持续播放）
+    // ======================================================================
+    // ⚠️ iOS 关键：必须在用户手势的"同一同步调用栈"内创建并播放声音
+    // 这里按顺序调用：1) ensureReady → 创建ctx + 立即播1ms解锁音
+    //                2) startBGM   → 调度BGM循环
+    //                3) 播一个"点击"音效（让用户立刻听到反馈）
+    // ======================================================================
+    audioManager.ensureReady();
+    audioManager.startBGM();
+    audioManager.play('click');
+
+    const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '匿名高手';
     setCodename(name);
-    // 📊 Vercel Analytics 追踪事件（可在项目面板查看）
     track('game_started', {
       codename: name,
       timestamp: new Date().toISOString(),
+      audio: audioManager.isUnlocked ? 'unlocked' : 'pending',
     });
     setPage('select');
   };
@@ -90,14 +97,14 @@ export default function Home() {
       <div className="relative z-10 w-full max-w-md">
         <div className="bg-white rounded-2xl border-[4px] border-[#1a1a2e] shadow-[6px_6px_0_0_#1a1a2e] p-5 mb-4 relative">
           <div className="absolute -top-3 left-4 bg-pink-500 text-white font-black text-xs rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]">
-            👤 给自己起个代号
+            👤 给自己起个代号（可不填）
           </div>
           <input
             type="text"
             value={codename}
             onChange={(e) => setCodenameInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleStart(); }}
-            placeholder="例：整顿职场哥 / 高情商大师 / 匿名高手"
+            placeholder="例：整顿职场哥 / 高情商大师"
             maxLength={20}
             className="w-full text-xl md:text-2xl font-black text-[#1a1a2e] placeholder:text-[#1a1a2e]/30
                        bg-yellow-50 border-[3px] border-[#1a1a2e] rounded-2xl px-4 py-3 mt-2
