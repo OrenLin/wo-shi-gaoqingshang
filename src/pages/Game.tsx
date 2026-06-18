@@ -103,14 +103,14 @@ export default function Game() {
     <div className="min-h-screen relative overflow-hidden">
       {/* 背景图片 */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url(${scene.bgImage})`,
           transform: 'scale(1.05)',
         }}
       >
         {/* 渐变遮罩 - 让前景内容更清晰，同时保留背景图的氛围 */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/60" />
       </div>
 
       {/* 内容区域 */}
