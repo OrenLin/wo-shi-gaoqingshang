@@ -1,16 +1,14 @@
 import type { Character } from '../../data/types';
+import { useI18n, pickLocalized } from '../../i18n';
 
-/**
- * 漫画对话气泡（NPC 说话区）
- * 顶部可挂一个小头像贴纸（Character）
- */
 interface Props {
-  character: Character;            // 说话人
-  dialog: string;                   // 说话内容
-  badge?: string;                   // 角标文字（如 "💬 灵魂拷问"）
+  character: Character;
+  dialog: string;
+  badge?: string;
 }
 
 export default function BubbleDialog({ character, dialog, badge }: Props) {
+  const { language } = useI18n();
   return (
     <div className="relative bg-white rounded-[24px] border-[3px] border-[#1a1a2e] shadow-[5px_5px_0_0_#1a1a2e] p-5 overflow-visible">
       {badge && (
@@ -19,7 +17,6 @@ export default function BubbleDialog({ character, dialog, badge }: Props) {
         </div>
       )}
 
-      {/* 人物行 */}
       <div className="flex items-center gap-3 mb-3 mt-1">
         <div className="relative flex-shrink-0">
           <div
@@ -29,20 +26,18 @@ export default function BubbleDialog({ character, dialog, badge }: Props) {
           >
             {character.emoji}
           </div>
-          {/* 说话指示器 */}
           <div className="absolute -top-1 -right-1">
             <div className="w-4 h-4 bg-green-400 rounded-full border-[2px] border-white animate-ping opacity-75" />
           </div>
         </div>
         <div>
-          <div className="text-[#1a1a2e] font-black text-base leading-tight">{character.name}</div>
+          <div className="text-[#1a1a2e] font-black text-base leading-tight">{pickLocalized(character.name, language)}</div>
           {character.description && (
-            <div className="text-[#1a1a2e]/60 text-xs font-semibold">{character.description}</div>
+            <div className="text-[#1a1a2e]/60 text-xs font-semibold">{pickLocalized(character.description, language)}</div>
           )}
         </div>
       </div>
 
-      {/* 气泡内容 */}
       <div className="relative bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 border-[2px] border-[#1a1a2e] rounded-2xl p-4">
         <div className="absolute -top-2 left-6 w-4 h-4 bg-yellow-50 border-t-[2px] border-l-[2px] border-[#1a1a2e] rotate-45" />
         <p className="text-[#1a1a2e] text-base font-bold leading-relaxed">

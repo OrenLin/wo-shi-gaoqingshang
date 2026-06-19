@@ -2,18 +2,26 @@ import { useState } from 'react';
 import type { Option, OptionLevel } from '../../data/types';
 import { levelGradient, levelEmoji, levelLabel } from '../../data/levels';
 import { audioManager } from '../../utils/audioManager';
+import { useI18n, pickLocalized } from '../../i18n';
 
-/**
- * 选项列表（盲选逻辑：选中后才揭晓等级）
- */
 interface Props {
   options: Option[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   disabled?: boolean;
+  renderContent?: (opt: Option) => React.ReactNode;
+  renderLevelLabel?: (level: OptionLevel) => React.ReactNode;
 }
 
-export default function OptionList({ options, selectedId, onSelect, disabled }: Props) {
+export default function OptionList({
+  options,
+  selectedId,
+  onSelect,
+  disabled,
+  renderContent,
+  renderLevelLabel,
+}: Props) {
+  const { language } = useI18n();
   return (
     <div className="space-y-3">
       {options.map((opt, idx) => {
@@ -35,14 +43,12 @@ export default function OptionList({ options, selectedId, onSelect, disabled }: 
                         ${disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
             style={{ animationDelay: `${idx * 60}ms` }}
           >
-            {/* 选中后顶部彩带 */}
             {isSelected && (
               <div
                 className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${levelGradient[opt.level]}`}
               />
             )}
             <div className="flex items-start gap-3 relative">
-              {/* 序号 */}
               <div
                 className={`flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center
                             font-black text-base border-[3px] border-[#1a1a2e]
@@ -52,15 +58,14 @@ export default function OptionList({ options, selectedId, onSelect, disabled }: 
               >
                 {idx + 1}
               </div>
-              {/* 文本 */}
               <div className="flex-1 min-w-0">
                 <div className="text-[#1a1a2e] text-base font-bold leading-relaxed">
-                  {opt.content}
+                  {renderContent ? renderContent(opt) : pickLocalized(opt.content, language)}
                 </div>
-                {/* 选中后揭晓等级 */}
-                {isSelected && <RevealRow level={opt.level} />}
+                {isSelected && (
+                  <RevealRow level={opt.level} renderLevelLabel={renderLevelLabel} />
+                )}
               </div>
-              {/* 右侧指示器 */}
               <div className="flex-shrink-0 mt-1.5">
                 {isSelected ? (
                   <span className="text-green-500 text-2xl font-black">✓</span>
@@ -76,7 +81,14 @@ export default function OptionList({ options, selectedId, onSelect, disabled }: 
   );
 }
 
-function RevealRow({ level }: { level: OptionLevel }) {
+function RevealRow({
+  level,
+  renderLevelLabel,
+}: {
+  level: OptionLevel;
+  renderLevelLabel?: (level: OptionLevel) => React.ReactNode;
+}) {
+  const { language } = useI18n();
   return (
     <div className="mt-3 inline-flex flex-wrap items-center gap-2 animate-pop-in">
       <span
@@ -87,7 +99,7 @@ function RevealRow({ level }: { level: OptionLevel }) {
         <span className="text-lg animate-bounce" style={{ animationDuration: '1.2s' }}>
           {levelEmoji[level]}
         </span>
-        {levelLabel[level]}
+        {renderLevelLabel ? renderLevelLabel(level) : pickLocalized(levelLabel[level], language)}
       </span>
     </div>
   );

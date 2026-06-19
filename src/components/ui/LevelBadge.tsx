@@ -1,3 +1,4 @@
+import { useI18n, pickLocalized } from '../../i18n';
 import { levelEmoji, levelGradient, levelLabel } from '../../data/levels';
 import type { OptionLevel } from '../../data/types';
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function LevelBadge({ level, size = 'md' }: Props) {
+  const { language } = useI18n();
   const padding = size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm';
   return (
     <div
@@ -20,7 +22,7 @@ export default function LevelBadge({ level, size = 'md' }: Props) {
       <span className="text-lg animate-bounce" style={{ animationDuration: '1.2s' }}>
         {levelEmoji[level]}
       </span>
-      <span>{levelLabel[level]}</span>
+      <span>{pickLocalized(levelLabel[level], language)}</span>
     </div>
   );
 }

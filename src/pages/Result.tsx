@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { scenes } from '../data';
 import { levelGradient } from '../data/levels';
+import { audioManager } from '../utils/audioManager';
+import { useI18n, pickLocalized } from '../i18n';
+import PageTopBar from '../components/ui/PageTopBar';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 import AntiKingToast from '../components/ui/AntiKingToast';
@@ -14,6 +17,7 @@ export default function Result() {
     currentSceneIndex,
     setPage,
   } = useGameStore();
+  const { language, setLanguage, t } = useI18n();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -25,6 +29,21 @@ export default function Result() {
   const sceneResult = getCurrentSceneResult();
   const nextIndex = currentSceneIndex + 1;
   const hasNext = nextIndex < scenes.length;
+  const nextScene = hasNext ? scenes[nextIndex] : undefined;
+
+  const langSwitch = (
+    <button
+      onClick={() => {
+        audioManager.userTapped();
+        audioManager.play('click');
+        setLanguage(language === 'zh' ? 'en' : 'zh');
+      }}
+      className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
+    >
+      <span>🌐</span>
+      <span>{language === 'zh' ? 'EN' : '中文'}</span>
+    </button>
+  );
 
   if (!scene || !sceneResult) {
     return (
@@ -40,17 +59,17 @@ export default function Result() {
   const qsDone = answers.length;
   const sceneFinished = qsDone >= qsTotal;
   const last = answers[answers.length - 1];
-  const isAntiKing = last.level.name === '抗压之王';
+  const isAntiKing = last.level.minScore === 100;
 
-  const gradientKey = last.level.name === '抗压之王' ? 'anti'
-    : last.level.name === '情商之神' ? 'god'
-    : last.level.name === '情商达人' ? 'high'
-    : last.level.name === '及格选手' ? 'medium' : 'low';
+  const gradientKey = last.level.minScore === 100 ? 'anti'
+    : last.level.minScore === 90 ? 'god'
+    : last.level.minScore === 70 ? 'high'
+    : last.level.minScore === 40 ? 'medium' : 'low';
 
   const displayAnswer = last.customInput ?? (() => {
     for (const q of scene.questions) {
       const o = q.options.find((x) => x.id === last.selectedOptionId);
-      if (o) return o.content;
+      if (o) return pickLocalized(o.content, language);
     }
     return '';
   })();
@@ -79,10 +98,21 @@ export default function Result() {
 
       <div className="relative z-10 max-w-2xl mx-auto">
 
+        {/* 顶栏 */}
+        <PageTopBar
+          onBack={() => {
+            audioManager.userTapped();
+            audioManager.play('click');
+            setPage('select');
+          }}
+          backText={t('game.back')}
+          rightSlot={langSwitch}
+        />
+
         {/* 小标签 */}
         <div className="text-center mb-4">
           <span className="inline-flex items-center gap-2 bg-white border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e]">
-            <span className="font-black text-sm text-[#1a1a2e]">{scene.emoji} {scene.title} · 本题得分</span>
+            <span className="font-black text-sm text-[#1a1a2e]">{scene.emoji} {pickLocalized(scene.title, language)}</span>
           </span>
         </div>
 
@@ -96,12 +126,12 @@ export default function Result() {
             <div className={`inline-block relative bg-gradient-to-br ${levelGradient[gradientKey]} text-white
                             rounded-[24px] border-[4px] border-[#1a1a2e] shadow-[5px_5px_0_0_#1a1a2e]
                             px-6 py-4 md:px-10 md:py-5 animate-pop-in`}>
-              <div className="text-xs md:text-sm font-black opacity-90 mb-1">情商得分</div>
+              <div className="text-xs md:text-sm font-black opacity-90 mb-1">{t('result.scoreBadge')}</div>
               <div className="text-6xl md:text-7xl font-black leading-none"
                    style={{ textShadow: '3px 3px 0 rgba(0,0,0,0.25)' }}>
                 {last.score}
               </div>
-              <div className="text-xs mt-1 opacity-80">场景均分 {score}</div>
+              <div className="text-xs mt-1 opacity-80">{t('result.sceneAvg')} {score}</div>
             </div>
           </div>
 
@@ -112,41 +142,41 @@ export default function Result() {
               {level.emoji}
             </div>
             <div className="inline-block bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1 mb-2">
-              {level.tag}
+              {pickLocalized(level.tag, language)}
             </div>
             <div className="text-2xl md:text-3xl font-black text-[#1a1a2e] leading-tight"
                  style={{ WebkitTextStroke: '1px #1a1a2e', textShadow: '3px 3px 0 #fbbf24' }}>
-              {level.name}
+              {pickLocalized(level.name, language)}
             </div>
-            <div className="text-base font-black text-[#1a1a2e]/70 mt-1">{level.slogan}</div>
+            <div className="text-base font-black text-[#1a1a2e]/70 mt-1">{pickLocalized(level.slogan, language)}</div>
           </div>
 
           {/* 解说气泡 */}
           <div className="relative bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-2xl border-[3px] border-[#1a1a2e] p-4 mb-4">
             <div className="absolute -top-3 -left-3 bg-pink-400 text-white font-black text-xs rounded-2xl px-3 py-1.5 border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] rotate-[-6deg]">
-              💬 解说
+              {t('result.comment')}
             </div>
-            <p className="text-[#1a1a2e] text-base font-bold leading-relaxed mt-1">「{last.result.comment}」</p>
+            <p className="text-[#1a1a2e] text-base font-bold leading-relaxed mt-1">「{pickLocalized(last.result.comment, language)}」</p>
           </div>
 
           {/* 贴士 */}
           <div className="relative bg-blue-50 rounded-2xl border-[3px] border-[#1a1a2e] p-4 mb-4">
             <div className="absolute -top-3 -left-3 bg-blue-400 text-white font-black text-xs rounded-2xl px-3 py-1.5 border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] rotate-[-6deg]">
-              💡 贴士
+              {t('result.tips')}
             </div>
-            <p className="text-[#1a1a2e] text-sm font-bold mt-1">{last.result.tips}</p>
+            <p className="text-[#1a1a2e] text-sm font-bold mt-1">{pickLocalized(last.result.tips, language)}</p>
           </div>
 
           {/* 你的回答 */}
           <div className="border-t-[3px] border-[#1a1a2e]/20 pt-4">
-            <div className="text-xs font-black text-[#1a1a2e]/60 mb-2">👉 你的回答</div>
+            <div className="text-xs font-black text-[#1a1a2e]/60 mb-2">{t('result.yourReply')}</div>
             <div className="bg-[#1a1a2e]/5 rounded-xl border-[2px] border-[#1a1a2e]/15 p-4">
               <p className="text-[#1a1a2e] text-sm font-bold leading-relaxed">{displayAnswer ?? '—'}</p>
             </div>
           </div>
 
           <div className="mt-4 text-center text-xs font-black text-[#1a1a2e]/60">
-            本场景进度：第 {qsDone} / {qsTotal} 题
+            {t('result.progress')} {qsDone} {t('common.of')} {qsTotal} {t('result.progressOf')}
           </div>
         </div>
 
@@ -155,31 +185,31 @@ export default function Result() {
           {sceneFinished ? (
             <>
               {hasNext ? (
-                <MangaButton variant="primary" onClick={goToNextScene} className="w-full !py-5 !text-xl">
+                <MangaButton variant="primary" onClick={() => { audioManager.userTapped(); audioManager.play('click'); goToNextScene(); }} className="w-full !py-5 !text-xl">
                   <span className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>🚀</span>
-                  下一场景：{scenes[nextIndex].emoji} {scenes[nextIndex].title} →
+                  {t('result.nextScene')} {nextScene?.emoji} {pickLocalized(nextScene?.title, language)} →
                 </MangaButton>
               ) : (
-                <MangaButton variant="primary" onClick={goToNextScene} className="w-full !py-5 !text-xl animate-wiggle">
-                  <span className="text-2xl">🎉</span> 查看我的最终情商鉴定报告！
+                <MangaButton variant="primary" onClick={() => { audioManager.userTapped(); audioManager.play('click'); goToNextScene(); }} className="w-full !py-5 !text-xl animate-wiggle">
+                  <span className="text-2xl">🎉</span> {t('result.viewFinal')}
                 </MangaButton>
               )}
             </>
           ) : (
-            <MangaButton variant="primary" onClick={() => setPage('game')} className="w-full !py-5 !text-xl">
+            <MangaButton variant="primary" onClick={() => { audioManager.userTapped(); audioManager.play('click'); setPage('game'); }} className="w-full !py-5 !text-xl">
               <span className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>🎯</span>
-              下一题（{qsDone + 1}/{qsTotal}）→
+              {t('result.nextQ')} ({qsDone + 1}/{qsTotal}) →
             </MangaButton>
           )}
 
-          <MangaButton variant="secondary" onClick={() => setPage('select')} className="w-full !py-3 !text-sm">
-            返回场景选择
+          <MangaButton variant="secondary" onClick={() => { audioManager.userTapped(); audioManager.play('click'); setPage('select'); }} className="w-full !py-3 !text-sm">
+            {t('result.backToSelect')}
           </MangaButton>
         </div>
 
         <div className="mt-5 text-center">
           <span className="inline-flex items-center gap-2 bg-white/80 border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e] text-xs font-black text-[#1a1a2e]">
-            💫 场景 {currentSceneIndex + 1} / {scenes.length}
+            {t('result.scene')} {currentSceneIndex + 1} {t('common.of')} {scenes.length}
           </span>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Analytics, track } from '@vercel/analytics/react';
 import { useGameStore } from './store/gameStore';
+import { useI18n } from './i18n';
 import { audioManager } from './utils/audioManager';
 import Home from './pages/Home';
 import SceneSelect from './pages/SceneSelect';
@@ -10,6 +11,7 @@ import FinalReport from './pages/FinalReport';
 
 export default function App() {
   const { currentPage } = useGameStore();
+  const { t } = useI18n();
 
   // 订阅音频管理器状态变化（用于刷新按钮图标）
   const [audioTick, setAudioTick] = useState(0);
@@ -21,7 +23,7 @@ export default function App() {
   //  iOS / 微信音频解锁方案（四层保险）：
   //    1. audioManager.init() → 安装全局 touchstart/click 监听（一次性自动解绑）
   //    2. 微信环境 → 自动尝试 JSBridge 解锁
-  //    3. 用户点击页面右上角"🔊 开启声音"按钮 → 同步栈内触发解锁 + BGM
+  //    3. 用户点击页面右上角音频按钮 → 同步栈内触发解锁 + BGM
   //    4. 页面切后台 → 恢复可见时尝试恢复 BGM
   // ======================================================================
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function App() {
   // 音频按钮显示的文字 & 状态
   // —— audioTick 确保状态变化时按钮重新渲染
   const audioState = audioManager.state;
-  const showAudioHint = !audioState.interacted; // 用户还没触过 → 显示提示
+  const showAudioHint = !audioState.interacted;
 
   return (
     <div className="App">
@@ -88,23 +90,14 @@ export default function App() {
                       : audioState.muted
                         ? 'bg-white'
                         : 'bg-emerald-300'}`}
-        title={audioState.muted ? '点击开启声音' : '点击静音'}
+        title={audioState.muted ? t('audio.enable') : t('audio.muted')}
       >
         {showAudioHint ? (
-          <>
-            <span className="text-base">🔊</span>
-            <span className="hidden sm:inline text-[#1a1a2e]">点我开声音</span>
-          </>
+          <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.enable')}</span>
         ) : audioState.muted ? (
-          <>
-            <span className="text-base">🔇</span>
-            <span className="hidden sm:inline text-[#1a1a2e]">静音中</span>
-          </>
+          <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.muted')}</span>
         ) : (
-          <>
-            <span className="text-base animate-pulse">🎵</span>
-            <span className="hidden sm:inline text-[#1a1a2e]">声音已开</span>
-          </>
+          <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.on')}</span>
         )}
       </button>
     </div>

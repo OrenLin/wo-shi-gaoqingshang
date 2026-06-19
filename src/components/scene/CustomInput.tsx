@@ -5,6 +5,10 @@ interface Props {
   onChange: (v: string) => void;
   maxLength?: number;
   placeholder?: string;
+  badgeText?: string;
+  countHint?: (len: number, max: number) => React.ReactNode;
+  qualityHint?: (len: number) => React.ReactNode;
+  tipText?: React.ReactNode;
 }
 
 /**
@@ -15,6 +19,10 @@ export default function CustomInput({
   onChange,
   maxLength = 200,
   placeholder = '写下你最想说的话... 越搞笑，段位可能越高哦 👀',
+  badgeText = '✨ 自由发挥',
+  countHint,
+  qualityHint,
+  tipText,
 }: Props) {
   const len = value.length;
   const pct = Math.round((len / maxLength) * 100);
@@ -22,7 +30,7 @@ export default function CustomInput({
   return (
     <div className="relative bg-white rounded-[24px] border-[3px] border-[#1a1a2e] shadow-[5px_5px_0_0_#1a1a2e] p-5">
       <div className="absolute -top-3 -right-3 bg-blue-400 text-white font-black text-xs rounded-2xl px-3 py-1.5 border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] rotate-[6deg]">
-        ✨ 自由发挥
+        {badgeText}
       </div>
 
       <textarea
@@ -39,8 +47,12 @@ export default function CustomInput({
 
       <div className="mt-3 flex items-center justify-between">
         <div className="font-black text-xs text-[#1a1a2e]/70">
-          ✏️ {len} / {maxLength} 字
-          {len >= 30 && <span className="ml-2 text-green-600">✓ 有内味儿了！</span>}
+          {countHint ? countHint(len, maxLength) : (
+            <>✏️ {len} / {maxLength} 字</>
+          )}
+          {qualityHint ? qualityHint(len) : (
+            len >= 30 && <span className="ml-2 text-green-600">✓ 有内味儿了！</span>
+          )}
         </div>
         <div className="flex-1 mx-4 h-2 bg-[#1a1a2e]/10 rounded-full overflow-hidden border border-[#1a1a2e]/30">
           <div
@@ -48,7 +60,9 @@ export default function CustomInput({
             style={{ width: `${pct}%` }}
           />
         </div>
-        <div className="text-[11px] font-bold text-[#1a1a2e]/50">💡 真诚必杀</div>
+        <div className="text-[11px] font-bold text-[#1a1a2e]/50">
+          {tipText ?? <>💡 真诚必杀</>}
+        </div>
       </div>
     </div>
   );

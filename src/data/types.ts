@@ -1,68 +1,67 @@
 // ======================================================================
 // 核心类型定义
-// 所有与场景/选项/段位的数据模型集中在这一个文件
-// 新增场景/题目时，只需要加符合 Scene 类型即可
 // ======================================================================
 
-// ---------- 基本元素 ----------
+// 双语字段：同一份数据同时承载中文/英文
+export interface Localized {
+  zh: string;
+  en: string;
+}
 
 export interface Character {
-  name: string;
+  name: string | Localized;  // 人物名（支持双语）
   emoji: string;
-  description?: string;
+  description?: string | Localized;  // 人物描述（支持双语）
 }
 
 export type OptionLevel =
-  | 'anti'    // 抗压之王（反杀型）
-  | 'low'     // 低情商
-  | 'medium'  // 中情商
-  | 'high'    // 高情商
-  | 'god';    // 情商之神
+  | 'anti'
+  | 'low'
+  | 'medium'
+  | 'high'
+  | 'god';
 
 export interface Option {
   id: string;
   level: OptionLevel;
-  content: string;
+  content: string | Localized;
   score: number;
 }
 
 // ---------- 题目 ----------
-// 一个场景（Scene）可以包含多道题（Question）
-// 每道题有自己的触发话术和选项
 export interface Question {
-  id: string;                      // 题目唯一ID（建议: `${sceneId}-q${n`）
-  triggerDialog: string;           // NPC 的灵魂拷问
-  characters?: Character[];          // 可选：该题专属人物；不传则使用场景默认人物
-  options: Option[];              // 预设选项
-  allowCustomInput?: boolean;      // 是否允许自由发挥（默认 true）
+  id: string;
+  triggerDialog: string | Localized;           // NPC 灵魂拷问
+  characters?: Character[];                       // 可选：该题专属人物
+  options: Option[];                            // 预设选项
+  allowCustomInput?: boolean;                   // 是否允许自由发挥
 }
 
 // ---------- 场景 ----------
 export interface Scene {
   id: string;
-  title: string;
+  title: string | Localized;
   emoji: string;
-  description: string;
-  bgImage: string;                 // 本地SVG或图片URL
-  bgColor: string;                 // Tailwind渐变: 'from-red-500/80 via-orange-400/60 to-amber-500/70'
-  accentColor: string;               // 语义色: 'red' | 'orange' | 'amber'...
-  characters: Character[];          // 场景默认人物
-  questions: Question[];            // ⭐ 该场景下的所有题目
+  description: string | Localized;
+  bgImage: string;
+  bgColor: string;
+  accentColor: string;
+  characters: Character[];
+  questions: Question[];
 }
 
 // ---------- 段位 ----------
 export interface Level {
-  name: string;                     // 显示名：情商之神 / 抗压之王...
-  tag: string;                      // 简短人设标签
-  emoji: string;                     // Emoji：👑🔥😎😅💀
+  name: string | Localized;
+  tag: string | Localized;
+  emoji: string;
   minScore: number;
   maxScore: number;
-  slogan: string;                   // 一句话核心人设（UI大标题副标题）
-  /** 四段式结构化文案 */
+  slogan: string | Localized;
   descModule: {
-    core: string;                    // 情商内核
-    history: string;                 // 历史对标 + 匹配逻辑
-    comment: string;                 // 社交画像
+    core: string | Localized;
+    history: string | Localized;
+    comment: string | Localized;
   };
-  socialCopy: string;               // 朋友圈/分享海报短句
+  socialCopy: string | Localized;
 }
