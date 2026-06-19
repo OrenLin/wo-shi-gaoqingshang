@@ -1,0 +1,297 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="roomWall" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#C9A066"/>
+      <stop offset="50%" stop-color="#A67C52"/>
+      <stop offset="100%" stop-color="#5D4037"/>
+    </linearGradient>
+    <radialGradient id="warmLight" cx="50%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#FFE8B0" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FFE8B0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="roundTable" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D4A574"/>
+      <stop offset="50%" stop-color="#B8864F"/>
+      <stop offset="100%" stop-color="#8B5A2B"/>
+    </linearGradient>
+    <linearGradient id="potGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4A3728"/>
+      <stop offset="100%" stop-color="#2D2015"/>
+    </linearGradient>
+    <filter id="bShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="2" dy="6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- 包厢背景 -->
+  <rect width="1600" height="1000" fill="url(#roomWall)"/>
+  
+  <!-- 暖光光晕 -->
+  <ellipse cx="800" cy="400" rx="700" ry="400" fill="url(#warmLight)"/>
+  
+  <!-- 顶部吊灯 -->
+  <g opacity="0.8">
+    <line x1="800" y1="0" x2="800" y2="80" stroke="#5D4037" stroke-width="4"/>
+    <path d="M 700 80 Q 720 120 800 140 Q 880 120 900 80 Q 850 100 800 100 Q 750 100 700 80" fill="#D4AF37" stroke="#8B6914" stroke-width="4"/>
+    <ellipse cx="800" cy="150" rx="80" ry="20" fill="#FFD700" opacity="0.7"/>
+    <circle cx="700" cy="90" r="8" fill="#FFD700"/>
+    <circle cx="900" cy="90" r="8" fill="#FFD700"/>
+    <circle cx="800" cy="75" r="10" fill="#FFD700"/>
+  </g>
+
+  <!-- 装饰墙壁元素 -->
+  <g opacity="0.6">
+    <rect x="100" y="150" width="150" height="100" rx="10" fill="#8B4513" stroke="#5D3A1A" stroke-width="4"/>
+    <text x="175" y="215" text-anchor="middle" font-size="48" fill="#FFD700" font-weight="bold">福</text>
+  </g>
+  <g opacity="0.6">
+    <rect x="1350" y="150" width="150" height="100" rx="10" fill="#8B4513" stroke="#5D3A1A" stroke-width="4"/>
+    <text x="1425" y="215" text-anchor="middle" font-size="48" fill="#FFD700" font-weight="bold">禄</text>
+  </g>
+
+  <!-- 地板 -->
+  <rect y="720" width="1600" height="280" fill="#5D4037"/>
+  <rect y="720" width="1600" height="15" fill="#4E342E"/>
+
+  <!-- 大圆桌 -->
+  <g filter="url(#bShadow)">
+    <ellipse cx="800" cy="580" rx="600" ry="130" fill="#5D4037" opacity="0.5"/>
+    <ellipse cx="800" cy="520" rx="570" ry="115" fill="url(#roundTable)" stroke="#5D4037" stroke-width="8"/>
+    <ellipse cx="800" cy="515" rx="550" ry="100" fill="#F5E6D3" opacity="0.4"/>
+    
+    <!-- 旋转台 -->
+    <ellipse cx="800" cy="500" rx="400" ry="70" fill="#E8D4B8" stroke="#C9A86C" stroke-width="4"/>
+    
+    <!-- 鸳鸯火锅 - 中央焦点 -->
+    <g transform="translate(800, 450)">
+      <ellipse cx="0" cy="30" rx="120" ry="40" fill="url(#potGrad)" stroke="#1A1A1A" stroke-width="5"/>
+      <path d="M -120 30 Q -130 70 -100 80 L 100 80 Q 130 70 120 30" fill="#3D2817"/>
+      <ellipse cx="0" cy="28" rx="115" ry="35" fill="#8B0000"/>
+      <!-- 中间分隔 -->
+      <path d="M 0 -10 Q -10 10 0 30 Q 10 50 0 70" stroke="#3D2817" stroke-width="4" fill="none"/>
+      <!-- 清汤 -->
+      <ellipse cx="-55" cy="30" rx="55" ry="15" fill="#F5DEB3" opacity="0.9"/>
+      <!-- 红汤 -->
+      <ellipse cx="55" cy="30" rx="55" ry="15" fill="#DC143C" opacity="0.9"/>
+      <!-- 辣椒 -->
+      <circle cx="30" cy="30" r="6" fill="#8B0000"/>
+      <circle cx="70" cy="32" r="5" fill="#A52A2A"/>
+      <circle cx="50" cy="35" r="4" fill="#FF4500"/>
+      <!-- 热气 -->
+      <path d="M -40 -5 Q -35 -30 -45 -55 Q -35 -80 -40 -110" fill="none" stroke="white" stroke-width="4" opacity="0.5"/>
+      <path d="M 0 -10 Q 5 -35 -5 -60 Q 5 -85 0 -120" fill="none" stroke="white" stroke-width="4" opacity="0.5"/>
+      <path d="M 40 -5 Q 50 -30 35 -55 Q 50 -80 40 -115" fill="none" stroke="white" stroke-width="4" opacity="0.5"/>
+    </g>
+
+    <!-- 烤串盘 -->
+    <g transform="translate(550, 500)">
+      <ellipse cx="0" cy="0" rx="70" ry="22" fill="#D4C4A8" stroke="#8B7355" stroke-width="3"/>
+      <!-- 烤串 -->
+      <line x1="-50" y1="-5" x2="50" y2="5" stroke="#D2691E" stroke-width="6"/>
+      <line x1="-50" y1="5" x2="50" y2="-5" stroke="#CD853F" stroke-width="5"/>
+      <circle cx="-40" cy="-3" r="7" fill="#8B4513"/>
+      <circle cx="0" cy="0" r="7" fill="#A0522D"/>
+      <circle cx="40" cy="3" r="7" fill="#8B4513"/>
+      <circle cx="-20" cy="2" r="6" fill="#D2691E"/>
+      <circle cx="20" cy="-2" r="6" fill="#CD853F"/>
+    </g>
+
+    <!-- 白酒杯 -->
+    <g transform="translate(650, 520)">
+      <rect x="-10" y="-25" width="20" height="25" rx="3" fill="#FFF8DC" stroke="#C9B896" stroke-width="2"/>
+      <ellipse cx="0" cy="-25" rx="10" ry="3" fill="#F5E6D3"/>
+      <rect x="-8" y="-22" width="16" height="18" fill="#FFD700" opacity="0.5"/>
+    </g>
+
+    <!-- 啤酒瓶 -->
+    <g transform="translate(1000, 510)">
+      <rect x="-15" y="-50" width="30" height="60" rx="5" fill="#228B22"/>
+      <rect x="-12" y="-48" width="24" height="25" fill="#32CD32"/>
+      <rect x="-18" y="-55" width="36" height="8" fill="#FFD700"/>
+      <text x="0" y="-20" text-anchor="middle" font-size="12" fill="white" font-weight="bold">啤</text>
+    </g>
+
+    <!-- 小菜盘 -->
+    <g transform="translate(1100, 505)">
+      <ellipse cx="0" cy="0" rx="45" ry="15" fill="#F5F0E6" stroke="#C9B896" stroke-width="2"/>
+      <ellipse cx="-15" cy="-3" rx="10" ry="5" fill="#90EE90"/>
+      <ellipse cx="10" cy="-2" rx="12" ry="6" fill="#FF6347" opacity="0.7"/>
+      <ellipse cx="20" cy="2" rx="8" ry="4" fill="#FFD700"/>
+    </g>
+
+    <!-- 酒杯 -->
+    <g transform="translate(1200, 520)">
+      <path d="M -15 -30 L 15 -30 L 10 0 Q 0 15 -10 0 Z" fill="#FFF8DC" stroke="#C9B896" stroke-width="2"/>
+      <path d="M -12 -25 L 12 -25 L 8 -5 Q 0 8 -8 -5 Z" fill="#FFD700" opacity="0.6"/>
+      <rect x="-3" y="0" width="6" height="20" fill="#F5E6D3"/>
+      <ellipse cx="0" cy="22" rx="12" ry="4" fill="#D4C4A8"/>
+    </g>
+  </g>
+
+  <!-- 领导角色 - 中央超大特写 - 压迫感 -->
+  <g transform="translate(800, 260)" filter="url(#bShadow)">
+    <!-- 头部 -->
+    <ellipse cx="0" cy="0" rx="140" ry="150" fill="#FFDAB9"/>
+    <!-- 秃顶高光 -->
+    <ellipse cx="0" cy="-80" rx="95" ry="55" fill="#FFE8D0"/>
+    <ellipse cx="-25" cy="-90" rx="35" ry="20" fill="#FFF5E6" opacity="0.8"/>
+    <!-- 侧边白发 -->
+    <path d="M -130 -25 Q -140 40 -115 75 Q -90 60 -80 25 Q -100 15 -130 -25" fill="#696969"/>
+    <path d="M 130 -25 Q 140 40 115 75 Q 90 60 80 25 Q 100 15 130 -25" fill="#696969"/>
+    
+    <!-- 大圆眼镜 -->
+    <circle cx="-45" cy="15" r="32" fill="white" stroke="#333" stroke-width="5"/>
+    <circle cx="45" cy="15" r="32" fill="white" stroke="#333" stroke-width="5"/>
+    <line x1="-13" y1="15" x2="13" y2="15" stroke="#333" stroke-width="5"/>
+    <!-- 镜片反光 -->
+    <ellipse cx="-55" cy="0" rx="10" ry="7" fill="white" opacity="0.7"/>
+    <ellipse cx="35" cy="0" rx="10" ry="7" fill="white" opacity="0.7"/>
+    
+    <!-- 眯眼眼睛 -->
+    <path d="M -60 -5 Q -45 -15 -30 -5" fill="none" stroke="#333" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 30 -5 Q 45 -15 60 -5" fill="none" stroke="#333" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- 眉毛 -->
+    <path d="M -65 -45 Q -45 -55 -20 -48" fill="none" stroke="#5D4037" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 20 -48 Q 45 -55 65 -45" fill="none" stroke="#5D4037" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- 大鼻子 -->
+    <ellipse cx="0" cy="50" rx="20" ry="18" fill="#F4C4A0"/>
+    
+    <!-- 脸颊泛红 - 喝酒 -->
+    <ellipse cx="-75" cy="55" rx="30" ry="20" fill="#FF9999" opacity="0.6"/>
+    <ellipse cx="75" cy="55" rx="30" ry="20" fill="#FF9999" opacity="0.6"/>
+    
+    <!-- 大嘴 - 热情假笑 -->
+    <ellipse cx="0" cy="90" rx="45" ry="35" fill="#8B0000"/>
+    <path d="M -40 80 Q 0 115 40 80 Q 20 95 0 98 Q -20 95 -40 80" fill="white"/>
+    <path d="M -35 90 Q 0 110 35 90 Q 15 100 0 102 Q -15 100 -35 90" fill="#FF6B6B"/>
+    
+    <!-- 双下巴 -->
+    <ellipse cx="0" cy="140" rx="100" ry="35" fill="#F4C4A0" opacity="0.7"/>
+    
+    <!-- 西装和领带 -->
+    <path d="M -170 150 Q -190 220 -155 310 L 155 310 Q 190 220 170 150 Q 140 145 0 150 Q -140 145 -170 150" fill="#1A1A2E"/>
+    <!-- 衬衫 -->
+    <path d="M -35 150 L 0 230 L 35 150 Q 15 145 0 145 Q -15 145 -35 150" fill="#F5F0E6"/>
+    <!-- 花纹领带 -->
+    <path d="M -10 165 L 0 280 L 20 280 L 12 165" fill="#8B0000"/>
+    <circle cx="5" cy="185" r="5" fill="#FFD700"/>
+    <circle cx="8" cy="220" r="5" fill="#FFD700"/>
+    <circle cx="2" cy="255" r="5" fill="#FFD700"/>
+    
+    <!-- 举酒杯的手 -->
+    <g transform="translate(-110, 200) rotate(-15)">
+      <!-- 手 -->
+      <ellipse cx="0" cy="0" rx="45" ry="30" fill="#FFDAB9" stroke="#D4A574" stroke-width="3"/>
+      <!-- 酒杯 -->
+      <rect x="-8" y="-70" width="16" height="50" rx="3" fill="FFF8DC" stroke="#C9B896" stroke-width="2" transform="rotate(15)"/>
+      <ellipse cx="0" cy="-70" rx="15" ry="5" fill="#F5E6D3" transform="rotate(15)"/>
+      <rect x="-6" y="-65" width="12" height="35" fill="#FFD700" opacity="0.7" transform="rotate(15)"/>
+    </g>
+  </g>
+
+  <!-- 醉酒红脸客户1 - 左侧 -->
+  <g transform="translate(300, 400)" filter="url(#bShadow)">
+    <ellipse cx="0" cy="0" rx="75" ry="85" fill="#FFDAB9"/>
+    <!-- 头发 -->
+    <path d="M -65 -30 Q -70 -85 0 -90 Q 70 -85 65 -30 Q 50 -55 0 -60 Q -50 -55 -65 -30" fill="#2D2D2D"/>
+    <!-- 眼睛 - 眯眼醉态 -->
+    <path d="M -35 -5 Q -22 -12 -10 -5" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 10 -5 Q 22 -12 35 -5" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+    <!-- 腮红 - 醉酒红 -->
+    <ellipse cx="-40" cy="25" rx="22" ry="15" fill="#FF6B6B" opacity="0.7"/>
+    <ellipse cx="40" cy="25" rx="22" ry="15" fill="#FF6B6B" opacity="0.7"/>
+    <!-- 嘴 - 张嘴起哄 -->
+    <ellipse cx="0" cy="55" rx="22" ry="22" fill="#8B0000"/>
+    <ellipse cx="0" cy="58" rx="15" ry="15" fill="#FF6B6B"/>
+    <!-- 衣服 -->
+    <path d="M -85 80 Q -95 140 -75 180 L 75 180 Q 95 140 85 80 Q 60 75 0 78 Q -60 75 -85 80" fill="#2C3E50"/>
+    <path d="M -15 85 L 0 130 L 15 85 Q 8 82 0 82 Q -8 82 -15 85" fill="#F5F0E6"/>
+    <path d="M -5 95 L 0 140 L 8 140 L 5 95" fill="#8B4513"/>
+    <!-- 举杯手 -->
+    <g transform="translate(65, 130) rotate(25)">
+      <ellipse cx="0" cy="0" rx="25" ry="18" fill="#FFDAB9" stroke="#D4A574" stroke-width="2"/>
+      <rect x="-5" y="-40" width="10" height="30" fill="#FFF8DC" stroke="#C9B896" stroke-width="1.5"/>
+      <rect x="-3" y="-38" width="6" height="22" fill="#FFD700" opacity="0.6"/>
+    </g>
+  </g>
+
+  <!-- 醉酒红脸客户2 - 右侧 -->
+  <g transform="translate(1300, 400)" filter="url(#bShadow)">
+    <ellipse cx="0" cy="0" rx="70" ry="80" fill="#FFDAB9"/>
+    <path d="M -60 -28 Q -65 -80 0 -85 Q 65 -80 60 -28 Q 45 -50 0 -55 Q -45 -50 -60 -28" fill="#4A4A4A"/>
+    <!-- 眯眼 -->
+    <path d="M -30 -3 Q -20 -10 -10 -3" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 10 -3 Q 20 -10 30 -3" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+    <!-- 大腮红 -->
+    <ellipse cx="-35" cy="28" rx="20" ry="14" fill="#FF6B6B" opacity="0.7"/>
+    <ellipse cx="35" cy="28" rx="20" ry="14" fill="#FF6B6B" opacity="0.7"/>
+    <!-- 嘴 - 大笑起哄 -->
+    <path d="M -25 55 Q 0 85 25 55 Q 0 72 -25 55" fill="#8B0000"/>
+    <path d="M -20 58 Q 0 78 20 58 Q 0 70 -20 58" fill="white"/>
+    <!-- 衣服 -->
+    <path d="M -80 78 Q -90 135 -70 175 L 70 175 Q 90 135 80 78 Q 55 73 0 76 Q -55 73 -80 78" fill="#8B4513"/>
+    <path d="M -15 82 L 0 125 L 15 82 Q 8 78 0 78 Q -8 78 -15 82" fill="#F5F0E6"/>
+    <!-- 拿酒瓶 -->
+    <g transform="translate(-70, 125) rotate(-20)">
+      <ellipse cx="0" cy="0" rx="28" ry="20" fill="#FFDAB9" stroke="#D4A574" stroke-width="2"/>
+      <rect x="-8" y="-55" width="16" height="55" rx="4" fill="#228B22"/>
+      <rect x="-6" y="-50" width="12" height="25" fill="#32CD32"/>
+      <rect x="-10" y="-60" width="20" height="8" fill="#FFD700"/>
+    </g>
+  </g>
+
+  <!-- 背景围观者1 - 后左 -->
+  <g transform="translate(180, 500)" filter="url(#bShadow)" opacity="0.85">
+    <ellipse cx="0" cy="0" rx="50" ry="55" fill="#FFDAB9"/>
+    <path d="M -42 -22 Q -45 -65 0 -70 Q 45 -65 42 -22" fill="#3D2817"/>
+    <ellipse cx="-15" cy="-5" rx="5" ry="7" fill="#333"/>
+    <ellipse cx="15" cy="-5" rx="5" ry="7" fill="#333"/>
+    <ellipse cx="-25" cy="20" rx="12" ry="8" fill="#FF9999" opacity="0.5"/>
+    <ellipse cx="25" cy="20" rx="12" ry="8" fill="#FF9999" opacity="0.5"/>
+    <ellipse cx="0" cy="35" rx="15" ry="12" fill="#8B0000"/>
+    <rect x="-55" y="55" width="110" height="80" rx="8" fill="#4A5D23"/>
+  </g>
+
+  <!-- 背景围观者2 - 后右 -->
+  <g transform="translate(1420, 520)" filter="url(#bShadow)" opacity="0.85">
+    <ellipse cx="0" cy="0" rx="48" ry="52" fill="#FFDAB9"/>
+    <path d="M -40 -20 Q -45 -62 0 -67 Q 45 -62 40 -20 Q 35 -45 0 -50 Q -35 -45 -40 -20" fill="#5D2906"/>
+    <ellipse cx="-13" cy="-3" rx="4" ry="6" fill="#333"/>
+    <ellipse cx="13" cy="-3" rx="4" ry="6" fill="#333"/>
+    <ellipse cx="-22" cy="18" rx="10" ry="7" fill="#FF9999" opacity="0.5"/>
+    <ellipse cx="22" cy="18" rx="10" ry="7" fill="#FF9999" opacity="0.5"/>
+    <path d="M -18 35 Q 0 50 18 35" fill="#8B0000"/>
+    <rect x="-50" y="52" width="100" height="75" rx="7" fill="#2C3E50"/>
+  </g>
+
+  <!-- 前景 - 玩家双手搭桌 (第一人称视角) -->
+  <g transform="translate(450, 800)">
+    <ellipse cx="0" cy="0" rx="120" ry="35" fill="#FFDAB9" opacity="0.9"/>
+    <rect x="-15" y="-25" width="70" height="50" rx="10" fill="#FFDAB9" stroke="#D4A574" stroke-width="2"/>
+  </g>
+  <g transform="translate(1150, 800)">
+    <ellipse cx="0" cy="0" rx="120" ry="35" fill="#FFDAB9" opacity="0.9"/>
+    <rect x="-55" y="-25" width="70" height="50" rx="10" fill="#FFDAB9" stroke="#D4A574" stroke-width="2"/>
+  </g>
+
+  <!-- 漫画速度线 - 压迫感 -->
+  <g opacity="0.18">
+    <line x1="150" y1="80" x2="300" y2="250" stroke="white" stroke-width="3"/>
+    <line x1="250" y1="60" x2="450" y2="280" stroke="white" stroke-width="2"/>
+    <line x1="1450" y1="80" x2="1300" y2="250" stroke="white" stroke-width="3"/>
+    <line x1="1350" y1="60" x2="1150" y2="280" stroke="white" stroke-width="2"/>
+    <line x1="800" y1="40" x2="800" y2="150" stroke="white" stroke-width="2"/>
+  </g>
+
+  <!-- 装饰小点 -->
+  <g opacity="0.5">
+    <circle cx="80" cy="700" r="12" fill="#FFD700"/>
+    <circle cx="1520" cy="700" r="12" fill="#FFD700"/>
+    <text x="800" y="680" text-anchor="middle" font-size="25" fill="#FFD700" opacity="0.7">✦</text>
+  </g>
+</svg>
