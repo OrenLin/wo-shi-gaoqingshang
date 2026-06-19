@@ -51,6 +51,12 @@ export interface Scene {
 }
 
 // ---------- 段位 ----------
+export interface Recommendation {
+  icon: string;              // 📖 或 🎬
+  title: { zh: string; en: string };   // 书名/片名（含原文或作者）
+  desc: { zh: string; en: string };    // 1-2 句推荐理由
+}
+
 export interface Level {
   name: string | Localized;
   tag: string | Localized;
@@ -64,4 +70,5 @@ export interface Level {
     comment: string | Localized;
   };
   socialCopy: string | Localized;
+  recos: Recommendation[];   // 段位精准推荐：书+影
 }

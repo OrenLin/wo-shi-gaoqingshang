@@ -99,6 +99,12 @@ const zh: Dict = {
   'report.hiddenAchievement': '🏅 隐藏成就',
   'report.achievementEqCeiling': '情商天花板',
   'report.achievementSocialKiller': '社交杀手',
+  'report.reco': '🎯 你的专属书单&影单',
+  'report.copyOne': '复制这一条',
+  'report.copyAll': '复制全部推荐',
+  'report.copiedShort': '已复制！',
+  'report.recoBonus': '🎞️ 全段位通用彩蛋',
+  'report.disclaimer': '· 游戏纯属娱乐 · 情商不是唯一标尺 · 表达风格因人而异 · 真诚最重要 ·',
 
   // ----- Audio Button -----
   'audio.enable': '🔊 点我开声音',
@@ -202,6 +208,12 @@ const en: Dict = {
   'report.footer': '🧠 I am High-EQ · 2026 · Reject Toxic Socializing',
   'report.copied': '✨ Share text copied! Go flex on social media~',
   'report.shareTemplate': 'I scored {score} on the EQ Challenge · Rank: {emoji} {level}! {copy}',
+  'report.reco': '🎯 Your Tailored Book & Movie Picks',
+  'report.copyOne': 'Copy this one',
+  'report.copyAll': 'Copy all recos',
+  'report.copiedShort': 'Copied!',
+  'report.recoBonus': '🎞️ Bonus · For all ranks',
+  'report.disclaimer': '· For entertainment only · EQ isn\'t the only measure · Everyone communicates differently · Authenticity matters most ·',
 
   // ----- Audio Button -----
   'audio.enable': '🔊 Tap for Sound',

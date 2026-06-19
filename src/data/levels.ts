@@ -35,6 +35,24 @@ export const levels: Level[] = [
       zh: '别人忙着人情世故，我忙着守住自己舒服的边界，本季社交整顿选手就位🔥',
       en: "Everyone else is busy performing social niceties — I'm busy defending my peace of mind. Certified boundary-setter of the season 🔥",
     },
+    recos: [
+      {
+        icon: '📖',
+        title: { zh: '《沉思录》 马可·奥勒留', en: 'Meditations · Marcus Aurelius' },
+        desc: {
+          zh: '罗马皇帝写的人生修养日记，讲的不是怎么讨好别人，而是怎么在混乱里守住自己的情绪和原则。当你已经不需要证明什么时，"稳"就是最高阶的社交优势。',
+          en: 'A Roman emperor\'s private journal on self-discipline and principle. Not about pleasing people — about keeping your ground in chaos. When nothing can rattle you, "steadiness" becomes your highest social superpower.',
+        },
+      },
+      {
+        icon: '🎬',
+        title: { zh: '《教父》 The Godfather', en: 'The Godfather' },
+        desc: {
+          zh: '不是教你当黑帮，是教你看懂"话里有话"。高级的社交从来不是说得多，而是知道什么话不说、什么时候说、用什么身份说。每一场对话都是谋局的艺术，100分选手的高阶参考书。',
+          en: 'Not about being a gangster — about reading subtext. High-end socializing isn\'t about talking more; it\'s about knowing what NOT to say, when to say it, and which persona to say it as. Every conversation is a chess move. Required viewing for 100-point operators.',
+        },
+      },
+    ],
   },
   {
     name: {
@@ -70,6 +88,24 @@ export const levels: Level[] = [
       zh: '行走的人际关系教科书，但凡有我在，就没有聊崩的局👑',
       en: 'A walking textbook on human relations. If I\'m in the room, there is no conversation that can go wrong 👑',
     },
+    recos: [
+      {
+        icon: '📖',
+        title: { zh: '《孙子兵法》', en: 'The Art of War · Sun Tzu' },
+        desc: {
+          zh: '别觉得兵书和情商无关。高阶社交本质是人心与利害的博弈——知己知彼、不战而屈人之兵。当你已经能做到说话滴水不漏，读这本能帮你从被动接招变成主动控场，不止会说话，更会谋局。',
+          en: 'Don\'t dismiss a military manual. High-level socializing is, at its core, a game of perception and stakes — know yourself, know your opponent, win without fighting. When you already speak flawlessly, this book moves you from reacting to controlling the room.',
+        },
+      },
+      {
+        icon: '🎬',
+        title: { zh: '《让子弹飞》', en: 'Let the Bullets Fly' },
+        desc: {
+          zh: '中式人情世故的顶级实景教学。全是话里有话的潜台词、明暗交错的利益拉扯，每一句对话、每一个场面都是处世智慧的博弈。常刷常新，高阶情商的中式范本。',
+          en: 'A masterclass in Chinese-style personal politics. Loaded with subtext, double meanings, and shifting stakes — every conversation is a tactical exchange. You pick up new nuances every rewatch. The definitive reference for the advanced EQ operator.',
+        },
+      },
+    ],
   },
   {
     name: {
@@ -105,6 +141,24 @@ export const levels: Level[] = [
       zh: '日常社交基本稳赢，偶尔小翻车，但绝不社死😎',
       en: 'Winning at social life on autopilot, minor missteps happen — total social death? Never 😎',
     },
+    recos: [
+      {
+        icon: '📖',
+        title: { zh: '《沟通的艺术：看入人里，看出人外》', en: 'Looking Out, Looking In · Adler & Proctor II' },
+        desc: {
+          zh: '美国高校40年经典教材，不灌鸡汤、讲的是真东西：怎么表达情绪、怎么倾听、怎么识别对方的防御机制。你已经会说场面话，这本书能帮你把"稳"升级到"暖"——从不错，变成让人印象深刻。',
+          en: 'A 40-year classic in US communication studies. No fluff — straight tools for expressing emotion, active listening, and recognizing defensive patterns. You already say the right things; this book turns "polished" into "warm and memorable."',
+        },
+      },
+      {
+        icon: '🎬',
+        title: { zh: '《布达佩斯大饭店》 The Grand Budapest Hotel', en: 'The Grand Budapest Hotel' },
+        desc: {
+          zh: '精致的人情世故里藏着最优雅的社交示范：门童零如何在各种大人物中间保持体面、化解窘境。节奏明快、画面讲究，学的不是话术，是"得体感"——一种让人舒服的高级气场。',
+          en: 'A masterclass in elegant social performance under pressure. Watch how Zero the lobby boy navigates powerful personalities, defuses awkwardness, and keeps his dignity. You\'re learning not WHAT to say, but HOW to BE — a rare, refined sense of appropriateness.',
+        },
+      },
+    ],
   },
   {
     name: {
@@ -140,6 +194,24 @@ export const levels: Level[] = [
       zh: '社交苟住型选手，不出错就是我的最大胜利😅',
       en: 'Survival-mode socializer — "not messing up" counts as my biggest win 😅',
     },
+    recos: [
+      {
+        icon: '📖',
+        title: { zh: '《非暴力沟通》 马歇尔·卢森堡', en: 'Nonviolent Communication · Marshall Rosenberg' },
+        desc: {
+          zh: '不是教你圆滑讨好，是教你怎么精准表达、怎么听懂对方的真实需求。很多人端水端得累，本质是把"评价"当"事实"、把"想法"当"感受"。这本书能帮你把"刻意维持体面"变成"自然的共情"，社交不再靠内耗硬撑。',
+          en: 'Not about being artificially "nice" — about precise expression and hearing the real need behind words. The mental exhaustion of "balancing things" usually comes from confusing judgments with facts, thoughts with feelings. This book turns forced politeness into genuine empathy.',
+        },
+      },
+      {
+        icon: '🎬',
+        title: { zh: '《触不可及》（法版） Intouchables', en: 'The Intouchables' },
+        desc: {
+          zh: '真实事件改编，跨越阶层与身份的友情故事。最高级的情商从来不是滴水不漏的客套，是尊重、真诚和恰到好处的分寸感。全程温暖松弛，看完会自然明白：好的社交，从来不需要委屈自己迎合别人。',
+          en: 'Based on a true story — an unlikely friendship across class and identity. The highest form of EQ isn\'t polished small-talk; it\'s respect, authenticity, and knowing where the line is. Warm, relaxed, zero preaching. You\'ll just get it after watching.',
+        },
+      },
+    ],
   },
   {
     name: {
@@ -175,8 +247,39 @@ export const levels: Level[] = [
       zh: '主打一个真诚坦荡，嘴比脑子跑得快，社死专业户本人💀',
       en: "Champion of unfiltered honesty — mouth outruns brain, official spokesperson for social death 💀",
     },
+    recos: [
+      {
+        icon: '📖',
+        title: { zh: '《所谓情商高，就是会说话》 佐佐木圭一', en: 'It\'s About How You Say It · Keiichi Sasaki' },
+        desc: {
+          zh: '薄薄一本口袋小书，没有鸡汤大道理，拆解了7个措辞突破口+8个实用技巧，全是可直接套用的话术公式。比如把"我不行"换成"我可以试试"，把"你错了"换成"换个角度看"，专治直来直去的踩雷体质，看完就能避开80%的日常社死场景。',
+          en: 'A slim, pocket-sized handbook with zero fluff. Seven phrasing frameworks + eight practical techniques you can literally copy-paste into daily conversation. "I can\'t do this" → "Let me give it a try." "You\'re wrong" → "Interesting — what if we look at it differently." Eliminates roughly 80% of routine social misfires.',
+        },
+      },
+      {
+        icon: '🎬',
+        title: { zh: '《好好先生》 Yes Man', en: 'Yes Man' },
+        desc: {
+          zh: '金·凯瑞主演的轻喜剧，讲一个凡事说"不"的封闭直男，被迫对所有邀约说"Yes"的人生反转。搞笑又治愈，能直观感受到"开放的回应方式"能给社交打开多少新可能，轻松看完就能get到主动接话的底层逻辑，完全不会有说教感。',
+          en: 'A Jim Carrey comedy about a closed-off "No" guy forced to say yes to every invitation for a year. Funny and heartwarming — you\'ll literally SEE how opening your response patterns reshapes social outcomes. Zero lectures, pure "learn by watching" entertainment.',
+        },
+      },
+    ],
   },
 ];
+
+// 全段位通用：彩蛋纪录片推荐
+export const bonusReco = {
+  icon: '🎞️',
+  title: {
+    zh: '《约翰·威尔逊的十万个怎么做》 How to with John Wilson',
+    en: 'How to with John Wilson',
+  },
+  desc: {
+    zh: '豆瓣9.5分的"社恐社交观察日记"，用絮絮叨叨的镜头记录纽约街头的真实社交：怎么和陌生人搭话、怎么应对聚餐AA尴尬、怎么处理闲聊冷场。没有标准答案，却满是真实的人间观察，看完会对"日常社交"有全新的松弛感理解，有趣又治愈。',
+    en: 'A 9.5-rated "social-observation diary for introverts." A rambling, deadpan lens on real-life New York socializing — how to talk to strangers, how to handle splitting the check, how to survive small-talk silences. No prescriptive answers. Just raw, relatable, strangely comforting observations. Funny and therapeutic.',
+  },
+};
 
 /** 根据分数拿到 Level */
 export function getLevel(score: number): Level {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { getOptionLevel, levelGradient } from '../data/levels';
+import { getOptionLevel, levelGradient, bonusReco } from '../data/levels';
 import { scenes } from '../data';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
@@ -18,6 +18,7 @@ export default function FinalReport() {
     maxStreakLow,
   } = useGameStore();
   const [show, setShow] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const report = getFinalReport();
 
   const levelName = pickLocalized(report.level.name, language);
@@ -26,6 +27,35 @@ export default function FinalReport() {
   const history = pickLocalized(report.level.descModule.history, language);
   const comment = pickLocalized(report.level.descModule.comment, language);
   const socialCopy = pickLocalized(report.level.socialCopy, language);
+
+  // 复制单个推荐项内容
+  const handleCopyReco = (icon: string, title: string, desc: string) => {
+    const text = `${icon} ${title}\n${desc}`;
+    navigator.clipboard?.writeText(text).then(
+      () => {
+        setCopiedKey(title);
+        setTimeout(() => setCopiedKey(null), 1500);
+      },
+      () => {},
+    );
+  };
+
+  // 复制全量推荐清单
+  const handleCopyAll = () => {
+    const head = `【${levelName} · 段位书单&影单】\n\n`;
+    const body = report.level.recos
+      .map((r, i) => `${i + 1}. ${r.icon} ${pickLocalized(r.title, language)}\n${pickLocalized(r.desc, language)}`)
+      .join('\n\n');
+    const bonus = `\n\n🎞️ 彩蛋（全段位通用）：${pickLocalized(bonusReco.title, language)}\n${pickLocalized(bonusReco.desc, language)}`;
+    const text = head + body + bonus;
+    navigator.clipboard?.writeText(text).then(
+      () => {
+        setCopiedKey('__all__');
+        setTimeout(() => setCopiedKey(null), 1500);
+      },
+      () => {},
+    );
+  };
 
   const isAntiKing = report.averageScore === 100;
   const gradient = isAntiKing
@@ -267,6 +297,85 @@ export default function FinalReport() {
               {socialCopy}
             </p>
           </div>
+
+          {/* 📖🎬 段位推荐卡片 */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-base md:text-lg font-black text-[#1a1a2e] flex items-center gap-2">
+                <span className="text-2xl">{t('report.reco')}</span>
+              </h4>
+              <button
+                onClick={handleCopyAll}
+                className="inline-flex items-center gap-1 bg-white border-[3px] border-[#1a1a2e] rounded-full px-3 py-1 shadow-[2px_2px_0_0_#1a1a2e] text-xs font-black text-[#1a1a2e] hover:-translate-y-[1px] active:translate-y-[1px] transition-transform"
+              >
+                {copiedKey === '__all__' ? '✨ ' + t('report.copiedShort') : '📋 ' + t('report.copyAll')}
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {report.level.recos.map((r, i) => {
+                const title = pickLocalized(r.title, language);
+                const desc = pickLocalized(r.desc, language);
+                const isCopied = copiedKey === title;
+                return (
+                  <div
+                    key={i}
+                    className="relative bg-gradient-to-br from-white to-amber-50/60 rounded-2xl border-[3px] border-[#1a1a2e] p-4 shadow-[3px_3px_0_0_#1a1a2e] animate-pop-in"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="text-3xl flex-shrink-0 mt-0.5">{r.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-black text-[#1a1a2e] text-sm md:text-base mb-1.5">
+                          {title}
+                        </div>
+                        <p className="text-[#1a1a2e]/75 text-xs md:text-sm font-bold leading-relaxed">
+                          {desc}
+                        </p>
+                        <button
+                          onClick={() => handleCopyReco(r.icon, title, desc)}
+                          className="mt-2.5 inline-flex items-center gap-1 bg-amber-400 text-white font-black text-xs rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e] hover:-translate-y-[1px] active:translate-y-[1px] transition-transform"
+                        >
+                          {isCopied ? '✨ ' + t('report.copiedShort') : '📋 ' + t('report.copyOne')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 全段位通用彩蛋纪录片 */}
+            <div
+              className="mt-4 relative bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-2xl border-[3px] border-dashed border-[#1a1a2e] p-4 animate-pop-in"
+              style={{ animationDelay: '300ms' }}
+            >
+              <div className="absolute -top-3 left-4 bg-pink-500 text-white font-black text-xs rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]">
+                {t('report.recoBonus')}
+              </div>
+              <div className="flex items-start gap-3 mt-1.5">
+                <div className="text-3xl flex-shrink-0">{bonusReco.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-black text-[#1a1a2e] text-sm md:text-base mb-1.5">
+                    {pickLocalized(bonusReco.title, language)}
+                  </div>
+                  <p className="text-[#1a1a2e]/75 text-xs md:text-sm font-bold leading-relaxed">
+                    {pickLocalized(bonusReco.desc, language)}
+                  </p>
+                  <button
+                    onClick={() => handleCopyReco(
+                      bonusReco.icon,
+                      pickLocalized(bonusReco.title, language),
+                      pickLocalized(bonusReco.desc, language),
+                    )}
+                    className="mt-2.5 inline-flex items-center gap-1 bg-pink-500 text-white font-black text-xs rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e] hover:-translate-y-[1px] active:translate-y-[1px] transition-transform"
+                  >
+                    {copiedKey === pickLocalized(bonusReco.title, language) ? '✨ ' + t('report.copiedShort') : '📋 ' + t('report.copyOne')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 操作按钮 */}
@@ -305,6 +414,12 @@ export default function FinalReport() {
         <div className="mt-6 text-center">
           <span className="inline-flex items-center gap-2 bg-white/80 border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e] text-xs font-black text-[#1a1a2e]">
             {t('report.footer')}
+          </span>
+        </div>
+
+        <div className="mt-3 text-center">
+          <span className="inline-flex items-center justify-center bg-transparent text-[11px] md:text-xs font-bold text-[#1a1a2e]/55 leading-relaxed max-w-md mx-auto">
+            {t('report.disclaimer')}
           </span>
         </div>
       </div>
