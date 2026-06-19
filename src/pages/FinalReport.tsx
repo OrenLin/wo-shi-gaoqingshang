@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOptionLevel, levelGradient, bonusReco } from '../data/levels';
 import { scenes } from '../data';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
+import EQChart from '../components/ui/EQChart';
 import { useI18n, pickLocalized } from '../i18n';
 
 export default function FinalReport() {
@@ -20,6 +21,62 @@ export default function FinalReport() {
   const [show, setShow] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const report = getFinalReport();
+
+  // 基于答题分布计算 5 个情商维度得分
+  const eqDims = useMemo(() => {
+    const allAnswers = report.scenes.flatMap((sr) => sr.answers);
+    if (allAnswers.length === 0) {
+      return [];
+    }
+
+    // 统计每个选项等级的出现次数（level.name.zh 对应等级名称）
+    const counts: Record<string, number> = { '情商之神': 0, '情商达人': 0, '及格选手': 0, '直球原生态选手': 0, '社死天花板': 0 };
+    allAnswers.forEach((a) => {
+      const lvlName = pickLocalized(a.level.name, 'zh');
+      counts[lvlName] = (counts[lvlName] ?? 0) + 1;
+    });
+    const total = allAnswers.length;
+
+    const toPct = (n: number) => Math.round(Math.min(100, (n / total) * 100));
+
+    return [
+      {
+        key: 'advocate',
+        label: { zh: '嘴替力', en: 'Advocate' },
+        color: '#f59e0b',
+        colorEnd: '#d97706',
+        value: toPct((counts['情商之神'] ?? 0) + (counts['情商达人'] ?? 0)),
+      },
+      {
+        key: 'social',
+        label: { zh: '社交力', en: 'Social' },
+        color: '#34d399',
+        colorEnd: '#059669',
+        value: toPct(counts['及格选手'] ?? 0),
+      },
+      {
+        key: 'pressure',
+        label: { zh: '抗压力', en: 'Pressure' },
+        color: '#60a5fa',
+        colorEnd: '#2563eb',
+        value: toPct(counts['直球原生态选手'] ?? 0),
+      },
+      {
+        key: 'disaster',
+        label: { zh: '社死预警', en: 'Awkward' },
+        color: '#f87171',
+        colorEnd: '#dc2626',
+        value: toPct(counts['社死天花板'] ?? 0),
+      },
+      {
+        key: 'potential',
+        label: { zh: '成长值', en: 'Growth' },
+        color: '#a78bfa',
+        colorEnd: '#7c3aed',
+        value: Math.min(100, Math.round(report.averageScore + (counts['情商之神'] ?? 0) * 5)),
+      },
+    ];
+  }, [report]);
 
   const levelName = pickLocalized(report.level.name, language);
   const levelTag = pickLocalized(report.level.tag, language);
@@ -187,6 +244,16 @@ export default function FinalReport() {
               </div>
             </div>
           </div>
+
+          {/* 迷你雷达图 */}
+          {eqDims.length > 0 && (
+            <EQChart
+              dims={eqDims}
+              language={language}
+              show={show}
+              title={t('report.eqChart')}
+            />
+          )}
 
           {/* Per-scene scores */}
           <div className="mb-5">
