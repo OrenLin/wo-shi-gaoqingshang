@@ -4,7 +4,7 @@ import { getOptionLevel, levelGradient, bonusReco } from '../data/levels';
 import { scenes } from '../data';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
-import EQChart from '../components/ui/EQChart';
+import ScoreBoard from '../components/ui/ScoreBoard';
 import { useI18n, pickLocalized } from '../i18n';
 
 export default function FinalReport() {
@@ -29,14 +29,22 @@ export default function FinalReport() {
       return [];
     }
 
-    // 统计每个选项等级的出现次数（level.name.zh 对应等级名称）
-    const counts: Record<string, number> = { '情商之神': 0, '情商达人': 0, '及格选手': 0, '直球原生态选手': 0, '社死天花板': 0 };
+    // 用 AnswerRecord.optionLevel（'anti' | 'god' | 'high' | 'medium' | 'low'）
+    const counts: Record<string, number> = { god: 0, high: 0, medium: 0, low: 0, anti: 0 };
     allAnswers.forEach((a) => {
-      const lvlName = pickLocalized(a.level.name, 'zh');
-      counts[lvlName] = (counts[lvlName] ?? 0) + 1;
+      if (a.optionLevel) {
+        counts[a.optionLevel] = (counts[a.optionLevel] ?? 0) + 1;
+      } else {
+        // 兜底：没有 optionLevel 的根据分数推断
+        const fallback = a.score >= 95 ? 'god'
+          : a.score >= 75 ? 'high'
+          : a.score >= 55 ? 'medium'
+          : a.score >= 30 ? 'low'
+          : 'anti';
+        counts[fallback] = (counts[fallback] ?? 0) + 1;
+      }
     });
     const total = allAnswers.length;
-
     const toPct = (n: number) => Math.round(Math.min(100, (n / total) * 100));
 
     return [
@@ -45,35 +53,35 @@ export default function FinalReport() {
         label: { zh: '嘴替力', en: 'Advocate' },
         color: '#f59e0b',
         colorEnd: '#d97706',
-        value: toPct((counts['情商之神'] ?? 0) + (counts['情商达人'] ?? 0)),
+        value: toPct((counts.god ?? 0) + (counts.high ?? 0)),
       },
       {
         key: 'social',
         label: { zh: '社交力', en: 'Social' },
         color: '#34d399',
         colorEnd: '#059669',
-        value: toPct(counts['及格选手'] ?? 0),
+        value: toPct(counts.medium ?? 0),
       },
       {
         key: 'pressure',
         label: { zh: '抗压力', en: 'Pressure' },
         color: '#60a5fa',
         colorEnd: '#2563eb',
-        value: toPct(counts['直球原生态选手'] ?? 0),
+        value: toPct(counts.low ?? 0),
       },
       {
-        key: 'disaster',
+        key: 'awkward',
         label: { zh: '社死预警', en: 'Awkward' },
         color: '#f87171',
         colorEnd: '#dc2626',
-        value: toPct(counts['社死天花板'] ?? 0),
+        value: toPct(counts.anti ?? 0),
       },
       {
-        key: 'potential',
+        key: 'growth',
         label: { zh: '成长值', en: 'Growth' },
         color: '#a78bfa',
         colorEnd: '#7c3aed',
-        value: Math.min(100, Math.round(report.averageScore + (counts['情商之神'] ?? 0) * 5)),
+        value: Math.min(100, Math.round(report.averageScore + (counts.god ?? 0) * 5)),
       },
     ];
   }, [report]);
@@ -212,46 +220,20 @@ export default function FinalReport() {
             </h2>
           </div>
 
-          {/* 综合得分 + 击败全球百分比 */}
-          <div className="text-center mb-5">
-            <div
-              className={`inline-block relative bg-gradient-to-br ${levelGradient[gradient]} text-white rounded-[24px] border-[4px] border-[#1a1a2e] shadow-[5px_5px_0_0_#1a1a2e] px-8 py-6 md:px-12 md:py-8 animate-pop-in`}
-            >
-              <div className="text-lg md:text-xl font-black opacity-90 mb-1">
-                {t('report.totalScore')}
-              </div>
-              <div
-                className="text-7xl md:text-8xl font-black leading-none mb-2"
-                style={{ textShadow: '3px 3px 0 rgba(0,0,0,0.25)' }}
-              >
-                {report.averageScore}
-              </div>
-            </div>
-
-            {/* 击败全球百分比 */}
-            <div
-              className="mt-4 inline-block relative bg-white border-[3px] border-[#1a1a2e] rounded-[20px] shadow-[4px_4px_0_0_#1a1a2e] px-5 py-3 animate-pop-in"
-              style={{ animationDelay: '0.15s' }}
-            >
-              <div className="text-sm font-black text-[#1a1a2e]/70 mb-1">
-                🌍 {language === 'zh' ? '你的表现已超越' : 'You beat'}
-              </div>
-              <div className="text-4xl font-black text-rose-500 leading-none">
-                {report.percentile.toFixed(1)}%
-              </div>
-              <div className="text-sm font-black text-[#1a1a2e]/70 mt-1">
-                {language === 'zh' ? '全球玩家' : 'of players worldwide'}
-              </div>
-            </div>
-          </div>
-
-          {/* 迷你雷达图 */}
+          {/* 融合式 ScoreBoard：分数 + 雷达图 + Beat% */}
           {eqDims.length > 0 && (
-            <EQChart
+            <ScoreBoard
+              score={report.averageScore}
+              percentile={report.percentile}
               dims={eqDims}
               language={language}
+              levelName={levelName}
+              levelEmoji={report.level.emoji}
               show={show}
-              title={t('report.eqChart')}
+              beatTitle={language === 'zh' ? '你的表现已超越' : 'You beat'}
+              beatSubtitle={language === 'zh' ? '全球玩家' : 'of players worldwide'}
+              scoreLabel={t('report.totalScore')}
+              boardTitle={t('report.scoreboard')}
             />
           )}
 
