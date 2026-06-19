@@ -21,7 +21,7 @@ export default function OptionList({
   renderContent,
   renderLevelLabel,
 }: Props) {
-  const { language } = useI18n();
+  const language = useI18n((s) => s.language);
   return (
     <div className="space-y-3">
       {options.map((opt, idx) => {
@@ -88,7 +88,7 @@ function RevealRow({
   level: OptionLevel;
   renderLevelLabel?: (level: OptionLevel) => React.ReactNode;
 }) {
-  const { language } = useI18n();
+  const language = useI18n((s) => s.language);
   return (
     <div className="mt-3 inline-flex flex-wrap items-center gap-2 animate-pop-in">
       <span

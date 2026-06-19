@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function BubbleDialog({ character, dialog, badge }: Props) {
-  const { language } = useI18n();
+  const language = useI18n((s) => s.language);
   return (
     <div className="relative bg-white rounded-[24px] border-[3px] border-[#1a1a2e] shadow-[5px_5px_0_0_#1a1a2e] p-5 overflow-visible">
       {badge && (

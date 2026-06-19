@@ -8,7 +8,9 @@ import { useI18n, pickLocalized } from '../i18n';
 
 export default function SceneSelect() {
   const { selectScene, reset, getCompletedSceneIds } = useGameStore();
-  const { language, setLanguage, t } = useI18n();
+  const language = useI18n((s) => s.language);
+  const setLanguage = useI18n((s) => s.setLanguage);
+  const t = useI18n((s) => s.t);
   const tLocal = (field: string | { zh: string; en: string } | undefined) =>
     pickLocalized(field, language);
 

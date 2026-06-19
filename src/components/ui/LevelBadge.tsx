@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function LevelBadge({ level, size = 'md' }: Props) {
-  const { language } = useI18n();
+  const language = useI18n((s) => s.language);
   const padding = size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm';
   return (
     <div

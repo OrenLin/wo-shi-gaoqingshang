@@ -28,7 +28,8 @@ export default function ConsentModal({
   onTogglePrivacy,
   onConfirm,
 }: Props) {
-  const { language, t } = useI18n();
+  const language = useI18n((s) => s.language);
+  const t = useI18n((s) => s.t);
 
   useEffect(() => {
     if (!open) return;

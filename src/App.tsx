@@ -11,7 +11,7 @@ import FinalReport from './pages/FinalReport';
 
 export default function App() {
   const { currentPage } = useGameStore();
-  const { t } = useI18n();
+  const t = useI18n((s) => s.t);
 
   // 订阅音频管理器状态变化（用于刷新按钮图标）
   const [audioTick, setAudioTick] = useState(0);

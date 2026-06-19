@@ -8,16 +8,18 @@ import ConsentModal from '../components/ui/ConsentModal';
 
 export default function Home() {
   const { setPage, setCodename, consented, setConsented } = useGameStore();
-  const { language, setLanguage, t } = useI18n();
+  // 用 selector 写法，确保 language 变化时 Home 组件重新渲染
+  const language = useI18n((s) => s.language);
+  const setLanguage = useI18n((s) => s.setLanguage);
+  const t = useI18n((s) => s.t);
 
   const [codename, setCodenameInput] = useState('');
   const [consentOpen, setConsentOpen] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
-  const [accept, setAccept] = useState(true); // 默认勾选，方便用户
+  const [accept, setAccept] = useState(true);
 
   const zh = language === 'zh';
 
-  // 点击开始时：未同意则弹出 consent；已同意直接进入
   const handleStart = () => {
     audioManager.userTapped();
     audioManager.play('click');
@@ -34,7 +36,6 @@ export default function Home() {
     if (!accept) return;
     setConsented(true);
     setConsentOpen(false);
-    // 同意后直接进入下一步
     const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '';
     setCodename(name);
     setPage('select');
@@ -84,40 +85,20 @@ export default function Home() {
           <div className="absolute -bottom-4 -right-4 w-14 h-14 bg-sky-400 rounded-full opacity-60 animate-spin-slow -z-10"
                style={{ animationDirection: 'reverse' }} />
 
-          {language === 'zh' ? (
-            <>
-              <div className="text-5xl md:text-6xl font-black text-[#1a1a2e] leading-none animate-wiggle"
-                   style={{ textShadow: '4px 4px 0 #fbbf24, 8px 8px 0 rgba(26,26,46,0.2)', WebkitTextStroke: '2px #1a1a2e' }}>
-                {t('home.title1')}
-              </div>
-              <div className="mt-1 text-6xl md:text-7xl font-black leading-none animate-wiggle"
-                   style={{
-                     background: 'linear-gradient(135deg, #f472b6 0%, #fb923c 50%, #facc15 100%)',
-                     WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-                     WebkitTextStroke: '3px #1a1a2e', textShadow: '6px 6px 0 rgba(26,26,46,0.15)',
-                     animationDelay: '0.2s',
-                   }}>
-                {t('home.title2')}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-5xl md:text-6xl font-black text-[#1a1a2e] leading-none animate-wiggle"
-                   style={{ textShadow: '4px 4px 0 #fbbf24, 8px 8px 0 rgba(26,26,46,0.2)', WebkitTextStroke: '2px #1a1a2e' }}>
-                {t('home.title1')}
-              </div>
-              <div className="mt-1 text-5xl md:text-6xl font-black leading-none animate-wiggle"
-                   style={{
-                     background: 'linear-gradient(135deg, #f472b6 0%, #fb923c 50%, #facc15 100%)',
-                     WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-                     WebkitTextStroke: '3px #1a1a2e', textShadow: '6px 6px 0 rgba(26,26,46,0.15)',
-                     animationDelay: '0.2s',
-                   }}>
-                {t('home.title2')}{' '}
-                <span style={{ color: 'transparent' }}>{t('home.title2b')}</span>
-              </div>
-            </>
-          )}
+          <div className="text-5xl md:text-6xl font-black text-[#1a1a2e] leading-none animate-wiggle"
+               style={{ textShadow: '4px 4px 0 #fbbf24, 8px 8px 0 rgba(26,26,46,0.2)', WebkitTextStroke: '2px #1a1a2e' }}>
+            {t('home.title1')}
+          </div>
+          <div className="mt-1 text-6xl md:text-7xl font-black leading-none animate-wiggle"
+               style={{
+                 background: 'linear-gradient(135deg, #f472b6 0%, #fb923c 50%, #facc15 100%)',
+                 WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+                 WebkitTextStroke: '3px #1a1a2e', textShadow: '6px 6px 0 rgba(26,26,46,0.15)',
+                 animationDelay: '0.2s',
+               }}>
+            {t('home.title2')}
+            {!zh && <span style={{ color: 'transparent' }}>{t('home.title2b')}</span>}
+          </div>
 
           <div className="absolute -top-3 -right-4 md:-right-10 bg-red-500 text-white font-black text-xs md:text-sm rounded-2xl px-3 py-1.5 border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] animate-wiggle rotate-[12deg]"
                style={{ animationDelay: '0.5s' }}>

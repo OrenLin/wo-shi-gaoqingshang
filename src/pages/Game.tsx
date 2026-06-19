@@ -19,7 +19,9 @@ export default function Game() {
     setCustomInput,
     setPage,
   } = useGameStore();
-  const { language, setLanguage, t } = useI18n();
+  const language = useI18n((s) => s.language);
+  const setLanguage = useI18n((s) => s.setLanguage);
+  const t = useI18n((s) => s.t);
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [useCustom, setUseCustom] = useState(false);

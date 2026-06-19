@@ -9,7 +9,8 @@ interface Props {
 }
 
 export default function SceneCard({ scene, completed, index, onClick }: Props) {
-  const { language, t } = useI18n();
+  const language = useI18n((s) => s.language);
+  const t = useI18n((s) => s.t);
   const qs = scene.questions.length;
 
   return (

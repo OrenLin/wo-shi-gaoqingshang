@@ -65,7 +65,7 @@ const FOOTER: { zh: string; en: string } = {
 };
 
 export default function AntiKingToast({ onClose, auto = false }: Props) {
-  const { language } = useI18n();
+  const language = useI18n((s) => s.language);
 
   const joke = useMemo(
     () => JOKES[Math.floor(Math.random() * JOKES.length)],

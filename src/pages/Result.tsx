@@ -17,7 +17,9 @@ export default function Result() {
     currentSceneIndex,
     setPage,
   } = useGameStore();
-  const { language, setLanguage, t } = useI18n();
+  const language = useI18n((s) => s.language);
+  const setLanguage = useI18n((s) => s.setLanguage);
+  const t = useI18n((s) => s.t);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
