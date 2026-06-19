@@ -336,3 +336,54 @@ a:focus-visible,
 .animate-slide-down {
   animation: slide-down 350ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* ============ 无障碍：大字体模式（可由用户手动切换） ============ */
+.large-text {
+  font-size: 1.25em;
+}
+.large-text h1,
+.large-text h2,
+.large-text h3,
+.large-text h4 {
+  font-size: 1.15em;
+}
+.large-text button,
+.large-text input,
+.large-text select {
+  font-size: 1.1em;
+}
+.large-text .font-black,
+.large-text .font-bold {
+  font-weight: 900;
+}
+
+/* ============ 无障碍：高对比度增强版 ============ */
+.high-contrast body {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+.high-contrast button {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+}
+.high-contrast .bg-white,
+.high-contrast .bg-amber-100,
+.high-contrast .bg-yellow-50,
+.high-contrast .bg-slate-50,
+.high-contrast .bg-cream {
+  background: #ffffff !important;
+}
+.high-contrast * {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+/* ============ 无障碍：屏幕阅读器辅助模式 ============ */
+.screen-reader-mode [aria-hidden] {
+  /* 在屏幕阅读器模式下，aria-hidden 依然生效 */
+}
+.screen-reader-mode button,
+.screen-reader-mode a {
+  outline-offset: 5px !important;
+}

@@ -116,6 +116,21 @@ const zh: Dict = {
   // ----- Common -----
   'common.points': '分',
   'common.of': '/',
+
+  // ----- Accessibility A11y -----
+  'a11y.title': '♿ 无障碍设置',
+  'a11y.hint': '点击下方开关，自定义你的体验',
+  'a11y.activeCount': '已启用 {n} 项增强',
+  'a11y.highContrast': '🎨 高对比度',
+  'a11y.highContrastDesc': '黑白高对比，看得更清楚',
+  'a11y.largeText': '🔠 大字体',
+  'a11y.largeTextDesc': '所有文字放大 25%，更易读',
+  'a11y.reduceMotion': '🚫 减少动画',
+  'a11y.reduceMotionDesc': '关闭弹跳/漂浮/摇摆动画',
+  'a11y.screenReader': '🔊 屏幕阅读器友好',
+  'a11y.screenReaderDesc': '为辅助技术增强提示和语义',
+  'a11y.keyboardHint': '键盘：按 Tab 键可在页面元素间切换',
+  'a11y.tabHint': '按 Enter 或 Space 键可激活按钮',
 };
 
 const en: Dict = {
@@ -227,6 +242,21 @@ const en: Dict = {
   // ----- Common -----
   'common.points': 'pts',
   'common.of': '/',
+
+  // ----- Accessibility A11y -----
+  'a11y.title': '♿ Accessibility Settings',
+  'a11y.hint': 'Tap a switch below to customize your experience',
+  'a11y.activeCount': '{n} enhancement(s) enabled',
+  'a11y.highContrast': '🎨 High Contrast',
+  'a11y.highContrastDesc': 'Black & white contrast for better readability',
+  'a11y.largeText': '🔠 Large Text',
+  'a11y.largeTextDesc': 'All text 25% larger, easier to read',
+  'a11y.reduceMotion': '🚫 Reduce Motion',
+  'a11y.reduceMotionDesc': 'Disable bounce/float/wobble animations',
+  'a11y.screenReader': '🔊 Screen Reader Friendly',
+  'a11y.screenReaderDesc': 'Enhanced hints for assistive technology',
+  'a11y.keyboardHint': 'Keyboard: Tab to navigate between elements',
+  'a11y.tabHint': 'Press Enter or Space to activate buttons',
 };
 
 const dictionaries: Record<Language, Dict> = { zh, en };
@@ -234,19 +264,23 @@ const dictionaries: Record<Language, Dict> = { zh, en };
 interface I18nState {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string, fallback?: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
 export const useI18n = create<I18nState>((set, get) => ({
   language: 'zh',
   setLanguage: (lang: Language) => set({ language: lang }),
-  t: (key: string, fallback?: string): string => {
+  t: (key: string, vars?: Record<string, string | number>): string => {
     const lang = get().language;
-    const val = dictionaries[lang]?.[key];
-    if (val) return val;
-    if (fallback) return fallback;
-    // fallback to zh dictionary
-    return dictionaries['zh']?.[key] ?? key;
+    let val: string | undefined = dictionaries[lang]?.[key];
+    if (!val) val = dictionaries['zh']?.[key] ?? key;
+    // 变量替换：{n} → vars.n
+    if (vars && val) {
+      for (const [k, v] of Object.entries(vars)) {
+        val = val.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      }
+    }
+    return val;
   },
 }));
 

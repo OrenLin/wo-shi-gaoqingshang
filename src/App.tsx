@@ -10,6 +10,7 @@ import Game from './pages/Game';
 import Result from './pages/Result';
 import FinalReport from './pages/FinalReport';
 import { AccessibilityProvider } from './components/a11y/AccessibilityProvider';
+import A11yControlPanel from './components/a11y/A11yControlPanel';
 
 export default function App() {
   const { currentPage } = useGameStore();
@@ -64,6 +65,9 @@ export default function App() {
         <Analytics />
         {/* Vercel Speed Insights：自动收集 Web Vitals / 性能指标 */}
         <SpeedInsights />
+
+        {/* 无障碍控制中心 — 右下角固定悬浮轮椅按钮 */}
+        <A11yControlPanel />
 
         {/* 全局音频控制按钮 —— 始终可见，用户点击即同步栈内解锁音频 */}
         <button
