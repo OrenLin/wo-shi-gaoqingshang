@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Analytics, track } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useGameStore } from './store/gameStore';
 import { useI18n } from './i18n';
 import { audioManager } from './utils/audioManager';
@@ -67,6 +68,8 @@ export default function App() {
       {renderPage()}
       {/* Vercel Analytics：自动统计访问者与页面浏览 */}
       <Analytics />
+      {/* Vercel Speed Insights：自动收集 Web Vitals / 性能指标 */}
+      <SpeedInsights />
 
       {/* 全局音频控制按钮 —— 始终可见，用户点击即同步栈内解锁音频 */}
       <button

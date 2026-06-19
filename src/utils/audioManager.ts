@@ -171,8 +171,10 @@ class AudioManager {
 
   // ==================================================================
   // 用户手势解锁 —— 同步播放声音并启动背景旋律
+  // 【iOS 关键】必须在「用户手势的同步调用栈」内完成：创建 context → resume → 实际播放音频
+  // 传 deferKey 时：解锁后立刻在同步路径里把这 sound 也播掉，避免时间戳过期
   // ==================================================================
-  async unlockByUserGesture(): Promise<boolean> {
+  async unlockByUserGesture(deferKey?: SoundKey): Promise<boolean> {
     // 1. 确保有 AudioContext（在用户手势内创建）
     const ok = this.ensureContext(true);
     if (!ok || !this.ctx || !this.sfxGain) {
@@ -189,6 +191,11 @@ class AudioManager {
       this.playNote(NOTES.C6, t + 0.02, 0.12, 'triangle', 0.4, this.sfxGain);
       this.playNote(NOTES.E6, t + 0.12, 0.12, 'triangle', 0.35, this.sfxGain);
       this.playNote(NOTES.G6, t + 0.22, 0.18, 'triangle', 0.3, this.sfxGain);
+
+      // 【iOS 即时播放】如果调用方传入了 deferKey，立刻在同步栈里把它也播掉
+      if (deferKey && deferKey !== 'click') {
+        this.playSfxAt(deferKey, t + 0.25);
+      }
 
       // HTML5 audio 解锁（有些 iOS 版本需要）
       this.playSilentHTMLAudio();
@@ -220,6 +227,50 @@ class AudioManager {
     }
 
     return true;
+  }
+
+  // 在指定时间点播放某个音效（给 unlockByUserGesture 用，避免重复写 case 逻辑）
+  private playSfxAt(key: SoundKey, t: number) {
+    if (!this.ctx || !this.sfxGain) return;
+    switch (key) {
+      case 'click':
+        this.playNote(880, t, 0.06, 'sine', 0.25, this.sfxGain);
+        break;
+      case 'select':
+        this.playNote(784, t, 0.08, 'triangle', 0.3, this.sfxGain);
+        this.playNote(1175, t + 0.05, 0.1, 'triangle', 0.25, this.sfxGain);
+        break;
+      case 'submit':
+        [523, 659, 784, 1047].forEach((f, i) => {
+          this.playNote(f, t + i * 0.08, 0.2, 'triangle', 0.28, this.sfxGain);
+        });
+        break;
+      case 'success':
+        [523, 659, 784, 1047, 1319].forEach((f, i) => {
+          this.playNote(f, t + i * 0.1, 0.25, 'triangle', 0.28, this.sfxGain);
+        });
+        break;
+      case 'anti':
+        this.playNote(200, t, 0.15, 'sawtooth', 0.35, this.sfxGain);
+        [523, 784, 1047, 1319, 1568].forEach((f, i) => {
+          this.playNote(f, t + 0.2 + i * 0.07, 0.2, 'square', 0.25, this.sfxGain);
+        });
+        this.playNote(1568, t + 0.6, 0.4, 'triangle', 0.2, this.sfxGain);
+        break;
+      case 'smartClick':
+        [784, 988, 1175, 1568].forEach((f, i) => {
+          this.playNote(f, t + i * 0.05, 0.15, 'triangle', 0.32, this.sfxGain);
+        });
+        this.playNote(2093, t + 0.1, 0.12, 'sine', 0.22, this.sfxGain);
+        break;
+      case 'caw':
+        this.playNote(320, t, 0.18, 'sawtooth', 0.32, this.sfxGain);
+        this.playNote(260, t + 0.18, 0.2, 'sawtooth', 0.3, this.sfxGain);
+        this.playNote(200, t + 0.38, 0.25, 'sawtooth', 0.28, this.sfxGain);
+        this.playNote(600, t + 0.08, 0.1, 'square', 0.15, this.sfxGain);
+        this.playNote(450, t + 0.25, 0.1, 'square', 0.13, this.sfxGain);
+        break;
+    }
   }
 
   // ==================================================================
@@ -380,56 +431,26 @@ class AudioManager {
   }
 
   play(key: SoundKey) {
-    // 确保解锁
+    if (this.muted) return;
+
+    // 【iOS 关键】如果还未解锁 → 在解锁的同步调用栈里把这个 sound 也播掉
     if (!this.unlocked) {
-      void this.unlockByUserGesture();
+      void this.unlockByUserGesture(key);
+      return;
     }
-    if (!this.ctx || this.muted || !this.sfxGain) return;
+
+    // 已解锁 → 确保 context is running（从后台切回等场景）
+    if (this.ctx && (this.ctx.state as string) !== 'running') {
+      try {
+        const p = this.ctx.resume();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      } catch { /* ignore */ }
+    }
+    if (!this.ctx || !this.sfxGain) return;
 
     try {
-      const t = this.ctx.currentTime;
-      switch (key) {
-        case 'click':
-          this.playNote(880, t, 0.06, 'sine', 0.25, this.sfxGain);
-          break;
-        case 'select':
-          this.playNote(784, t, 0.08, 'triangle', 0.3, this.sfxGain);
-          this.playNote(1175, t + 0.05, 0.1, 'triangle', 0.25, this.sfxGain);
-          break;
-        case 'submit':
-          [523, 659, 784, 1047].forEach((f, i) => {
-            this.playNote(f, t + i * 0.08, 0.2, 'triangle', 0.28, this.sfxGain);
-          });
-          break;
-        case 'success':
-          [523, 659, 784, 1047, 1319].forEach((f, i) => {
-            this.playNote(f, t + i * 0.1, 0.25, 'triangle', 0.28, this.sfxGain);
-          });
-          break;
-        case 'anti':
-          this.playNote(200, t, 0.15, 'sawtooth', 0.35, this.sfxGain);
-          [523, 784, 1047, 1319, 1568].forEach((f, i) => {
-            this.playNote(f, t + 0.2 + i * 0.07, 0.2, 'square', 0.25, this.sfxGain);
-          });
-          this.playNote(1568, t + 0.6, 0.4, 'triangle', 0.2, this.sfxGain);
-          break;
-        case 'smartClick':
-          // 清脆爽感：上行快速琶音 + sparkle
-          [784, 988, 1175, 1568].forEach((f, i) => {
-            this.playNote(f, t + i * 0.05, 0.15, 'triangle', 0.32, this.sfxGain);
-          });
-          this.playNote(2093, t + 0.1, 0.12, 'sine', 0.22, this.sfxGain);
-          break;
-        case 'caw':
-          // 乌鸦叫：低频下行 + 颤音，营造尴尬社死感
-          this.playNote(320, t, 0.18, 'sawtooth', 0.32, this.sfxGain);
-          this.playNote(260, t + 0.18, 0.2, 'sawtooth', 0.3, this.sfxGain);
-          this.playNote(200, t + 0.38, 0.25, 'sawtooth', 0.28, this.sfxGain);
-          // 加一个高音"嘎"
-          this.playNote(600, t + 0.08, 0.1, 'square', 0.15, this.sfxGain);
-          this.playNote(450, t + 0.25, 0.1, 'square', 0.13, this.sfxGain);
-          break;
-      }
+      const t = Math.max(this.ctx.currentTime, 0.01);
+      this.playSfxAt(key, t);
     } catch { /* ignore */ }
   }
 
