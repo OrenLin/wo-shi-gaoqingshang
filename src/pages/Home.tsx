@@ -90,6 +90,7 @@ export default function Home() {
           <span className="font-black text-sm text-[#1a1a2e]">{t('home.brand')}</span>
         </div>
         <button
+          aria-label={language === 'zh' ? '切换到英文' : 'Switch to Chinese'}
           onClick={() => {
             audioManager.userTapped();
             audioManager.play('click');
@@ -97,7 +98,7 @@ export default function Home() {
           }}
           className="ml-3 inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
         >
-          <span>🌐</span>
+          <span aria-hidden="true">🌐</span>
           <span>{language === 'zh' ? 'EN' : '中文'}</span>
         </button>
       </div>
@@ -106,7 +107,7 @@ export default function Home() {
       {loading && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-amber-100/95">
           <div className="text-center">
-            <div className="text-7xl animate-bounce mb-4">🎴</div>
+            <div className="text-7xl animate-bounce mb-4" aria-hidden="true">🎴</div>
             <div className="text-2xl font-black text-[#1a1a2e] animate-pulse">
               {loadingText}
             </div>
@@ -145,9 +146,9 @@ export default function Home() {
             {!zh && <span style={{ color: 'transparent' }}>{t('home.title2b')}</span>}
           </div>
 
-          <div
-            className="absolute -top-3 -right-4 md:-right-10 bg-red-500 text-white font-black text-xs md:text-sm rounded-2xl px-3 py-1.5 border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] animate-wiggle rotate-[12deg]"
+          <div className="absolute -top-3 -right-4 md:-right-10 bg-red-500 text-white font-black text-xs md:text-sm rounded-2xl px-3 py-1.5 border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] animate-wiggle rotate-[12deg]"
             style={{ animationDelay: '0.5s' }}
+            aria-hidden="true"
           >
             {t('home.hot')}
           </div>
@@ -163,7 +164,7 @@ export default function Home() {
       {/* 代号输入 + 开始按钮 */}
       <div className="relative z-10 w-full max-w-md mt-6">
         <div className="bg-white rounded-2xl border-[4px] border-[#1a1a2e] shadow-[6px_6px_0_0_#1a1a2e] p-5 mb-4 relative">
-          <div className="absolute -top-3 left-4 bg-pink-500 text-white font-black text-xs rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]">
+          <div className="absolute -top-3 left-4 bg-pink-500 text-white font-black text-xs rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]" aria-hidden="true">
             👤 {t('home.codenameInput')}
           </div>
           <input
@@ -182,13 +183,19 @@ export default function Home() {
           </div>
         </div>
 
-        <MangaButton variant="primary" onClick={handleStart} className="w-full !py-5 !text-xl">
-          <span className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>🎯</span>
+        <MangaButton
+          variant="primary"
+          onClick={handleStart}
+          aria-label={codename.trim().length > 0 ? t('home.startWithName') : t('home.startAnon')}
+          className="w-full !py-5 !text-xl"
+        >
+          <span aria-hidden="true" className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>🎯</span>
           {codename.trim().length > 0 ? t('home.startWithName') : t('home.startAnon')}
         </MangaButton>
 
         {/* 地狱模式入口 */}
         <button
+          aria-label={t('report.hellMode')}
           onClick={() => {
             audioManager.userTapped();
             audioManager.play('caw');
@@ -203,7 +210,7 @@ export default function Home() {
           }}
           className="mt-3 w-full !py-4 !text-sm inline-flex items-center justify-center gap-2 bg-gradient-to-r from-rose-500 via-red-500 to-orange-500 text-white font-black rounded-2xl border-[3px] border-[#1a1a2e] shadow-[4px_4px_0_0_#1a1a2e] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
         >
-          <span className="text-2xl animate-bounce" style={{ animationDuration: '1s' }}>🔥</span>
+          <span aria-hidden="true" className="text-2xl animate-bounce" style={{ animationDuration: '1s' }}>🔥</span>
           {t('report.hellMode')}
         </button>
 

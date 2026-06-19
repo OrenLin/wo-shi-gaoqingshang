@@ -13,22 +13,27 @@ interface Props {
 
 export default function PageTopBar({ title, onBack, backText = '← 返回', rightSlot }: Props) {
   return (
-    <div className="flex items-start justify-between gap-3 mb-5">
+    <header className="flex items-start justify-between gap-3 mb-5" role="banner">
       {onBack ? (
-        <MangaButton variant="secondary" onClick={onBack} className="!py-2 !px-4 !text-sm">
+        <MangaButton
+          variant="secondary"
+          onClick={onBack}
+          aria-label={backText}
+          className="!py-2 !px-4 !text-sm"
+        >
           {backText}
         </MangaButton>
       ) : (
         <div className="w-[72px]" aria-hidden />
       )}
       {title && (
-        <div className="flex-1 text-center -mt-1">
+        <div className="flex-1 text-center -mt-1" role="heading" aria-level={1}>
           <span className="inline-flex items-center gap-2 bg-white text-[#1a1a2e] rounded-full border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] px-4 py-1.5 font-black text-sm">
             {title}
           </span>
         </div>
       )}
       <div className="flex items-center gap-2 justify-end w-[72px]">{rightSlot}</div>
-    </div>
+    </header>
   );
 }

@@ -77,10 +77,9 @@ export default function Game() {
   if (!scene || !qInfo) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: 'linear-gradient(180deg, #fef3c7 0%, #fbbf24 100%)' }}
+        aria-label={language === 'zh' ? '加载中' : 'Loading'}
       >
-        <div className="text-5xl animate-bounce">🎴</div>
+        <div aria-hidden="true" className="text-5xl animate-bounce">🎴</div>
       </div>
     );
   }
@@ -123,6 +122,7 @@ export default function Game() {
 
   const langSwitch = (
     <button
+      aria-label={language === 'zh' ? '切换到英文' : '切换到中文'}
       onClick={() => {
         audioManager.userTapped();
         audioManager.play('click');
@@ -130,7 +130,7 @@ export default function Game() {
       }}
       className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0 #fbbf24] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
     >
-      <span>🌐</span>
+      <span aria-hidden="true">🌐</span>
       <span>{language === 'zh' ? 'EN' : '中文'}</span>
     </button>
   );
@@ -168,10 +168,13 @@ export default function Game() {
         ]}
       />
 
-      {/* 全屏微反馈浮层（1.5 秒消失） */}
+      {/* 全屏微反馈浮层（1.5 秒消失）—— aria-live 播报给屏幕阅读器 */}
       {feedback.type && (
         <div
           key={feedback.key}
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
           className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none animate-pop-in"
           style={{ animationDuration: '0.4s' }}
         >
@@ -183,7 +186,7 @@ export default function Game() {
               }`}
             style={{ transform: 'rotate(-4deg)' }}
           >
-            <div className="text-6xl mb-2 animate-wiggle">
+            <div aria-hidden="true" className="text-6xl mb-2 animate-wiggle">
               {feedback.type === 'smart' ? '🎯' : '💀'}
             </div>
             <div className="text-2xl md:text-3xl font-black text-[#1a1a2e] leading-tight">
@@ -238,8 +241,8 @@ export default function Game() {
                 className="text-lg font-black text-white drop-shadow-md flex items-center gap-2"
                 style={{ textShadow: '2px 2px 0 rgba(26,26,46,0.6)' }}
               >
-                <span>💡</span>
-                {t('game.howReply')}
+                <span aria-hidden="true">💡</span>
+                <span>{t('game.howReply')}</span>
               </h3>
               {question.allowCustomInput !== false && (
                 <MangaButton
@@ -278,6 +281,14 @@ export default function Game() {
               variant="primary"
               onClick={handleSubmit}
               disabled={!canSubmit}
+              aria-label={
+                canSubmit
+                  ? qIndex + 1 === totalQs
+                    ? t('game.revealScene')
+                    : t('game.submit')
+                  : t('game.pickOne')
+              }
+              aria-disabled={!canSubmit}
               className="w-full !py-5 !text-xl"
             >
               <span

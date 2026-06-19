@@ -9,18 +9,28 @@ interface Props {
  */
 export default function ProgressBar({ current, total, label }: Props) {
   const pct = Math.min(100, Math.round((current / total) * 100));
+  const defaultLabel = `第 ${current} / ${total} 题`;
+  const a11yLabel = label ?? defaultLabel;
   return (
-    <div className="bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] px-4 py-3">
+    <div
+      className="bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] px-4 py-3"
+      role="progressbar"
+      aria-valuenow={current}
+      aria-valuemin={1}
+      aria-valuemax={total}
+      aria-label={`${a11yLabel}，进度 ${pct}%`}
+    >
       <div className="flex items-center justify-between mb-1.5">
         <span className="font-black text-sm text-[#1a1a2e]">
-          {label ?? `第 ${current} / ${total} 题`}
+          {a11yLabel}
         </span>
-        <span className="font-black text-sm text-[#1a1a2e]/60">{pct}%</span>
+        <span className="font-black text-sm text-[#1a1a2e]/60" aria-hidden="true">{pct}%</span>
       </div>
       <div className="h-3 bg-[#1a1a2e]/10 rounded-full overflow-hidden border-2 border-[#1a1a2e]/60">
         <div
           className="h-full bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 transition-all duration-700"
           style={{ width: `${pct}%` }}
+          aria-hidden="true"
         />
       </div>
     </div>

@@ -94,7 +94,7 @@ export default function ScoreBoard({
 
         {/* 标题行 */}
         <div className="flex items-center justify-center gap-2 pt-5 pb-3 px-5">
-          <span className="text-2xl animate-wiggle">{levelEmoji}</span>
+          <span aria-hidden="true" className="text-2xl animate-wiggle">{levelEmoji}</span>
           <h3
             className="text-white font-black text-base md:text-lg"
             style={{ textShadow: '0 0 20px rgba(251,191,36,0.5), 2px 2px 0 rgba(0,0,0,0.3)' }}

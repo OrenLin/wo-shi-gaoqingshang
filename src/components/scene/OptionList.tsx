@@ -23,13 +23,18 @@ export default function OptionList({
 }: Props) {
   const language = useI18n((s) => s.language);
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" role="radiogroup" aria-label={language === 'zh' ? '回复选项' : 'Response options'}>
       {options.map((opt, idx) => {
         const isSelected = selectedId === opt.id;
+        const optionText = renderContent ? renderContent(opt) : pickLocalized(opt.content, language);
+        const levelText = pickLocalized(levelLabel[opt.level], language);
         return (
           <button
             key={opt.id}
             disabled={disabled}
+            aria-pressed={isSelected}
+            aria-disabled={disabled}
+            aria-label={`${language === 'zh' ? '选项' : 'Option'} ${idx + 1}: ${optionText}${isSelected ? ` · ${levelText}` : ''}`}
             onClick={() => {
               audioManager.userTapped();
               audioManager.play('select');
@@ -46,10 +51,12 @@ export default function OptionList({
             {isSelected && (
               <div
                 className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${levelGradient[opt.level]}`}
+                aria-hidden="true"
               />
             )}
             <div className="flex items-start gap-3 relative">
               <div
+                aria-hidden="true"
                 className={`flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center
                             font-black text-base border-[3px] border-[#1a1a2e]
                             ${isSelected
@@ -60,15 +67,15 @@ export default function OptionList({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[#1a1a2e] text-base font-bold leading-relaxed">
-                  {renderContent ? renderContent(opt) : pickLocalized(opt.content, language)}
+                  {optionText}
                 </div>
                 {isSelected && (
                   <RevealRow level={opt.level} renderLevelLabel={renderLevelLabel} />
                 )}
               </div>
-              <div className="flex-shrink-0 mt-1.5">
+              <div aria-hidden="true" className="flex-shrink-0 mt-1.5">
                 {isSelected ? (
-                  <span className="text-green-500 text-2xl font-black">✓</span>
+                  <span className="text-green-500 text-2xl font-black" aria-hidden="true">✓</span>
                 ) : (
                   <span className="inline-block w-5 h-5 rounded-full border-[2px] border-[#1a1a2e]/40 bg-white" />
                 )}

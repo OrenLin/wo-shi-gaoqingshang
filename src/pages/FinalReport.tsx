@@ -183,10 +183,12 @@ export default function FinalReport() {
           {t('select.home')}
         </button>
         <button
+          aria-label={language === 'zh' ? '切换到英文' : 'Switch to Chinese'}
           onClick={toggleLanguage}
           className="inline-flex items-center gap-1 bg-white border-[3px] border-[#1a1a2e] rounded-full px-3 py-1.5 shadow-[3px_3px_0_0_#1a1a2e] font-black text-sm text-[#1a1a2e] transition-transform active:scale-95 hover:scale-105"
         >
-          {t('lang.label')}
+          <span aria-hidden="true">🌐</span>
+          <span>{t('lang.label')}</span>
         </button>
       </div>
 
@@ -254,7 +256,7 @@ export default function FinalReport() {
                   >
                     <div className="flex items-center justify-between mb-2 gap-3">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="text-2xl flex-shrink-0">{s?.emoji}</span>
+                        <span className="text-2xl flex-shrink-0" aria-hidden="true">{s?.emoji}</span>
                         <span className="font-black text-[#1a1a2e] text-sm md:text-base truncate">
                           {sceneTitle}
                         </span>
@@ -278,12 +280,12 @@ export default function FinalReport() {
             </div>
           </div>
 
-          {/* 隐藏成就展示 */}
+          {/* 🏅 隐藏成就展示 */}
           {(maxStreakAnti >= 3 || maxStreakLow >= 3) && (
             <div className="mb-5 bg-gradient-to-br from-amber-50 to-rose-50 rounded-2xl border-[3px] border-[#1a1a2e] p-4 shadow-[3px_3px_0_0_#1a1a2e] animate-pop-in">
               <div className="text-center mb-3">
                 <span className="inline-flex items-center gap-2 bg-amber-400 text-white font-black text-xs rounded-full px-4 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]">
-                  🏅 {t('report.hiddenAchievement')}
+                  <span aria-hidden="true">🏅</span> {t('report.hiddenAchievement')}
                 </span>
               </div>
               <div className="flex flex-wrap justify-center gap-3">
@@ -300,7 +302,7 @@ export default function FinalReport() {
                 )}
                 {maxStreakLow >= 3 && (
                   <div className="text-center bg-white rounded-2xl border-[3px] border-[#1a1a2e] px-4 py-3 shadow-[3px_3px_0_0_#1a1a2e] min-w-[150px]">
-                    <div className="text-3xl mb-1">💀</div>
+                    <div className="text-3xl mb-1" aria-hidden="true">💀</div>
                     <div className="font-black text-sm text-[#1a1a2e]">
                       {t('report.achievementSocialKiller')}
                     </div>
@@ -432,9 +434,10 @@ export default function FinalReport() {
           <MangaButton
             variant="primary"
             onClick={handleShare}
+            aria-label={t('report.shareBtn')}
             className="w-full !py-5 !text-xl"
           >
-            <span className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>
+            <span aria-hidden="true" className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>
               📤
             </span>
             {t('report.shareBtn')}
@@ -443,19 +446,20 @@ export default function FinalReport() {
           {/* 地狱模式按钮 */}
           <MangaButton
             variant="danger"
+            aria-label={t('report.hellMode')}
             onClick={() => {
               const randomIdx = Math.floor(Math.random() * scenes.length);
               selectScene(randomIdx, { hellMode: true });
             }}
             className="w-full !py-5 !text-xl"
           >
-            <span className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>
+            <span aria-hidden="true" className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>
               🔥
             </span>
             {t('report.hellMode')}
           </MangaButton>
 
-          <MangaButton variant="secondary" onClick={reset} className="w-full !py-5 !text-xl">
+          <MangaButton variant="secondary" aria-label={t('report.retry')} onClick={reset} className="w-full !py-5 !text-xl">
             {t('report.retry')}
           </MangaButton>
         </div>

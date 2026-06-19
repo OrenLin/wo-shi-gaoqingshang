@@ -22,6 +22,7 @@ export default function FloatingEmojis({ items }: Props) {
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {items.map((it, i) => (
         <div
+          aria-hidden="true"
           key={i}
           className="absolute animate-float-gentle opacity-50"
           style={{

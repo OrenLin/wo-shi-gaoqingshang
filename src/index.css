@@ -179,13 +179,104 @@ body {
   }
 }
 
-/* ============ 减少动画（无障碍） ============ */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* ============ 无障碍：无障碍跳转链接（WCAG 2.4.1） ============ */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: 99999;
+  background: #1a1a2e;
+  color: #fbbf24;
+  font-weight: 900;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0 0 12px 12px;
+  text-decoration: none;
+  border: 3px solid #fbbf24;
+  border-top: none;
+  box-shadow: 3px 3px 0 0 #fbbf24;
+  transition: top 200ms ease;
+  /* 确保始终在最顶层 */
+  outline: 4px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 4px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+/* ============ 无障碍：全局焦点样式（WCAG 2.4.7） ============ */
+/* 移除浏览器默认的 focus ring，用自定义样式替代 */
+:focus {
+  outline: none;
+}
+
+/* 交互元素使用可见的 focus 样式 */
+:focus-visible {
+  outline: 3px solid #fbbf24;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* 漫画按钮使用更醒目的 focus 样式 */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid #fbbf24;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.25);
+}
+
+/* ============ 无障碍：减少动画（WCAG 2.3.3） ============ */
+/* 选择性减少：保留必要的内容变化动画，移除装饰性动画 */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 但保留弹出/进入动画（内容出现需要过渡，否则屏幕阅读器会错过） */
+.reduce-motion .animate-pop-in,
+.reduce-motion .animate-slide-down {
+  animation-duration: 0.01ms !important;
+}
+
+.reduce-motion .animate-wiggle {
+  animation: none !important;
+}
+
+.reduce-motion .animate-bounce {
+  animation: none !important;
+}
+
+.reduce-motion .animate-float-gentle {
+  animation: none !important;
+}
+
+/* ============ 无障碍：高对比度模式（WCAG 1.4.6） ============ */
+.high-contrast {
+  /* 提高前景与背景的对比度 */
+  --color-ink: #000000;
+  --color-cream: #ffffff;
+}
+
+/* ============ 无障碍：朗读隐藏（屏幕阅读器专用内容） ============ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 /* ============ 字体：标题更粗更可爱 ============ */
