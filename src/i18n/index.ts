@@ -41,6 +41,7 @@ const zh: Dict = {
   'select.qs': '题 · 立即挑战 →',
   'select.challengeDone': '✅ 已挑战完成',
   'select.allDone': '🎉 全部通关！你的社交段位已生成',
+  'select.viewReport': '查看我的情商鉴定报告 →',
 
   // ----- Game -----
   'game.back': '← 返回',
@@ -125,6 +126,7 @@ const en: Dict = {
   'select.qs': ' questions · Start Now →',
   'select.challengeDone': '✅ Already Completed',
   'select.allDone': '🎉 All Cleared! Your Social Rank is Ready',
+  'select.viewReport': 'View My EQ Report →',
 
   // ----- Game -----
   'game.back': '← Back',
