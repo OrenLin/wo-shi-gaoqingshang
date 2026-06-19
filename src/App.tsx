@@ -21,25 +21,12 @@ export default function App() {
   }, []);
 
   // ======================================================================
-  //  iOS / 微信音频解锁方案（四层保险）：
-  //    1. audioManager.init() → 安装全局 touchstart/click 监听（一次性自动解绑）
-  //    2. 微信环境 → 自动尝试 JSBridge 解锁
-  //    3. 用户点击页面右上角音频按钮 → 同步栈内触发解锁 + BGM
-  //    4. 页面切后台 → 恢复可见时尝试恢复 BGM
+  //  iOS / 微信音频解锁：audioManager.init() 安装了持久的手势监听器
+  //  用户点击右上角音频按钮时才真正解锁
+  //  另外 audioManager 内部也会监听 visibilitychange，从后台切回时尝试 resume
   // ======================================================================
   useEffect(() => {
     audioManager.init();
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        audioManager.onPageVisible();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
   }, []);
 
   // 页面切换时发送 tracking 事件
@@ -61,7 +48,7 @@ export default function App() {
   // 音频按钮显示的文字 & 状态
   // —— audioTick 确保状态变化时按钮重新渲染
   const audioState = audioManager.state;
-  const showAudioHint = !audioState.interacted;
+  const showAudioHint = !audioState.unlocked;
 
   return (
     <div className="App">
@@ -84,23 +71,32 @@ export default function App() {
             track('audio_toggle', { muted: muted ? 'on' : 'off' });
           }
         }}
-        className={`fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-2 rounded-full
+        className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-full
                     border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e]
-                    font-black text-xs md:text-sm
+                    font-black text-[11px] md:text-sm
                     transition-transform active:scale-90 hover:scale-105
                     ${showAudioHint
-                      ? 'bg-yellow-300 animate-wiggle'
+                      ? 'bg-yellow-300 animate-wiggle animate-pulse'
                       : audioState.muted
                         ? 'bg-white'
                         : 'bg-emerald-300'}`}
         title={audioState.muted ? t('audio.enable') : t('audio.muted')}
       >
         {showAudioHint ? (
-          <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.enable')}</span>
+          <>
+            <span className="text-lg">🔊</span>
+            <span className="text-[#1a1a2e]">{t('audio.enable')}</span>
+          </>
         ) : audioState.muted ? (
-          <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.muted')}</span>
+          <>
+            <span className="text-lg">🔇</span>
+            <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.muted')}</span>
+          </>
         ) : (
-          <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.on')}</span>
+          <>
+            <span className="text-lg">🎵</span>
+            <span className="hidden sm:inline text-[#1a1a2e]">{t('audio.on')}</span>
+          </>
         )}
       </button>
     </div>
