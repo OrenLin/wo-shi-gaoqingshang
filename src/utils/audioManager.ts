@@ -14,7 +14,7 @@
 // - 防止一次性 { once: true } 监听器失败后静默失效
 // ======================================================================
 
-type SoundKey = 'click' | 'select' | 'submit' | 'success' | 'anti';
+type SoundKey = 'click' | 'select' | 'submit' | 'anti' | 'smartClick' | 'caw' | 'success';
 
 const NOTES: Record<string, number> = {
   C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.0, A4: 440.0, B4: 493.88,
@@ -412,6 +412,22 @@ class AudioManager {
             this.playNote(f, t + 0.2 + i * 0.07, 0.2, 'square', 0.25, this.sfxGain);
           });
           this.playNote(1568, t + 0.6, 0.4, 'triangle', 0.2, this.sfxGain);
+          break;
+        case 'smartClick':
+          // 清脆爽感：上行快速琶音 + sparkle
+          [784, 988, 1175, 1568].forEach((f, i) => {
+            this.playNote(f, t + i * 0.05, 0.15, 'triangle', 0.32, this.sfxGain);
+          });
+          this.playNote(2093, t + 0.1, 0.12, 'sine', 0.22, this.sfxGain);
+          break;
+        case 'caw':
+          // 乌鸦叫：低频下行 + 颤音，营造尴尬社死感
+          this.playNote(320, t, 0.18, 'sawtooth', 0.32, this.sfxGain);
+          this.playNote(260, t + 0.18, 0.2, 'sawtooth', 0.3, this.sfxGain);
+          this.playNote(200, t + 0.38, 0.25, 'sawtooth', 0.28, this.sfxGain);
+          // 加一个高音"嘎"
+          this.playNote(600, t + 0.08, 0.1, 'square', 0.15, this.sfxGain);
+          this.playNote(450, t + 0.25, 0.1, 'square', 0.13, this.sfxGain);
           break;
       }
     } catch { /* ignore */ }

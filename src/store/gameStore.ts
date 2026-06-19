@@ -1,9 +1,11 @@
 // ============================================================
-// 游戏全局状态（zustand）
+// 游戏全局状态（zustand · v3 增强版）
 // ------------------------------------------------------------
-// 支持：多场景 / 每场景多道题 / 自由发挥 / 段位结算
-// 使用方式：
-//   const { currentPage, setPage, submitAnswer } = useGameStore();
+// 新增：
+//   - 连续选对高情商答案 → 隐藏段位「情商天花板」
+//   - 连续选社死选项 → 解锁「社交杀手」隐藏成就
+//   - 随机地狱模式（hellMode）
+//   - 击败全球玩家百分比计算（percentile）
 // ============================================================
 import { create } from 'zustand';
 import type { Scene, Level } from '../data/types';
@@ -22,102 +24,145 @@ export interface AnswerRecord {
   result: ScoringResult;
   selectedOptionId?: string;
   customInput?: string;
+  optionLevel?: 'anti' | 'god' | 'high' | 'medium' | 'low';
 }
 
 // 每个场景的聚合结果（用于结果页/总报告页）
 export interface SceneResult {
   sceneId: string;
-  totalScore: number;       // 各题得分之和
-  averageScore: number;     // 平均分（四舍五入到整数）
-  level: Level;             // 按平均分拿到的段位
-  answers: AnswerRecord[];  // 每道题的答题详情
+  totalScore: number;
+  averageScore: number;
+  level: Level;
+  answers: AnswerRecord[];
+}
+
+// 隐藏成就
+export interface HiddenAchievement {
+  id: 'eqCeiling' | 'socialKiller';
+  title: { zh: string; en: string };
+  desc: { zh: string; en: string };
+  emoji: string;
 }
 
 interface GameState {
-  // 页面路由
   currentPage: PageName;
   setPage: (page: PageName) => void;
 
-  // 用户代号（首页输入）
   codename: string;
   setCodename: (name: string) => void;
 
-  // 隐私同意（首次访问需确认后才能进入游戏）
   consented: boolean;
   setConsented: (v: boolean) => void;
 
-  // 场景进度
   currentSceneIndex: number;
   currentQuestionIndex: number;
-  selectScene: (index: number) => void;
+  selectScene: (index: number, opts?: { hellMode?: boolean }) => void;
 
-  // 答题结果
-  answers: AnswerRecord[];                 // 所有答题记录
-  customInputs: Record<string, string>;     // 自由发挥内容（key: sceneId:questionId 或 sceneId 兼容旧数据）
+  // 地狱模式（混合场景题目）
+  hellMode: boolean;
+  setHellMode: (v: boolean) => void;
+
+  // 连续选对 / 选错追踪（用于隐藏彩蛋）
+  streakAnti: number;  // 连续选高情商 (anti + god + high)
+  streakLow: number;   // 连续选社死 (low)
+  maxStreakAnti: number;
+  maxStreakLow: number;
+  achieved: Set<string>;
+
+  answers: AnswerRecord[];
+  customInputs: Record<string, string>;
   setCustomInput: (key: string, value: string) => void;
 
-  // 提交答案：
-  //   - 如果当前场景还有下一题 → 停留在 game（组件自己判断切换到下一题动画）
-  //   - 如果是场景最后一题 → result 页
-  submitAnswer: (optionId?: string, customInput?: string) => void;
+  submitAnswer: (optionId?: string, customInput?: string, optionLevel?: 'anti' | 'god' | 'high' | 'medium' | 'low') => void;
 
-  // 跳到下一场景（从 result 页出发）
   goToNextScene: () => void;
-
-  // 重置游戏
   reset: () => void;
 
-  // ---------- 只读便利方法 ----------
-  // 当前场景对象
+  // ---- 只读便利方法 ----
   getCurrentScene: () => Scene | null;
-  // 当前题目
   getCurrentQuestion: () => { questionIndex: number; question: Scene['questions'][0] } | null;
-  // 已完成场景结果（便于结果页/报告页取数）
   getCompletedSceneResult: (sceneId: string) => SceneResult | null;
-  // 当前场景结果（刚答完题目后展示）
   getCurrentSceneResult: () => SceneResult | null;
-  // 总报告
   getFinalReport: () => {
     totalScore: number;
     averageScore: number;
     level: Level;
     scenes: SceneResult[];
+    percentile: number;      // 击败全球 XX% 玩家
   };
-  // 已完成的场景ID集合（用于场景选择页的"已完成"角标）
   getCompletedSceneIds: () => Set<string>;
 }
 
+// --- 击败百分比计算：基于合理的正态分布模拟 ---
+// 全球玩家平均分≈65分，标准差≈18
+// 用累积正态分布近似估算玩家位置
+function estimatePercentile(avg: number): number {
+  const mean = 65;
+  const sd = 18;
+  const z = (avg - mean) / sd;
+  // Abramowitz & Stegun 近似 erf
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+  const sign = z >= 0 ? 1 : -1;
+  const x = Math.abs(z) / Math.sqrt(2);
+  const t = 1 / (1 + p * x);
+  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  const erf = sign * y;
+  const pct = 0.5 * (1 + erf);
+  // 边界夹紧 + 让数据更友好
+  const friendly = Math.min(99.9, Math.max(0.5, pct * 100));
+  // 极端高分额外加一点"神性"加成
+  if (avg >= 95) return Math.min(99.9, friendly + 0.5);
+  if (avg >= 90) return Math.min(99.9, friendly + 0.3);
+  return friendly;
+}
+
 export const useGameStore = create<GameState>((set, get) => ({
-  // ---------- 路由 ----------
   currentPage: 'home',
   setPage: (page) => set({ currentPage: page }),
 
-  // ---------- 用户代号 ----------
   codename: '',
   setCodename: (name) => set({ codename: name }),
 
-  // ---------- 隐私同意 ----------
   consented: false,
   setConsented: (v) => set({ consented: v }),
 
-  // ---------- 场景进度 ----------
   currentSceneIndex: 0,
   currentQuestionIndex: 0,
-  selectScene: (index) =>
+  selectScene: (index, optsIn) => {
+    const opts = typeof optsIn === 'object' && optsIn !== null ? optsIn : {};
     set({
       currentSceneIndex: index,
       currentQuestionIndex: 0,
       currentPage: 'game',
-    }),
+      hellMode: opts?.hellMode ?? false,
+      streakAnti: 0,
+      streakLow: 0,
+      maxStreakAnti: 0,
+      maxStreakLow: 0,
+      achieved: new Set(),
+    });
+  },
 
-  // ---------- 答题数据 ----------
   answers: [],
   customInputs: {},
   setCustomInput: (key, value) =>
     set((s) => ({ customInputs: { ...s.customInputs, [key]: value } })),
 
-  // ---------- 提交答案 ----------
-  submitAnswer: (optionId, customInput) => {
+  hellMode: false,
+  setHellMode: (v) => set({ hellMode: v }),
+
+  streakAnti: 0,
+  streakLow: 0,
+  maxStreakAnti: 0,
+  maxStreakLow: 0,
+  achieved: new Set<string>(),
+
+  submitAnswer: (optionId, customInput, optionLevel) => {
     const state = get();
     const scene = state.getCurrentScene();
     const q = state.getCurrentQuestion();
@@ -128,6 +173,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     let result: ScoringResult;
     let recordOptionId: string | undefined;
     let recordCustomInput: string | undefined;
+    let resolvedLevel = optionLevel;
 
     if (optionId) {
       const option = q.question.options.find((o) => o.id === optionId);
@@ -136,12 +182,16 @@ export const useGameStore = create<GameState>((set, get) => ({
       level = getOptionLevel(option.level);
       result = scorePresetOption(score);
       recordOptionId = optionId;
+      resolvedLevel = option.level;
     } else if (customInput !== undefined && customInput.trim().length > 0) {
       const r = scoreCustomInput(customInput);
       score = r.score;
       level = r.level;
       result = r;
       recordCustomInput = customInput;
+      if (score >= 85) resolvedLevel = 'high';
+      else if (score < 40) resolvedLevel = 'low';
+      else resolvedLevel = 'medium';
     } else {
       return;
     }
@@ -154,36 +204,55 @@ export const useGameStore = create<GameState>((set, get) => ({
       result,
       selectedOptionId: recordOptionId,
       customInput: recordCustomInput,
+      optionLevel: resolvedLevel,
     };
 
-    // 判断是否场景内最后一题
+    // --- 连对 / 连错追踪 ---
+    let nextStreakAnti = state.streakAnti;
+    let nextStreakLow = state.streakLow;
+    const newAchieved = new Set(state.achieved);
+
+    if (resolvedLevel === 'anti' || resolvedLevel === 'god' || resolvedLevel === 'high') {
+      nextStreakAnti = state.streakAnti + 1;
+      nextStreakLow = 0;
+      if (nextStreakAnti >= 3) newAchieved.add('eqCeiling');
+    } else if (resolvedLevel === 'low') {
+      nextStreakLow = state.streakLow + 1;
+      nextStreakAnti = 0;
+      if (nextStreakLow >= 3) newAchieved.add('socialKiller');
+    } else {
+      nextStreakAnti = 0;
+      nextStreakLow = 0;
+    }
+
     const isLastInScene = q.questionIndex + 1 >= scene.questions.length;
 
     set({
       answers: [...state.answers, record],
       currentQuestionIndex: isLastInScene ? 0 : q.questionIndex + 1,
       currentPage: 'result',
+      streakAnti: nextStreakAnti,
+      streakLow: nextStreakLow,
+      maxStreakAnti: Math.max(state.maxStreakAnti, nextStreakAnti),
+      maxStreakLow: Math.max(state.maxStreakLow, nextStreakLow),
+      achieved: newAchieved,
     });
   },
 
-  // ---------- 下一场景 ----------
   goToNextScene: () => {
     const { currentSceneIndex, getCompletedSceneIds } = get();
-    // 找下一个未完成的场景
     const completed = getCompletedSceneIds();
     let nextIndex = currentSceneIndex + 1;
     while (nextIndex < scenes.length && completed.has(scenes[nextIndex].id)) {
       nextIndex++;
     }
     if (nextIndex >= scenes.length) {
-      // 都完成 → 报告页
       set({ currentPage: 'report' });
     } else {
       set({ currentSceneIndex: nextIndex, currentQuestionIndex: 0, currentPage: 'select' });
     }
   },
 
-  // ---------- 重置 ----------
   reset: () =>
     set({
       currentPage: 'home',
@@ -191,9 +260,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentQuestionIndex: 0,
       answers: [],
       customInputs: {},
+      hellMode: false,
+      streakAnti: 0,
+      streakLow: 0,
+      maxStreakAnti: 0,
+      maxStreakLow: 0,
+      achieved: new Set(),
     }),
 
-  // ---------- 只读方法 ----------
   getCurrentScene: () => scenes[get().currentSceneIndex] ?? null,
 
   getCurrentQuestion: () => {
@@ -210,9 +284,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (answers.length === 0) return null;
     const totalScore = answers.reduce((sum, a) => sum + a.score, 0);
     const averageScore = Math.round(totalScore / answers.length);
-    // 用总分（百分制等价：直接用平均分）取 Level
     const level = (() => {
-      // 用最高分的一题取 emoji
       const maxAnswer = answers.reduce((a, b) => (a.score > b.score ? a : b));
       return maxAnswer.level;
     })();
@@ -230,12 +302,16 @@ export const useGameStore = create<GameState>((set, get) => ({
       .map((s) => get().getCompletedSceneResult(s.id))
       .filter((r): r is SceneResult => !!r);
     if (completed.length === 0) {
-      // 空结果（避免 NaN）
-      return { totalScore: 0, averageScore: 0, level: getOptionLevel('low'), scenes: [] };
+      return {
+        totalScore: 0,
+        averageScore: 0,
+        level: getOptionLevel('low'),
+        scenes: [],
+        percentile: 0.5,
+      };
     }
     const totalScore = completed.reduce((sum, r) => sum + r.averageScore, 0);
     const avg = Math.round(totalScore / completed.length);
-    // 找对应 Level
     const foundLevel = (() => {
       if (avg === 100) return getOptionLevel('anti');
       if (avg >= 90) return getOptionLevel('god');
@@ -248,6 +324,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       averageScore: avg,
       level: foundLevel,
       scenes: completed,
+      percentile: estimatePercentile(avg),
     };
   },
 
@@ -264,3 +341,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     return ids;
   },
 }));
+
+// ---- 隐藏成就元数据 ----
+export const HIDDEN_ACHIEVEMENTS: HiddenAchievement[] = [
+  {
+    id: 'eqCeiling',
+    title: { zh: '🏆 情商天花板', en: '🏆 EQ Ceiling' },
+    desc: {
+      zh: '连续 3 题选到高情商答案，全场被你稳稳拿捏',
+      en: 'Picked 3 high-EQ answers in a row — you owned that room',
+    },
+    emoji: '🏆',
+  },
+  {
+    id: 'socialKiller',
+    title: { zh: '💀 社交杀手', en: '💀 Social Killer' },
+    desc: {
+      zh: '连续 3 题触发社死答案，恭喜抠出三室一厅',
+      en: '3 social-death answers in a row — congrats, you excavated three apartments',
+    },
+    emoji: '💀',
+  },
+];

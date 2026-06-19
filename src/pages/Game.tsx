@@ -9,6 +9,17 @@ import CustomInput from '../components/scene/CustomInput';
 import ProgressBar from '../components/ui/ProgressBar';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
+import type { Option } from '../data/types';
+
+// Fisher-Yates 随机打乱
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function Game() {
   const {
@@ -18,6 +29,9 @@ export default function Game() {
     customInputs,
     setCustomInput,
     setPage,
+    streakAnti,
+    streakLow,
+    hellMode,
   } = useGameStore();
   const language = useI18n((s) => s.language);
   const setLanguage = useI18n((s) => s.setLanguage);
@@ -25,18 +39,40 @@ export default function Game() {
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [useCustom, setUseCustom] = useState(false);
-  // 控制内容滑入动画的 key（题目变化时切换，触发重渲染+动画）
   const [contentKey, setContentKey] = useState(0);
+  const [shuffledOptions, setShuffledOptions] = useState<Option[]>([]);
+
+  // 微反馈提示（"嘴替附体" / "抠出三室一厅"）
+  const [feedback, setFeedback] = useState<{ type: 'smart' | 'cringe' | null; key: number }>({
+    type: null,
+    key: 0,
+  });
 
   const scene = getCurrentScene();
   const qInfo = getCurrentQuestion();
 
-  // 新题目进来：重置状态 + 触发滑入动画
+  // 新题目进来：重置状态 + 随机打乱选项
   useEffect(() => {
     setSelectedOption(null);
     setUseCustom(false);
     setContentKey((k) => k + 1);
+    if (qInfo?.question?.options) {
+      setShuffledOptions(shuffle(qInfo.question.options));
+    }
   }, [scene?.id, qInfo?.question.id]);
+
+  // 连对/连错触发彩蛋
+  useEffect(() => {
+    if (streakAnti >= 3) {
+      setFeedback({ type: 'smart', key: Date.now() });
+      audioManager.userTapped();
+      audioManager.play('smartClick');
+    } else if (streakLow >= 3) {
+      setFeedback({ type: 'cringe', key: Date.now() });
+      audioManager.userTapped();
+      audioManager.play('caw');
+    }
+  }, [streakAnti, streakLow]);
 
   if (!scene || !qInfo) {
     return (
@@ -66,10 +102,16 @@ export default function Game() {
       const option = question.options.find((o) => o.id === selectedOption);
       if (option?.level === 'anti') {
         audioManager.play('anti');
+      } else if (option?.level === 'god' || option?.level === 'high') {
+        audioManager.play('smartClick');
+        setFeedback({ type: 'smart', key: Date.now() });
+      } else if (option?.level === 'low') {
+        audioManager.play('caw');
+        setFeedback({ type: 'cringe', key: Date.now() });
       } else {
         audioManager.play('submit');
       }
-      submitAnswer(selectedOption);
+      submitAnswer(selectedOption, undefined, option?.level);
     }
   };
 
@@ -79,7 +121,6 @@ export default function Game() {
 
   const speaker = question.characters?.[0] ?? scene.characters[0];
 
-  // 语言切换按钮（参考 Home.tsx 样式）
   const langSwitch = (
     <button
       onClick={() => {
@@ -87,7 +128,7 @@ export default function Game() {
         audioManager.play('click');
         setLanguage(language === 'zh' ? 'en' : 'zh');
       }}
-      className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
+      className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0 #fbbf24] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
     >
       <span>🌐</span>
       <span>{language === 'zh' ? 'EN' : '中文'}</span>
@@ -99,7 +140,6 @@ export default function Game() {
       className="min-h-screen relative overflow-hidden"
       style={{ background: scene.bgColor }}
     >
-      {/* 背景图 */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
@@ -128,24 +168,57 @@ export default function Game() {
         ]}
       />
 
+      {/* 全屏微反馈浮层（1.5 秒消失） */}
+      {feedback.type && (
+        <div
+          key={feedback.key}
+          className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none animate-pop-in"
+          style={{ animationDuration: '0.4s' }}
+        >
+          <div
+            className={`px-8 py-6 rounded-[28px] border-[4px] border-[#1a1a2e] shadow-[8px_8px_0_0_#1a1a2e] text-center
+              ${feedback.type === 'smart'
+                ? 'bg-gradient-to-br from-amber-200 via-yellow-300 to-orange-300'
+                : 'bg-gradient-to-br from-slate-200 via-gray-300 to-slate-400'
+              }`}
+            style={{ transform: 'rotate(-4deg)' }}
+          >
+            <div className="text-6xl mb-2 animate-wiggle">
+              {feedback.type === 'smart' ? '🎯' : '💀'}
+            </div>
+            <div className="text-2xl md:text-3xl font-black text-[#1a1a2e] leading-tight">
+              {feedback.type === 'smart' ? t('game.feedbackSmart') : t('game.feedbackCringe')}
+            </div>
+            {feedback.type === 'smart' && streakAnti >= 3 && (
+              <div className="mt-3 text-sm font-bold text-[#1a1a2e]/70">
+                🔥 {language === 'zh' ? '连对' : 'Streak'} x{streakAnti}
+              </div>
+            )}
+            {feedback.type === 'cringe' && streakLow >= 3 && (
+              <div className="mt-3 text-sm font-bold text-[#1a1a2e]/70">
+                💥 {language === 'zh' ? '连社死' : 'Cringe Streak'} x{streakLow}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="relative z-10 min-h-screen py-5 px-3 md:px-5 flex flex-col">
         <div className="max-w-2xl mx-auto w-full">
-          {/* 顶栏 */}
           <PageTopBar
             onBack={() => setPage('select')}
             backText={t('game.back')}
-            title={`${scene.emoji} ${pickLocalized(scene.title, language)}`}
+            title={`${scene.emoji} ${pickLocalized(scene.title, language)}${
+              hellMode ? (language === 'zh' ? ' · 地狱模式' : ' · Hell Mode') : ''
+            }`}
             rightSlot={langSwitch}
           />
 
-          {/* 进度条 */}
           <div className="mb-4">
             <ProgressBar current={qIndex + 1} total={totalQs} />
           </div>
 
-          {/* ===== 答题内容区：每次换题从上往下滑入 ===== */}
           <div key={contentKey} className="animate-slide-down">
-            {/* 对话气泡 */}
             <div className="mb-4">
               <BubbleDialog
                 character={{
@@ -160,7 +233,6 @@ export default function Game() {
               />
             </div>
 
-            {/* 选项 / 自由发挥 切换 */}
             <div className="flex items-center justify-between mb-4 px-1">
               <h3
                 className="text-lg font-black text-white drop-shadow-md flex items-center gap-2"
@@ -193,7 +265,7 @@ export default function Game() {
               />
             ) : (
               <OptionList
-                options={question.options}
+                options={shuffledOptions.length > 0 ? shuffledOptions : question.options}
                 selectedId={selectedOption}
                 onSelect={setSelectedOption}
                 renderContent={(opt) => pickLocalized(opt.content, language)}
@@ -201,7 +273,6 @@ export default function Game() {
             )}
           </div>
 
-          {/* 提交按钮 */}
           <div className="mt-5 pb-4">
             <MangaButton
               variant="primary"

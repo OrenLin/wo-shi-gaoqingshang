@@ -23,7 +23,11 @@ const zh: Dict = {
   'home.hint': '⭐ 多个场景 · 每题多选项 · 解锁你的段位',
   'home.guide': '👇 看看你是 情商之神 还是 社交杀手',
   'home.author': '✏️ 作者 · 森 SEN',
-  'home.version': 'v1.2.0 · 2026',
+  'home.version': 'v1.3.0 · 2026',
+  'home.loading1': '正在加载社死现场…',
+  'home.loading2': '正在收集七大姑八大姨的灵魂拷问…',
+  'home.loading3': '正在预热你的嘴替…',
+  'home.loading4': '正在召唤你的对手：老板 / 催婚大姑 / 劝酒领导…',
 
   // ----- Language Switch -----
   'lang.label': '🌐 中 / EN',
@@ -57,6 +61,8 @@ const zh: Dict = {
   'game.submit': '🎯 提交本题答案 →',
   'game.revealScene': '🎯 揭晓本场景结果！',
   'game.pickOne': '👆 先选一个回应',
+  'game.feedbackSmart': '嘴替附体！',
+  'game.feedbackCringe': '抠出三室一厅…',
 
   // ----- Result -----
   'result.scoreBadge': '情商得分',
@@ -71,6 +77,8 @@ const zh: Dict = {
   'result.nextQ': '🎯 下一题',
   'result.backToSelect': '返回场景选择',
   'result.scene': '💫 场景',
+  'result.beatGlobal': '🌍 已超越全球',
+  'result.beatGlobalPlayers': '的玩家',
 
   // ----- Final Report -----
   'report.allDone': '🏆 全部场景通关！',
@@ -86,6 +94,11 @@ const zh: Dict = {
   'report.footer': '🧠 我是高情商 · 2026 · 拒绝无效社交从我做起',
   'report.copied': '✨ 分享文案已复制！快去朋友圈装X～',
   'report.shareTemplate': '我在「我是高情商」挑战中获得 {score} 分，段位：{emoji} {level}！{copy}',
+  'report.hellMode': '🔥 随机地狱模式',
+  'report.hellModeDesc': '混合所有场景的高难度题目，二刷玩家挑战',
+  'report.hiddenAchievement': '🏅 隐藏成就',
+  'report.achievementEqCeiling': '情商天花板',
+  'report.achievementSocialKiller': '社交杀手',
 
   // ----- Audio Button -----
   'audio.enable': '🔊 点我开声音',
@@ -113,7 +126,11 @@ const en: Dict = {
   'home.hint': '⭐ Multiple scenes · Several options each · Discover your rank',
   'home.guide': '👇 Are you an EQ God or a Social Killer?',
   'home.author': '✏️ By · SEN',
-  'home.version': 'v1.2.0 · 2026',
+  'home.version': 'v1.3.0 · 2026',
+  'home.loading1': 'Loading social-death scenarios…',
+  'home.loading2': 'Collecting soul-searching questions from aunties…',
+  'home.loading3': 'Warming up your social retort…',
+  'home.loading4': 'Summoning your opponents: Boss / Marriage-Pressure Aunt / Drinking-Party Leader…',
 
   // ----- Language Switch -----
   'lang.label': '🌐 中 / EN',
@@ -140,13 +157,15 @@ const en: Dict = {
 
   // ----- Game -----
   'game.back': '← Back',
-  'game.questionBadge': '💬 Soul-Stirring Question',
+  'game.questionBadge': '💬 Soul-Searching Question',
   'game.howReply': 'How would you respond?',
   'game.toggleCustom': '✍️ Freestyle',
   'game.toggleOptions': '✍️ Back to Options',
   'game.submit': '🎯 Submit Answer →',
   'game.revealScene': '🎯 Reveal Scene Result!',
   'game.pickOne': '👆 Pick a response first',
+  'game.feedbackSmart': 'Perfect Retort!',
+  'game.feedbackCringe': 'Excavating a 3-BR apartment…',
 
   // ----- Result -----
   'result.scoreBadge': 'EQ Score',
@@ -161,6 +180,8 @@ const en: Dict = {
   'result.nextQ': '🎯 Next Question',
   'result.backToSelect': 'Back to Scene Select',
   'result.scene': '💫 Scene',
+  'result.beatGlobal': '🌍 Beat',
+  'result.beatGlobalPlayers': 'of players worldwide',
 
   // ----- Final Report -----
   'report.allDone': '🏆 All Scenes Cleared!',
@@ -173,6 +194,11 @@ const en: Dict = {
   'report.share': '📣 Share Copy',
   'report.shareBtn': '📤 Share My Rank →',
   'report.retry': '🔄 Play Again',
+  'report.hellMode': '🔥 Random Hell Mode',
+  'report.hellModeDesc': 'Hardest questions mixed from all scenes — for second-run players',
+  'report.hiddenAchievement': '🏅 Hidden Achievements',
+  'report.achievementEqCeiling': 'EQ Ceiling',
+  'report.achievementSocialKiller': 'Social Killer',
   'report.footer': '🧠 I am High-EQ · 2026 · Reject Toxic Socializing',
   'report.copied': '✨ Share text copied! Go flex on social media~',
   'report.shareTemplate': 'I scored {score} on the EQ Challenge · Rank: {emoji} {level}! {copy}',
