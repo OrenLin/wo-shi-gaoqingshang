@@ -43,6 +43,11 @@ const zh: Dict = {
   'select.allDone': '🎉 全部通关！你的社交段位已生成',
   'select.viewReport': '查看我的情商鉴定报告 →',
 
+  // ----- Immersive Preview -----
+  'preview.pressureWarning': '前方压力来袭 · 准备好了吗？',
+  'preview.enterScene': '进入战场！',
+  'select.scene': '📍 场景',
+
   // ----- Game -----
   'game.back': '← 返回',
   'game.questionBadge': '💬 灵魂拷问',
@@ -127,6 +132,11 @@ const en: Dict = {
   'select.challengeDone': '✅ Already Completed',
   'select.allDone': '🎉 All Cleared! Your Social Rank is Ready',
   'select.viewReport': 'View My EQ Report →',
+
+  // ----- Immersive Preview -----
+  'preview.pressureWarning': 'Pressure Ahead · Ready?',
+  'preview.enterScene': 'Enter the Battle!',
+  'select.scene': '📍 Scene',
 
   // ----- Game -----
   'game.back': '← Back',

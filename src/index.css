@@ -118,6 +118,13 @@ body {
   80% { transform: translateX(4px); }
 }
 
+@keyframes breathing-lens {
+  0%, 100% { transform: scale(1.1) translateX(0) translateY(0); }
+  25% { transform: scale(1.12) translateX(3px) translateY(-2px); }
+  50% { transform: scale(1.1) translateX(-2px) translateY(3px); }
+  75% { transform: scale(1.11) translateX(2px) translateY(-1px); }
+}
+
 .animate-wiggle {
   animation: wiggle-soft 3s ease-in-out infinite;
 }

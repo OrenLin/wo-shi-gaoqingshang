@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { scenes } from '../data';
 import SceneCard from '../components/scene/SceneCard';
+import ImmersiveScenePreview from '../components/scene/ImmersiveScenePreview';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 import { audioManager } from '../utils/audioManager';
@@ -13,6 +15,8 @@ export default function SceneSelect() {
   const t = useI18n((s) => s.t);
   const tLocal = (field: string | { zh: string; en: string } | undefined) =>
     pickLocalized(field, language);
+
+  const [previewScene, setPreviewScene] = useState<{ scene: typeof scenes[0]; index: number } | null>(null);
 
   const completedIds = getCompletedSceneIds();
   const doneCount = completedIds.size;
@@ -130,7 +134,11 @@ export default function SceneSelect() {
                       scene={localizedScene}
                       index={getSceneOriginalIndex(scene.id)}
                       completed={false}
-                      onClick={() => selectScene(getSceneOriginalIndex(scene.id))}
+                      onClick={() => {
+                        audioManager.userTapped();
+                        audioManager.play('click');
+                        setPreviewScene({ scene, index: getSceneOriginalIndex(scene.id) });
+                      }}
                     />
                   </div>
                 );
@@ -169,7 +177,11 @@ export default function SceneSelect() {
                       scene={localizedScene}
                       index={getSceneOriginalIndex(scene.id)}
                       completed={true}
-                      onClick={() => selectScene(getSceneOriginalIndex(scene.id))}
+                      onClick={() => {
+                        audioManager.userTapped();
+                        audioManager.play('click');
+                        setPreviewScene({ scene, index: getSceneOriginalIndex(scene.id) });
+                      }}
                     />
                   </div>
                 );
@@ -178,6 +190,18 @@ export default function SceneSelect() {
           </>
         )}
       </div>
+
+      {previewScene && (
+        <ImmersiveScenePreview
+          scene={previewScene.scene}
+          index={previewScene.index}
+          onEnter={() => {
+            selectScene(previewScene.index);
+            setPreviewScene(null);
+          }}
+          onClose={() => setPreviewScene(null)}
+        />
+      )}
     </div>
   );
 }
