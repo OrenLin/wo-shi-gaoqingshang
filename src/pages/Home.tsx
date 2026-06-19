@@ -4,15 +4,37 @@ import { audioManager } from '../utils/audioManager';
 import { useI18n, pickLocalized } from '../i18n';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
+import ConsentModal from '../components/ui/ConsentModal';
 
 export default function Home() {
-  const { setPage, setCodename } = useGameStore();
-  const [codename, setCodenameInput] = useState('');
+  const { setPage, setCodename, consented, setConsented } = useGameStore();
   const { language, setLanguage, t } = useI18n();
 
+  const [codename, setCodenameInput] = useState('');
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [accept, setAccept] = useState(true); // 默认勾选，方便用户
+
+  const zh = language === 'zh';
+
+  // 点击开始时：未同意则弹出 consent；已同意直接进入
   const handleStart = () => {
     audioManager.userTapped();
     audioManager.play('click');
+    if (!consented) {
+      setConsentOpen(true);
+      return;
+    }
+    const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '';
+    setCodename(name);
+    setPage('select');
+  };
+
+  const handleConsentConfirm = () => {
+    if (!accept) return;
+    setConsented(true);
+    setConsentOpen(false);
+    // 同意后直接进入下一步
     const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '';
     setCodename(name);
     setPage('select');
@@ -42,7 +64,6 @@ export default function Home() {
         <div className="inline-flex items-center gap-2 bg-white border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e]">
           <span className="font-black text-sm text-[#1a1a2e]">{t('home.brand')}</span>
         </div>
-        {/* 语言切换按钮 */}
         <button
           onClick={() => {
             audioManager.userTapped();
@@ -153,7 +174,7 @@ export default function Home() {
           {t('home.guide')}
         </p>
 
-        {/* 作者署名 + 版本号 */}
+        {/* 底部：作者 + 版本号 */}
         <div className="mt-6 pb-2 text-center flex flex-col items-center gap-2">
           <span className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-[11px] rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24]">
             {t('home.author')}
@@ -161,11 +182,35 @@ export default function Home() {
           <span className="inline-flex items-center gap-1 bg-white text-[#1a1a2e]/70 font-black text-[10px] rounded-full px-3 py-1 border-[2px] border-[#1a1a2e]/30">
             {t('home.version')}
           </span>
+
+          {/* 隐私小按钮 — 任何时候都可以查看 */}
+          <button
+            onClick={() => { setConsentOpen(true); setShowPrivacy(false); }}
+            className="inline-flex items-center gap-1.5 text-[10px] font-black text-[#1a1a2e]/60 hover:text-[#1a1a2e] underline underline-offset-4 transition-colors"
+          >
+            🔒 {zh ? '隐私与使用说明' : 'Privacy & Usage Notice'}
+          </button>
+
+          {/* 状态徽章 */}
+          <span className={`inline-flex items-center gap-1 text-[10px] font-black rounded-full px-3 py-1 border-[2px] border-[#1a1a2e]/30 ${consented ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
+            {consented
+              ? (zh ? '✓ 已同意匿名访问' : '✓ Anonymous access granted')
+              : (zh ? '⏳ 首次开始时需同意' : '⏳ Consent on first start')}
+          </span>
         </div>
       </div>
+
+      {/* Consent 弹窗 */}
+      <ConsentModal
+        open={consentOpen}
+        accepted={accept}
+        showPrivacy={showPrivacy}
+        onToggleAccept={setAccept}
+        onTogglePrivacy={setShowPrivacy}
+        onConfirm={handleConsentConfirm}
+      />
     </div>
   );
 }
 
-// re-export pickLocalized for other files if needed
 export { pickLocalized };

@@ -42,6 +42,10 @@ interface GameState {
   codename: string;
   setCodename: (name: string) => void;
 
+  // 隐私同意（首次访问需确认后才能进入游戏）
+  consented: boolean;
+  setConsented: (v: boolean) => void;
+
   // 场景进度
   currentSceneIndex: number;
   currentQuestionIndex: number;
@@ -91,6 +95,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   // ---------- 用户代号 ----------
   codename: '',
   setCodename: (name) => set({ codename: name }),
+
+  // ---------- 隐私同意 ----------
+  consented: false,
+  setConsented: (v) => set({ consented: v }),
 
   // ---------- 场景进度 ----------
   currentSceneIndex: 0,

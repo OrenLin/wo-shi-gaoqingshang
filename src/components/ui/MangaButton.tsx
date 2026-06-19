@@ -7,9 +7,10 @@ import { cn } from '../../lib/utils';
  */
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
-interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface Props extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   variant?: Variant;
   children: React.ReactNode;
+  onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const variantStyles: Record<Variant, string> = {
