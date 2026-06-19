@@ -73,14 +73,18 @@ class AudioManager {
       /^((?!android).)*$/.test(navigator.userAgent) && 'ontouchend' in document;
 
     // ---- 持久解锁 handler（在 audio 解锁前持续存在）----
-    const tryUnlock = () => {
-      this.unlockByUserGesture().catch(() => { /* ignore */ });
+    // 【注意】这里只负责「预创建 context」，不标记 unlocked！
+    // 标记 unlocked 只能在用户主动触发（点击音频按钮 / 点击选项）时发生，
+    // 否则用户还没开始玩，unlocked 就被设了，但 context 可能还在 suspended，
+    // 导致真正 play() 时走错分支。
+    const tryPreCreate = () => {
+      try { this.ensureContext(true); } catch { /* ignore */ }
     };
 
     // ---- 在多个事件类型上注册（兼容移动端 + 桌面端）----
     const events = ['pointerdown', 'touchstart', 'click', 'mousedown', 'keydown'];
     events.forEach((ev) => {
-      const handler = () => tryUnlock();
+      const handler = () => tryPreCreate();
       this.persistentHandlers.push(() =>
         document.removeEventListener(ev, handler, { capture: true } as any));
       document.addEventListener(ev, handler, { capture: true, passive: true } as any);
@@ -91,7 +95,7 @@ class AudioManager {
       const wxHandler = () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         try { (window as any).WeixinJSBridge?.invoke?.('getNetworkType', {}, () => {
-          tryUnlock();
+          tryPreCreate();
         }); } catch { /* ignore */ }
       };
       document.addEventListener('WeixinJSBridgeReady', wxHandler as any, { once: true });
@@ -115,6 +119,11 @@ class AudioManager {
 
   // ==================================================================
   // 确保 AudioContext 已创建（可选是否在用户手势内）
+  // 【注意】不在这里调用 ctx.resume()！
+  // resume 的时序完全由 unlockByUserGesture 统一控制，
+  // 避免在 ensureContext 和 unlockByUserGesture 里双重 resume 导致状态竞争。
+  // 确保 AudioContext 已创建 + 解锁音效使用 start(0) 兜底 → 即便 context 还在 suspended，
+  // resumed 后浏览器也会播出 start(0) 调度的声音。
   // ==================================================================
   private ensureContext(fromUserGesture: boolean): boolean {
     if (!this.ctx) {
@@ -154,25 +163,17 @@ class AudioManager {
         return false;
       }
     }
-
-    // 恢复 context 状态（必须在用户手势内调用才能成功）
-    if (fromUserGesture && this.ctx) {
-      try {
-        const st = this.ctx.state as string;
-        if (st === 'suspended' || st === 'interrupted') {
-          // 不等待 Promise —— iOS 要求同步栈内调用
-          const p = this.ctx.resume();
-          if (p && typeof p.catch === 'function') p.catch(() => {});
-        }
-      } catch { /* ignore */ }
-    }
     return true;
   }
 
   // ==================================================================
   // 用户手势解锁 —— 同步播放声音并启动背景旋律
-  // 【iOS 关键】必须在「用户手势的同步调用栈」内完成：创建 context → resume → 实际播放音频
-  // 传 deferKey 时：解锁后立刻在同步路径里把这 sound 也播掉，避免时间戳过期
+  // 【iOS 关键】必须在「用户手势的同步调用栈」内完成：
+  //   1. 创建 AudioContext（最核心的解锁条件）
+  //   2. 调度所有音频事件（使用 start(0) 兜底，resumed 后自动播放）
+  //   3. 调用 ctx.resume()（通知 iOS Safari 解锁音频）
+  //   4. 等 resumed 后标记 unlocked → 启动 BGM
+  // 传 deferKey 时：在步骤 2 同步路径里把这 sound 也播掉
   // ==================================================================
   async unlockByUserGesture(deferKey?: SoundKey): Promise<boolean> {
     // 1. 确保有 AudioContext（在用户手势内创建）
@@ -181,10 +182,7 @@ class AudioManager {
       return false;
     }
 
-    // 2. 三重保险：
-    //    a. 同步播放短音频 buffer（最可靠）
-    //    b. 播放音符（OSC 节点）
-    //    c. 触发一个隐藏 HTML5 audio 播放（某些 iOS 版本需要）
+    // 2. 同步调度所有音频（使用 start(0)，resumed 后浏览器自动播放）
     try {
       const t = this.ctx.currentTime;
       this.playShortBeep(t);
@@ -193,6 +191,7 @@ class AudioManager {
       this.playNote(NOTES.G6, t + 0.22, 0.18, 'triangle', 0.3, this.sfxGain);
 
       // 【iOS 即时播放】如果调用方传入了 deferKey，立刻在同步栈里把它也播掉
+      // deferKey === 'click' 走 playShortBeep 的 unlock 音；其余用 playSfxAt
       if (deferKey && deferKey !== 'click') {
         this.playSfxAt(deferKey, t + 0.25);
       }
@@ -201,16 +200,22 @@ class AudioManager {
       this.playSilentHTMLAudio();
     } catch { /* ignore */ }
 
-    // 3. 等一小段时间后确认 state === 'running'
-    await new Promise((r) => setTimeout(r, 60));
+    // 3. 通知 iOS Safari 解锁音频（必须同步调用，不能 await）
     try {
-      if (this.ctx && (this.ctx.state as string) !== 'running') {
-        const p = this.ctx.resume();
-        if (p && typeof p.catch === 'function') p.catch(() => {});
+      if (this.ctx) {
+        const st = this.ctx.state as string;
+        if (st === 'suspended' || st === 'interrupted') {
+          const p = this.ctx.resume();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        }
       }
     } catch { /* ignore */ }
 
-    // 4. 标记已解锁，启动 BGM（如无静音）
+    // 4. 等待 resumed 后标记 unlocked → 启动 BGM
+    // 【注意】不依赖硬编码 60ms，用 setTimeout 0 跳到下一个 macrotask
+    // 此时 ctx.resume() 的 Promise 应该已经 resolved，ctx.state === 'running'
+    await new Promise((r) => setTimeout(r, 0));
+
     if (!this.unlocked) {
       this.unlocked = true;
 
@@ -275,6 +280,9 @@ class AudioManager {
 
   // ==================================================================
   // 播放一个非常短的「合成音频 Buffer」，最符合 iOS 媒体解锁条件
+  // 【iOS 关键】使用 start(0) 而不是 start(t)：
+  // iOS Safari 在 AudioContext suspended 状态下，start(past_time) 会被静默忽略，
+  // 但 start(0) = "从当前位置立即播放"，即使在 resumed 之前调度，resumed 后也能正常播出。
   // ==================================================================
   private playShortBeep(t: number) {
     if (!this.ctx || !this.sfxGain) return;
@@ -290,7 +298,8 @@ class AudioManager {
       const src = this.ctx.createBufferSource();
       src.buffer = buffer;
       src.connect(this.sfxGain);
-      src.start(t);
+      // 【关键】用 start(0) 替代 start(t)，iOS Safari 在 context suspended 时也能正确播放
+      src.start(0);
     } catch { /* ignore */ }
   }
 
@@ -318,6 +327,10 @@ class AudioManager {
 
   // ==================================================================
   // 音符播放（OSC 节点）
+  // 【iOS 关键】当 start 距离 ctx.currentTime 不足 50ms 时，使用 osc.start(0) 替代精确调度：
+  // iOS Safari 在 AudioContext suspended 状态下，osc.start(past_or_near_future_time) 可能静默失效，
+  // 但 osc.start(0) = "立即开始"，即使在 resumed 之前调度，resumed 后能正常播出。
+  // 对于需要精确时序的和弦/琶音，保留精确调度；短促单音用 start(0) 更可靠。
   // ==================================================================
   private playNote(
     freq: number,
@@ -342,7 +355,15 @@ class AudioManager {
 
       osc.connect(g);
       g.connect(dest);
-      osc.start(start);
+
+      // 【iOS 关键】近未来时间用 start(0) 兜底；精确调度保留给琶音和弦等有明确时序要求的场景
+      const timeFromNow = start - this.ctx.currentTime;
+      if (timeFromNow < 0.05) {
+        // 距离当前时间不足 50ms → 用 start(0) 立即播放，iOS Safari 兼容性更好
+        osc.start(0);
+      } else {
+        osc.start(start);
+      }
       osc.stop(start + duration + 0.05);
     } catch { /* ignore */ }
   }
@@ -359,7 +380,7 @@ class AudioManager {
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
       osc.connect(g);
       g.connect(this.bgmGain);
-      osc.start(t);
+      osc.start(Math.max(t, 0));
       osc.stop(t + 0.2);
     } catch { /* ignore */ }
   }
@@ -375,7 +396,7 @@ class AudioManager {
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
       osc.connect(g);
       g.connect(this.bgmGain);
-      osc.start(t);
+      osc.start(Math.max(t, 0));
       osc.stop(t + 0.05);
     } catch { /* ignore */ }
   }
