@@ -264,13 +264,13 @@ export const divinationLots: DivinationLot[] = [
   },
 ];
 
-// 随机抽签（加权概率：上上/下下较少，中签最多）
+// 随机抽签（加权概率：中签最多，下签/下下签极少，尽量讨喜）
 const WEIGHTS: Record<LotLevel, number> = {
-  supreme: 1,
-  upper: 3,
-  middle: 4,
-  lower: 2,
-  bottom: 1,
+  supreme: 2,   // 上上签 — 略增，给用户惊喜
+  upper: 4,     // 上签 — 较多
+  middle: 6,    // 中签 — 最多，平和稳妥
+  lower: 1,     // 下签 — 很少
+  bottom: 1,    // 下下签 — 极少
 };
 
 export function drawRandomLot(): DivinationLot {

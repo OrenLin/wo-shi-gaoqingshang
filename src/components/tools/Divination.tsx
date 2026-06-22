@@ -155,13 +155,22 @@ export default function Divination({ onBack }: DivinationProps) {
 
       {/* ===== 主内容区（flex-1 撑满，底部操作区始终可见） ===== */}
       <main className="relative z-10 flex flex-col flex-1 px-4 min-h-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {/* ===== 上部：竹筒交互区（固定比例，不遮挡） ===== */}
-        <div className="flex items-end justify-center flex-shrink-0" style={{ height: '38vh', minHeight: '200px' }}>
-          <BambooTube phase={phase} lot={currentLot} levelChar={levelCfg?.shortLabel.zh ?? ''} onDraw={handleDraw} zh={zh} />
+        {/* ===== 上部：竹筒交互区（缩小比例，留更多空间给面板） ===== */}
+        <div className="flex items-end justify-center flex-shrink-0" style={{ height: '32vh', minHeight: '180px' }}>
+          <BambooTube phase={phase} lot={currentLot} levelChar={levelCfg?.shortLabel.zh ?? ''} sealChar={levelCfg?.sealChar ?? ''} onDraw={handleDraw} zh={zh} />
         </div>
 
-        {/* ===== 下部：解签面板（flex-1，内部滚动，底部操作区固定） ===== */}
-        <div className="flex-1 flex flex-col min-h-0 pb-3">
+        {/* ===== 提示文字（独立行，不与竹筒重叠） ===== */}
+        {phase === 'idle' && (
+          <div className="text-center flex-shrink-0 py-1">
+            <span className="text-[11px] font-bold text-[#3d2817]/50 divination-hint-pulse">
+              {zh ? '👆 轻触竹筒 · 诚心摇签' : '👆 Tap the tube · Draw with intention'}
+            </span>
+          </div>
+        )}
+
+        {/* ===== 下部：解签面板（flex-1，内部滚动，底部操作区固定可见） ===== */}
+        <div className="flex-1 flex flex-col min-h-0 pb-2">
           {phase === 'idle' && <IdlePanel zh={zh} onDraw={handleDraw} />}
           {phase === 'shaking' && <ShakingPanel zh={zh} />}
           {(phase === 'revealing' || phase === 'revealed') && currentLot && levelCfg && elemCfg && (
@@ -181,97 +190,137 @@ export default function Divination({ onBack }: DivinationProps) {
 }
 
 // ============================================================
-// 背景场景：水墨山水 + 庭院竹林（多层次氛围）
+// 背景场景：水墨山水 + 庭院竹林（浅色衬底，清晰可见）
 // ============================================================
 function BackdropScene() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {/* 顶部竹叶画框 */}
-      <svg className="absolute top-0 left-0 w-full h-20 opacity-25" viewBox="0 0 375 80" preserveAspectRatio="xMidYMid slice">
-        <g fill="#5a8d5e">
-          <ellipse cx="30" cy="20" rx="18" ry="4" transform="rotate(-30 30 20)" opacity="0.6" />
-          <ellipse cx="55" cy="12" rx="20" ry="4" transform="rotate(-20 55 12)" opacity="0.5" />
-          <ellipse cx="80" cy="22" rx="16" ry="3.5" transform="rotate(-35 80 22)" opacity="0.4" />
-          <ellipse cx="340" cy="18" rx="18" ry="4" transform="rotate(25 340 18)" opacity="0.6" />
-          <ellipse cx="315" cy="10" rx="20" ry="4" transform="rotate(15 315 10)" opacity="0.5" />
-          <ellipse cx="290" cy="24" rx="16" ry="3.5" transform="rotate(30 290 24)" opacity="0.4" />
+      {/* ===== 顶部竹叶画框（清晰） ===== */}
+      <svg className="absolute top-0 left-0 w-full h-16 opacity-40" viewBox="0 0 375 64" preserveAspectRatio="xMidYMid slice">
+        <g fill="#4a7c4e">
+          <ellipse cx="25" cy="18" rx="20" ry="4.5" transform="rotate(-30 25 18)" opacity="0.7" />
+          <ellipse cx="52" cy="10" rx="22" ry="4" transform="rotate(-20 52 10)" opacity="0.6" />
+          <ellipse cx="80" cy="20" rx="18" ry="4" transform="rotate(-35 80 20)" opacity="0.5" />
+          <ellipse cx="345" cy="16" rx="20" ry="4.5" transform="rotate(25 345 16)" opacity="0.7" />
+          <ellipse cx="318" cy="8" rx="22" ry="4" transform="rotate(15 318 8)" opacity="0.6" />
+          <ellipse cx="290" cy="22" rx="18" ry="4" transform="rotate(30 290 22)" opacity="0.5" />
+          {/* 竹枝 */}
+          <path d="M 0 30 Q 30 25, 60 28 Q 90 22, 100 26" fill="none" stroke="#4a7c4e" strokeWidth="1.2" opacity="0.4" />
+          <path d="M 375 28 Q 340 24, 310 27 Q 280 22, 270 25" fill="none" stroke="#4a7c4e" strokeWidth="1.2" opacity="0.4" />
         </g>
       </svg>
 
-      {/* 远山层（最淡） */}
-      <svg className="absolute bottom-0 left-0 w-full h-1/2 opacity-20" viewBox="0 0 375 300" preserveAspectRatio="xMidYMax slice">
-        <path d="M0,300 L0,160 Q50,120 100,140 Q150,110 200,130 Q250,100 300,125 Q350,110 375,130 L375,300 Z" fill="#6a7b6a" opacity="0.5" />
+      {/* ===== 远山层（水墨淡彩，清晰可见） ===== */}
+      <svg className="absolute bottom-0 left-0 w-full h-1/2 opacity-35" viewBox="0 0 375 300" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="farMountain" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#7a8b7a" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#5a6b5a" stopOpacity="0.6" />
+          </linearGradient>
+        </defs>
+        <path d="M0,300 L0,160 Q50,110 100,135 Q150,100 200,125 Q250,90 300,120 Q350,95 375,115 L375,300 Z" fill="url(#farMountain)" />
       </svg>
 
-      {/* 中山层 */}
-      <svg className="absolute bottom-0 left-0 w-full h-2/5 opacity-25" viewBox="0 0 375 250" preserveAspectRatio="xMidYMax slice">
-        <path d="M0,250 L0,180 Q60,150 120,165 Q180,140 240,160 Q300,135 375,155 L375,250 Z" fill="#4a5b4a" opacity="0.6" />
+      {/* ===== 中山层 + 云雾 ===== */}
+      <svg className="absolute bottom-0 left-0 w-full h-2/5 opacity-40" viewBox="0 0 375 250" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="midMountain" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#5a6b5a" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#3a4b3a" stopOpacity="0.8" />
+          </linearGradient>
+        </defs>
+        <path d="M0,250 L0,180 Q60,145 120,160 Q180,135 240,155 Q300,125 375,150 L375,250 Z" fill="url(#midMountain)" />
         {/* 山间云雾 */}
-        <ellipse cx="100" cy="170" rx="40" ry="6" fill="white" opacity="0.3" />
-        <ellipse cx="250" cy="165" rx="50" ry="7" fill="white" opacity="0.25" />
+        <ellipse cx="90" cy="168" rx="45" ry="7" fill="white" opacity="0.4" />
+        <ellipse cx="250" cy="162" rx="55" ry="8" fill="white" opacity="0.35" />
+        <ellipse cx="180" cy="175" rx="35" ry="5" fill="white" opacity="0.3" />
       </svg>
 
-      {/* 近山层 + 庭院轮廓 */}
-      <svg className="absolute bottom-0 left-0 w-full h-1/3 opacity-30" viewBox="0 0 375 200" preserveAspectRatio="xMidYMax slice">
-        <path d="M0,200 L0,150 Q70,135 140,145 Q210,130 280,142 Q340,135 375,145 L375,200 Z" fill="#3a4b3a" opacity="0.7" />
-        {/* 小桥轮廓 */}
-        <path d="M 120 165 Q 150 145, 180 165" fill="none" stroke="#5a4a3a" strokeWidth="1.5" opacity="0.4" />
-        <line x1="125" y1="165" x2="125" y2="172" stroke="#5a4a3a" strokeWidth="1" opacity="0.3" />
-        <line x1="175" y1="165" x2="175" y2="172" stroke="#5a4a3a" strokeWidth="1" opacity="0.3" />
+      {/* ===== 近山层 + 庭院小桥 ===== */}
+      <svg className="absolute bottom-0 left-0 w-full h-1/3 opacity-45" viewBox="0 0 375 200" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="nearMountain" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#3a4b3a" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#2a3b2a" stopOpacity="0.9" />
+          </linearGradient>
+        </defs>
+        <path d="M0,200 L0,150 Q70,130 140,142 Q210,125 280,140 Q340,130 375,140 L375,200 Z" fill="url(#nearMountain)" />
+        {/* 庭院小桥 */}
+        <path d="M 110 168 Q 150 148, 190 168" fill="none" stroke="#5a4a3a" strokeWidth="2" opacity="0.5" />
+        <line x1="115" y1="168" x2="115" y2="176" stroke="#5a4a3a" strokeWidth="1.2" opacity="0.4" />
+        <line x1="135" y1="162" x2="135" y2="172" stroke="#5a4a3a" strokeWidth="1" opacity="0.35" />
+        <line x1="165" y1="162" x2="165" y2="172" stroke="#5a4a3a" strokeWidth="1" opacity="0.35" />
+        <line x1="185" y1="168" x2="185" y2="176" stroke="#5a4a3a" strokeWidth="1.2" opacity="0.4" />
+        {/* 水面波纹 */}
+        <path d="M 100 178 Q 120 176, 140 178 Q 160 180, 180 178 Q 200 176, 220 178" fill="none" stroke="#5a6b7a" strokeWidth="0.8" opacity="0.3" />
       </svg>
 
-      {/* 底部竹林（左右两侧） */}
-      <svg className="absolute bottom-0 left-0 w-full h-2/5 opacity-20" viewBox="0 0 375 200" preserveAspectRatio="xMidYMax slice">
+      {/* ===== 底部竹林（左右两侧，清晰可见） ===== */}
+      <svg className="absolute bottom-0 left-0 w-full h-2/5 opacity-35" viewBox="0 0 375 200" preserveAspectRatio="xMidYMax slice">
         {/* 左侧竹丛 */}
-        {[15, 30, 45, 8, 38].map((x, i) => {
-          const h = 120 + (i % 3) * 30;
+        {[10, 25, 40, 5, 33].map((x, i) => {
+          const h = 130 + (i % 3) * 35;
           const y = 200 - h;
           return (
-            <g key={`l${i}`} opacity={0.4 + (i % 2) * 0.2}>
-              <rect x={x} y={y} width="3.5" height={h} fill="#4a7c4e" />
+            <g key={`l${i}`} opacity={0.5 + (i % 2) * 0.2}>
+              {/* 竹竿 */}
+              <rect x={x} y={y} width="4" height={h} fill="#4a7c4e" />
               {/* 竹节 */}
-              <rect x={x - 0.5} y={y + h * 0.3} width="4.5" height="2" fill="#2d5b31" opacity="0.6" />
-              <rect x={x - 0.5} y={y + h * 0.6} width="4.5" height="2" fill="#2d5b31" opacity="0.6" />
-              {/* 竹叶 */}
-              <ellipse cx={x + 2} cy={y + 5} rx="10" ry="3" fill="#5a8d5e" opacity="0.5" transform={`rotate(${-30 + i * 10} ${x + 2} ${y + 5})`} />
-              <ellipse cx={x - 1} cy={y + 15} rx="9" ry="2.5" fill="#5a8d5e" opacity="0.4" transform={`rotate(${20 + i * 8} ${x - 1} ${y + 15})`} />
+              <rect x={x - 1} y={y + h * 0.25} width="6" height="2.5" fill="#2d5b31" opacity="0.7" />
+              <rect x={x - 1} y={y + h * 0.5} width="6" height="2.5" fill="#2d5b31" opacity="0.7" />
+              <rect x={x - 1} y={y + h * 0.75} width="6" height="2.5" fill="#2d5b31" opacity="0.7" />
+              {/* 竹叶簇 */}
+              <ellipse cx={x + 3} cy={y + 3} rx="12" ry="3.5" fill="#5a8d5e" opacity="0.6" transform={`rotate(${-35 + i * 12} ${x + 3} ${y + 3})`} />
+              <ellipse cx={x - 1} cy={y + 12} rx="10" ry="3" fill="#5a8d5e" opacity="0.5" transform={`rotate(${25 + i * 10} ${x - 1} ${y + 12})`} />
+              <ellipse cx={x + 4} cy={y + 20} rx="11" ry="3" fill="#5a8d5e" opacity="0.45" transform={`rotate(${-20 + i * 8} ${x + 4} ${y + 20})`} />
             </g>
           );
         })}
         {/* 右侧竹丛 */}
-        {[330, 345, 360, 322, 352].map((x, i) => {
-          const h = 110 + (i % 3) * 35;
+        {[328, 343, 358, 320, 350].map((x, i) => {
+          const h = 120 + (i % 3) * 40;
           const y = 200 - h;
           return (
-            <g key={`r${i}`} opacity={0.4 + (i % 2) * 0.2}>
-              <rect x={x} y={y} width="3.5" height={h} fill="#4a7c4e" />
-              <rect x={x - 0.5} y={y + h * 0.3} width="4.5" height="2" fill="#2d5b31" opacity="0.6" />
-              <rect x={x - 0.5} y={y + h * 0.6} width="4.5" height="2" fill="#2d5b31" opacity="0.6" />
-              <ellipse cx={x + 2} cy={y + 5} rx="10" ry="3" fill="#5a8d5e" opacity="0.5" transform={`rotate(${30 - i * 10} ${x + 2} ${y + 5})`} />
-              <ellipse cx={x + 4} cy={y + 15} rx="9" ry="2.5" fill="#5a8d5e" opacity="0.4" transform={`rotate(${-20 - i * 8} ${x + 4} ${y + 15})`} />
+            <g key={`r${i}`} opacity={0.5 + (i % 2) * 0.2}>
+              <rect x={x} y={y} width="4" height={h} fill="#4a7c4e" />
+              <rect x={x - 1} y={y + h * 0.25} width="6" height="2.5" fill="#2d5b31" opacity="0.7" />
+              <rect x={x - 1} y={y + h * 0.5} width="6" height="2.5" fill="#2d5b31" opacity="0.7" />
+              <rect x={x - 1} y={y + h * 0.75} width="6" height="2.5" fill="#2d5b31" opacity="0.7" />
+              <ellipse cx={x + 3} cy={y + 3} rx="12" ry="3.5" fill="#5a8d5e" opacity="0.6" transform={`rotate(${35 - i * 12} ${x + 3} ${y + 3})`} />
+              <ellipse cx={x + 5} cy={y + 12} rx="10" ry="3" fill="#5a8d5e" opacity="0.5" transform={`rotate(${-25 - i * 10} ${x + 5} ${y + 12})`} />
+              <ellipse cx={x + 2} cy={y + 20} rx="11" ry="3" fill="#5a8d5e" opacity="0.45" transform={`rotate(${20 + i * 8} ${x + 2} ${y + 20})`} />
             </g>
           );
         })}
       </svg>
 
-      {/* 石灯笼装饰（左下角） */}
-      <svg className="absolute bottom-4 left-2 w-12 h-20 opacity-20" viewBox="0 0 48 80">
-        <ellipse cx="24" cy="76" rx="16" ry="3" fill="#3d2817" opacity="0.3" />
-        <rect x="18" y="68" width="12" height="6" fill="#5a4a3a" />
-        <rect x="20" y="58" width="8" height="10" fill="#6a5a4a" />
-        <path d="M 14 40 L 34 40 L 30 58 L 18 58 Z" fill="#8a7a5a" opacity="0.7" />
-        <rect x="16" y="38" width="16" height="3" fill="#5a4a3a" />
-        <rect x="18" y="28" width="12" height="10" fill="#6a5a4a" />
-        <rect x="20" y="20" width="8" height="8" fill="#5a4a3a" />
+      {/* ===== 石灯笼装饰（左下角，清晰） ===== */}
+      <svg className="absolute bottom-3 left-1 w-11 h-18 opacity-35" viewBox="0 0 44 72">
+        <ellipse cx="22" cy="69" rx="14" ry="3" fill="#3d2817" opacity="0.4" />
+        <rect x="16" y="62" width="12" height="6" fill="#5a4a3a" opacity="0.8" />
+        <rect x="18" y="52" width="8" height="10" fill="#6a5a4a" opacity="0.8" />
+        <path d="M 12 36 L 32 36 L 28 52 L 16 52 Z" fill="#8a7a5a" opacity="0.75" />
+        <rect x="14" y="34" width="16" height="3" fill="#5a4a3a" opacity="0.8" />
+        <rect x="16" y="24" width="12" height="10" fill="#6a5a4a" opacity="0.8" />
+        <rect x="18" y="16" width="8" height="8" fill="#5a4a3a" opacity="0.8" />
         {/* 灯光 */}
-        <circle cx="24" cy="49" r="3" fill="#fbbf24" opacity="0.4" />
+        <circle cx="22" cy="44" r="3.5" fill="#fbbf24" opacity="0.5" />
+        <circle cx="22" cy="44" r="2" fill="#fef3c7" opacity="0.4" />
       </svg>
 
-      {/* 水墨晕染（底部，增加层次） */}
+      {/* ===== 右下角苔石装饰 ===== */}
+      <svg className="absolute bottom-2 right-1 w-16 h-10 opacity-30" viewBox="0 0 64 40">
+        <ellipse cx="20" cy="32" rx="16" ry="8" fill="#5a6b5a" opacity="0.5" />
+        <ellipse cx="40" cy="34" rx="12" ry="6" fill="#4a5b4a" opacity="0.5" />
+        <ellipse cx="15" cy="28" rx="4" ry="2" fill="#5a8d5e" opacity="0.4" />
+        <ellipse cx="48" cy="31" rx="3" ry="1.5" fill="#5a8d5e" opacity="0.4" />
+      </svg>
+
+      {/* ===== 水墨晕染（底部，增加层次） ===== */}
       <div
-        className="absolute bottom-0 left-0 w-full h-1/4 pointer-events-none"
+        className="absolute bottom-0 left-0 w-full h-1/3 pointer-events-none"
         style={{
-          background: 'linear-gradient(180deg, transparent 0%, rgba(58,75,58,0.08) 60%, rgba(58,75,58,0.15) 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(58,75,58,0.06) 50%, rgba(58,75,58,0.12) 100%)',
         }}
       />
     </div>
@@ -327,18 +376,22 @@ function BambooTube({
   phase,
   lot,
   levelChar,
+  sealChar,
   onDraw,
   zh,
 }: {
   phase: Phase;
   lot: DivinationLot | null;
   levelChar: string;
+  sealChar: string;
   onDraw: () => void;
   zh: boolean;
 }) {
   const isShaking = phase === 'shaking';
   const isRevealing = phase === 'revealing';
   const isInteractive = phase === 'idle' || phase === 'revealed';
+  // 签文显示：用印章字（吉/福/平/守/忍），单字，楷体，渐显
+  const displayChar = lot ? sealChar : '';
 
   return (
     <div className="relative flex flex-col items-center">
@@ -380,7 +433,7 @@ function BambooTube({
         className={`relative bg-transparent border-0 p-0 ${isShaking ? 'divination-shake' : ''} ${isInteractive ? 'cursor-pointer hover:scale-[1.04] active:scale-95' : 'cursor-default'} transition-transform duration-300`}
         style={{ transformOrigin: 'bottom center' }}
       >
-        <svg width="150" height="210" viewBox="0 0 180 240" className="overflow-visible">
+        <svg width="140" height="195" viewBox="0 0 180 240" className="overflow-visible">
           <defs>
             {/* 竹筒主体渐变（增强3D感：左暗→中亮→右暗） */}
             <linearGradient id="bambooGrad3d" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -439,13 +492,6 @@ function BambooTube({
               <stop offset="50%" stopColor="#6b9d6f" />
               <stop offset="100%" stopColor="#2d5b31" />
             </linearGradient>
-            {/* 阴影滤镜 */}
-            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-              <feOffset dx="1" dy="2" result="offsetblur" />
-              <feComponentTransfer><feFuncA type="linear" slope="0.3" /></feComponentTransfer>
-              <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
           </defs>
 
           {/* 地面阴影（更柔和） */}
@@ -461,58 +507,47 @@ function BambooTube({
 
             {/* 选中签（中央，清晰，更宽以容纳文字） */}
             <g className={isRevealing || phase === 'revealed' ? 'divination-lot-rise' : ''}>
-              {/* 签条主体（加宽到 14px，避免文字溢出） */}
-              <rect x="80" y="42" width="14" height="110" rx="3" fill="url(#selWoodGrad3d)" />
+              {/* 签条主体（加宽到 16px，容纳楷体大字） */}
+              <rect x="79" y="40" width="16" height="115" rx="3" fill="url(#selWoodGrad3d)" />
               {/* 顶部高光 */}
-              <rect x="80" y="42" width="14" height="7" rx="3" fill="rgba(255,255,255,0.3)" />
+              <rect x="79" y="40" width="16" height="8" rx="3" fill="rgba(255,255,255,0.3)" />
               {/* 左侧高光线 */}
-              <rect x="81" y="49" width="1.5" height="100" fill="rgba(255,255,255,0.2)" rx="0.5" />
+              <rect x="80" y="48" width="1.5" height="105" fill="rgba(255,255,255,0.2)" rx="0.5" />
               {/* 右侧阴影线 */}
-              <rect x="92" y="49" width="1.5" height="100" fill="rgba(0,0,0,0.15)" rx="0.5" />
-              {/* 签文（竖排，适配宽度） */}
-              {lot && levelChar && (
-                <text
-                  x="87"
-                  y="62"
-                  textAnchor="middle"
-                  fontSize="6.5"
-                  fill="#3d2817"
-                  fontWeight="bold"
-                  fontFamily="'STKaiti', 'KaiTi', serif"
-                >
-                  {levelChar.length > 1 ? levelChar[0] : levelChar}
-                </text>
+              <rect x="93" y="48" width="1.5" height="105" fill="rgba(0,0,0,0.15)" rx="0.5" />
+              {/* 签文淡色衬底（矩形底纹，像盖章的底色） */}
+              {lot && displayChar && (
+                <rect x="81" y="55" width="12" height="14" rx="1" fill="rgba(169,50,38,0.08)" />
               )}
-              {lot && levelChar && levelChar.length > 1 && (
+              {/* 签文（楷体单字，渐显动画） */}
+              {lot && displayChar && (
                 <text
                   x="87"
-                  y="72"
+                  y="66"
                   textAnchor="middle"
-                  fontSize="6.5"
-                  fill="#3d2817"
+                  fontSize="10"
+                  fill="#a93226"
                   fontWeight="bold"
-                  fontFamily="'STKaiti', 'KaiTi', serif"
+                  fontFamily="'STKaiti', 'KaiTi', 'STXingkai', '行楷', serif"
+                  className="divination-lot-text-reveal"
                 >
-                  {levelChar[1]}
+                  {displayChar}
                 </text>
               )}
               {/* 底部装饰线 */}
-              <line x1="83" y1="145" x2="91" y2="145" stroke="#3d2817" strokeWidth="0.4" opacity="0.3" />
+              <line x1="82" y1="148" x2="92" y2="148" stroke="#3d2817" strokeWidth="0.4" opacity="0.3" />
             </g>
           </g>
 
           {/* ===== 筒口（3D 深度） ===== */}
-          {/* 筒口外圈（竹色边缘） */}
           <ellipse cx="90" cy="150" rx="44" ry="7" fill="url(#rimGrad)" />
-          {/* 筒口内圈（深黑，有深度） */}
           <ellipse cx="90" cy="150" rx="40" ry="5.5" fill="url(#openingGrad3d)" />
-          {/* 筒口内壁高光（左侧） */}
           <ellipse cx="78" cy="149" rx="8" ry="2" fill="rgba(255,255,255,0.08)" />
 
           {/* ===== 竹筒主体（3D 圆柱感） ===== */}
           <path d="M 46 150 L 46 240 L 134 240 L 134 150 Z" fill="url(#bambooGrad3d)" />
 
-          {/* 竖向纹理（竹纤维感，更细腻） */}
+          {/* 竖向纹理（竹纤维感） */}
           <g opacity="0.15">
             {[54, 62, 70, 78, 86, 94, 102, 110, 118, 126].map((x) => (
               <line key={x} x1={x} y1="152" x2={x} y2="238" stroke="#1a3a1e" strokeWidth="0.5" />
@@ -534,7 +569,6 @@ function BambooTube({
 
           {/* ===== 绳结装饰（中部） ===== */}
           <rect x="42" y="198" width="96" height="16" fill="url(#ropeGrad3d)" />
-          {/* 绳纹 */}
           <g opacity="0.4">
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
               <line
@@ -548,7 +582,6 @@ function BambooTube({
               />
             ))}
           </g>
-          {/* 绳结中心扣 */}
           <circle cx="90" cy="206" r="5.5" fill="url(#ropeGrad3d)" />
           <circle cx="90" cy="206" r="4" fill="#6b5b40" />
           <circle cx="89" cy="205" r="1.5" fill="rgba(255,255,255,0.25)" />
@@ -562,13 +595,6 @@ function BambooTube({
           <ellipse cx="90" cy="239" rx="44" ry="3" fill="rgba(0,0,0,0.25)" />
         </svg>
       </button>
-
-      {/* 提示文字（idle 时显示在竹筒下方，不遮挡） */}
-      {phase === 'idle' && (
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold text-[#3d2817]/50 divination-hint-pulse">
-          {zh ? '👆 轻触竹筒 · 诚心摇签' : '👆 Tap the tube · Draw with intention'}
-        </div>
-      )}
     </div>
   );
 }
@@ -649,27 +675,49 @@ function InterpretationPanel({
 
   return (
     <div className="flex flex-col divination-panel-enter min-h-0 flex-1">
-      {/* 木框笺纸（渐变融入背景，无硬边框） */}
+      {/* 木框笺纸（渐变融入背景 + 淡色衬底纹理 + 质感提升） */}
       <div
         className="relative flex flex-col overflow-hidden divination-scroll-unfold flex-1 min-h-0"
         style={{
           borderRadius: '12px 12px 8px 8px',
-          // 用多层 box-shadow 替代硬边框，渐变融入背景
           boxShadow: `
             0 2px 8px rgba(61,40,23,0.12),
             0 8px 24px rgba(61,40,23,0.08),
             inset 0 1px 0 rgba(255,255,255,0.5),
             inset 0 0 0 1px rgba(122,93,71,0.3)
           `,
-          // 渐变背景：纸色 + 边缘渐隐
           background: `
             linear-gradient(135deg, rgba(245,235,210,0.97) 0%, rgba(237,228,208,0.97) 50%, rgba(230,220,200,0.97) 100%)
           `,
-          // 底部渐变融入背景（mask 效果）
           maskImage: 'linear-gradient(180deg, black 0%, black 92%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(180deg, black 0%, black 92%, transparent 100%)',
         }}
       >
+        {/* ===== 淡色衬底纹理：传统信笺暗纹（高级感） ===== */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 20% 30%, rgba(122,93,71,0.04) 1px, transparent 2px),
+              radial-gradient(circle at 80% 70%, rgba(122,93,71,0.03) 1px, transparent 2px),
+              repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(122,93,71,0.025) 28px, rgba(122,93,71,0.025) 29px)
+            `,
+            backgroundSize: '40px 40px, 50px 50px, 100% 100%',
+          }}
+        />
+        {/* 衬底水印：大字"禅"（极淡） */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
+          style={{
+            fontSize: '120px',
+            fontFamily: "'STKaiti', 'KaiTi', serif",
+            color: 'rgba(122,93,71,0.04)',
+            fontWeight: 'bold',
+            lineHeight: 1,
+          }}
+        >
+          {zh ? '禅' : 'Zen'}
+        </div>
         {/* 顶部装饰条（渐变，非硬边框） */}
         <div
           className="h-1 flex-shrink-0"
