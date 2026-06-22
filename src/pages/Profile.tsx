@@ -1,39 +1,41 @@
+import { useState, useMemo } from 'react';
 import { useI18n } from '../i18n';
 import { useGameStore } from '../store/gameStore';
 import { audioManager } from '../utils/audioManager';
+import { getReportHistory, getReportStats } from '../utils/reportStorage';
+import { calculateEQCoefficient, getUnlockedCount } from '../utils/eqTrajectory';
+import ReportHistory from '../components/profile/ReportHistory';
+import EQTrajectory from '../components/profile/EQTrajectory';
+import PersonalAdvice from '../components/profile/PersonalAdvice';
+import SurveyLink from '../components/ui/SurveyLink';
+
+type Tab = 'history' | 'trajectory' | 'advice';
 
 export default function Profile() {
   const language = useI18n((s) => s.language);
-  const t = useI18n((s) => s.t);
   const codename = useGameStore((s) => s.codename);
   const setPage = useGameStore((s) => s.setPage);
   const zh = language === 'zh';
 
-  // 未来功能列表
-  const features = [
-    {
-      emoji: '📊',
-      title: zh ? '报告历史' : 'Report History',
-      desc: zh ? '查看你所有的情商鉴定报告' : 'View all your EQ assessment reports',
-    },
-    {
-      emoji: '📈',
-      title: zh ? '情商轨迹' : 'EQ Trajectory',
-      desc: zh ? '追踪你的情商成长曲线' : 'Track your EQ growth curve over time',
-    },
-    {
-      emoji: '💡',
-      title: zh ? '个性化建议' : 'Personalized Tips',
-      desc: zh ? '基于你的表现定制提升方案' : 'Tailored improvement plans based on your performance',
-    },
+  const [activeTab, setActiveTab] = useState<Tab>('history');
+
+  const reports = useMemo(() => getReportHistory(), []);
+  const stats = useMemo(() => getReportStats(), []);
+  const coefficient = useMemo(() => calculateEQCoefficient(reports), [reports]);
+  const unlockedTitles = useMemo(() => getUnlockedCount(reports), [reports]);
+
+  const tabs: { key: Tab; emoji: string; label: string }[] = [
+    { key: 'history', emoji: '📊', label: zh ? '报告历史' : 'Reports' },
+    { key: 'trajectory', emoji: '📈', label: zh ? '情商轨迹' : 'Trajectory' },
+    { key: 'advice', emoji: '💡', label: zh ? '个性化建议' : 'Advice' },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-rose-50 px-4 py-6 pb-24">
-      {/* 顶部标题区 */}
       <div className="max-w-md mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-black text-[#1a1a2e] flex items-center gap-2">
+        {/* 顶部标题区 */}
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-2xl font-black text-[#1a1a2e] flex items-center gap-2">
             <span aria-hidden="true">👤</span>
             {zh ? '个人中心' : 'My Profile'}
           </h1>
@@ -52,58 +54,71 @@ export default function Profile() {
         </div>
 
         {/* 用户信息卡片 */}
-        <div className="bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[4px_4px_0_0_#1a1a2e] p-5 mb-5 animate-pop-in">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 border-[3px] border-[#1a1a2e] flex items-center justify-center text-3xl" aria-hidden="true">
+        <div className="bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[4px_4px_0_0_#1a1a2e] p-4 mb-4 animate-pop-in">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 border-[3px] border-[#1a1a2e] flex items-center justify-center text-2xl flex-shrink-0" aria-hidden="true">
               🧑
             </div>
-            <div className="flex-1">
-              <div className="text-xs font-bold text-[#1a1a2e]/50">
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-bold text-[#1a1a2e]/50">
                 {zh ? '代号' : 'Codename'}
               </div>
-              <div className="text-xl font-black text-[#1a1a2e]">
+              <div className="text-lg font-black text-[#1a1a2e] truncate">
                 {codename || (zh ? '匿名高手' : 'Anonymous Pro')}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* 即将上线横幅 */}
-        <div className="bg-gradient-to-r from-sky-400 to-blue-500 text-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[4px_4px_0_0_#1a1a2e] p-5 mb-5 text-center animate-pop-in" style={{ animationDelay: '0.1s' }}>
-          <div className="text-5xl mb-2 animate-bounce" style={{ animationDuration: '1.5s' }} aria-hidden="true">🚧</div>
-          <div className="text-xl font-black mb-1">{zh ? '即将上线' : 'Coming Soon'}</div>
-          <div className="text-sm font-bold opacity-90">
-            {zh ? '我们正在精心打造个人中心功能' : 'We\'re crafting your personal center'}
-          </div>
-        </div>
-
-        {/* 未来功能预告 */}
-        <div className="space-y-3">
-          <div className="text-sm font-black text-[#1a1a2e]/60 px-1">
-            {zh ? '🎁 未来功能预告' : '🎁 Upcoming Features'}
-          </div>
-          {features.map((f, i) => (
-            <div
-              key={i}
-              className="bg-white/70 rounded-2xl border-[3px] border-[#1a1a2e]/20 p-4 flex items-center gap-3 animate-pop-in"
-              style={{ animationDelay: `${0.2 + i * 0.1}s` }}
-            >
-              <div className="w-12 h-12 rounded-xl bg-slate-100 border-[2px] border-[#1a1a2e]/20 flex items-center justify-center text-2xl flex-shrink-0" aria-hidden="true">
-                {f.emoji}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-black text-sm text-[#1a1a2e]">{f.title}</div>
-                <div className="text-xs font-bold text-[#1a1a2e]/50">{f.desc}</div>
-              </div>
-              <div className="text-2xl flex-shrink-0 opacity-40" aria-hidden="true">🔒</div>
+          {/* 统计数据 */}
+          <div className="grid grid-cols-3 gap-2 pt-3 border-t-[2px] border-dashed border-[#1a1a2e]/15">
+            <div className="text-center">
+              <div className="text-xl font-black text-amber-600">{stats.totalCount}</div>
+              <div className="text-[9px] font-bold text-[#1a1a2e]/50">{zh ? '测评次数' : 'Tests'}</div>
             </div>
+            <div className="text-center">
+              <div className="text-xl font-black text-indigo-600">{coefficient}</div>
+              <div className="text-[9px] font-bold text-[#1a1a2e]/50">{zh ? '情商系数' : 'EQ Score'}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-black text-emerald-600">{unlockedTitles}</div>
+              <div className="text-[9px] font-bold text-[#1a1a2e]/50">{zh ? '称号' : 'Titles'}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab 切换 */}
+        <div className="flex gap-1.5 mb-4 bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] p-1.5">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => {
+                audioManager.userTapped();
+                audioManager.play('click');
+                setActiveTab(tab.key);
+              }}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl border-[2px] transition-all ${
+                activeTab === tab.key
+                  ? 'bg-amber-300 border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]'
+                  : 'bg-white border-transparent'
+              }`}
+              aria-pressed={activeTab === tab.key}
+            >
+              <span className="text-lg" aria-hidden="true">{tab.emoji}</span>
+              <span className={`text-[10px] font-black ${activeTab === tab.key ? 'text-[#1a1a2e]' : 'text-[#1a1a2e]/40'}`}>
+                {tab.label}
+              </span>
+            </button>
           ))}
         </div>
 
-        {/* 底部鼓励语 */}
-        <div className="mt-6 text-center text-xs font-bold text-[#1a1a2e]/40">
-          {zh ? '✨ 先去挑战场景，积累你的情商数据吧！' : '✨ Go challenge some scenes and build your EQ data!'}
+        {/* Tab 内容 */}
+        <div className="mb-4">
+          {activeTab === 'history' && <ReportHistory />}
+          {activeTab === 'trajectory' && <EQTrajectory />}
+          {activeTab === 'advice' && <PersonalAdvice />}
         </div>
+
+        {/* 问卷链接 */}
+        <SurveyLink variant="full" />
       </div>
     </div>
   );

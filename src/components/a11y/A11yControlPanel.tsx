@@ -66,8 +66,8 @@ export default function A11yControlPanel() {
       {/* ============ 悬浮按钮：小轮椅图标 ============ */}
       <button
         className={
-          'a11y-toggle-btn fixed bottom-5 right-5 z-[60] ' +
-          'w-14 h-14 md:w-16 md:h-16 rounded-full ' +
+          'a11y-toggle-btn fixed bottom-20 right-5 z-[60] ' +
+          'w-12 h-12 md:w-14 md:h-14 rounded-full ' +
           'bg-gradient-to-br from-sky-400 to-blue-600 text-white ' +
           'border-[4px] border-[#1a1a2e] shadow-[4px_4px_0_0_#1a1a2e] ' +
           'flex items-center justify-center ' +
@@ -82,7 +82,7 @@ export default function A11yControlPanel() {
         aria-haspopup="dialog"
       >
         {/* 轮椅 emoji 图标 */}
-        <span aria-hidden="true" className="text-3xl md:text-4xl leading-none">
+        <span aria-hidden="true" className="text-2xl md:text-3xl leading-none">
           ♿
         </span>
         {/* 激活模式计数小红点 */}
@@ -100,7 +100,7 @@ export default function A11yControlPanel() {
       {/* ============ 弹出的控制面板 ============ */}
       {open && (
         <div
-          className="a11y-panel fixed bottom-24 right-5 z-[60] w-72 md:w-80 rounded-2xl border-[4px] border-[#1a1a2e] shadow-[6px_6px_0_0_#1a1a2e] bg-white overflow-hidden animate-pop-in"
+          className="a11y-panel fixed bottom-36 right-5 z-[60] w-72 md:w-80 rounded-2xl border-[4px] border-[#1a1a2e] shadow-[6px_6px_0_0_#1a1a2e] bg-white overflow-hidden animate-pop-in"
           role="dialog"
           aria-label={zh ? '无障碍设置' : 'Accessibility settings'}
         >

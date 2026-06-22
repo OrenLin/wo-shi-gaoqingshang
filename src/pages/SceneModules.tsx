@@ -19,18 +19,24 @@ export default function SceneModules() {
   const completedIds = getCompletedSceneIds();
 
   const handleModuleClick = (moduleId: SceneModule) => {
-    audioManager.userTapped();
-    audioManager.play('click');
+    // 先跳转，不阻塞
     selectModule(moduleId);
+    // 延迟播放音频，不阻塞 UI
+    requestAnimationFrame(() => {
+      audioManager.userTapped();
+      audioManager.play('click');
+    });
   };
 
   const handleLockedClick = () => {
-    audioManager.userTapped();
-    audioManager.play('caw');
     setLockedShake(true);
     setShowToast(true);
     setTimeout(() => setLockedShake(false), 500);
     setTimeout(() => setShowToast(false), 2500);
+    requestAnimationFrame(() => {
+      audioManager.userTapped();
+      audioManager.play('caw');
+    });
   };
 
   return (
@@ -44,9 +50,11 @@ export default function SceneModules() {
           </h1>
           <button
             onClick={() => {
-              audioManager.userTapped();
-              audioManager.play('click');
               setPage('home');
+              requestAnimationFrame(() => {
+                audioManager.userTapped();
+                audioManager.play('click');
+              });
             }}
             aria-label={zh ? '返回首页' : 'Back to home'}
             className="inline-flex items-center gap-1 bg-white border-[3px] border-[#1a1a2e] rounded-full px-3 py-1.5 shadow-[2px_2px_0_0_#1a1a2e] font-black text-sm text-[#1a1a2e] transition-transform active:scale-95 hover:scale-105"

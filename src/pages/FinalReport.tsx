@@ -1,10 +1,12 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOptionLevel, levelGradient, bonusReco } from '../data/levels';
-import { scenes, getScenesByModule } from '../data';
+import { scenes, getScenesByModule, getModuleById } from '../data';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 import ScoreBoard from '../components/ui/ScoreBoard';
+import SurveyLink from '../components/ui/SurveyLink';
+import { saveReport } from '../utils/reportStorage';
 import { useI18n, pickLocalized } from '../i18n';
 
 export default function FinalReport() {
@@ -20,9 +22,11 @@ export default function FinalReport() {
     setPage,
   } = useGameStore();
   const currentModule = useGameStore((s) => s.currentModule);
+  const codename = useGameStore((s) => s.codename);
   const [show, setShow] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const report = getFinalReport();
+  const savedRef = useRef(false);
 
   // 基于答题分布计算 5 个情商维度得分（仅统计当前模块的答题记录）
   const eqDims = useMemo(() => {
@@ -142,6 +146,32 @@ export default function FinalReport() {
     const t = setTimeout(() => setShow(true), 200);
     return () => clearTimeout(t);
   }, []);
+
+  // 保存报告到 localStorage（防重复保存）
+  useEffect(() => {
+    if (savedRef.current) return;
+    if (!report || report.scenes.length === 0) return;
+    if (eqDims.length === 0) return;
+    savedRef.current = true;
+
+    const modConfig = getModuleById(currentModule);
+    const moduleName = modConfig?.title;
+    if (!moduleName) return;
+    const moduleNameLocalized = typeof moduleName === 'string'
+      ? { zh: moduleName, en: moduleName }
+      : moduleName;
+
+    saveReport({
+      module: currentModule,
+      moduleName: moduleNameLocalized,
+      averageScore: report.averageScore,
+      level: report.level,
+      percentile: report.percentile,
+      dims: eqDims.map((d) => ({ key: d.key, label: d.label, value: d.value })),
+      sceneCount: report.scenes.length,
+      codename: codename,
+    });
+  }, [report, eqDims, currentModule, codename]);
 
   const handleShare = () => {
     const template = t('report.shareTemplate');
@@ -469,6 +499,11 @@ export default function FinalReport() {
           </MangaButton>
         </div>
 
+        {/* 问卷反馈链接 */}
+        <div className="mt-5">
+          <SurveyLink variant="full" />
+        </div>
+
         <div className="mt-6 text-center">
           <span className="inline-flex items-center gap-2 bg-white/80 border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e] text-xs font-black text-[#1a1a2e]">
             {t('report.footer')}
@@ -486,4 +521,4 @@ export default function FinalReport() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _unused = { getOptionLevel };
+const _unused = { getOptionLevel, levelGradient };

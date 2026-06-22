@@ -5,6 +5,7 @@ import { useI18n, pickLocalized } from '../i18n';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 import ConsentModal from '../components/ui/ConsentModal';
+import SurveyLink from '../components/ui/SurveyLink';
 
 export default function Home() {
   const { setPage, setCodename, consented, setConsented, selectScene, reset } = useGameStore();
@@ -234,6 +235,9 @@ export default function Home() {
           <span className="inline-flex items-center gap-1 bg-white text-[#1a1a2e]/70 font-black text-[10px] rounded-full px-3 py-1 border-[2px] border-[#1a1a2e]/30">
             {t('home.version')}
           </span>
+
+          {/* 问卷反馈链接 */}
+          <SurveyLink variant="compact" />
 
           {/* 隐私小按钮 —— 任何时候都可以查看 */}
           <button

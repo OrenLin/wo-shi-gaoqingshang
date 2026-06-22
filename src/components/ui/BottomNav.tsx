@@ -37,11 +37,11 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-[3px] border-[#1a1a2e] shadow-[0_-4px_0_0_#1a1a2e]"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-[3px] border-[#1a1a2e] shadow-[0_-3px_0_0_#1a1a2e]"
       role="navigation"
       aria-label={zh ? '主导航' : 'Main navigation'}
     >
-      <div className="flex items-stretch justify-around max-w-md mx-auto px-2 py-1.5"
+      <div className="flex items-stretch justify-around max-w-md mx-auto px-2 py-1"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {tabs.map((tab) => {
@@ -52,16 +52,16 @@ export default function BottomNav() {
               onClick={() => handleTabClick(tab.key)}
               aria-label={tab.label}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl border-[3px] transition-all
+              className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg border-[3px] transition-all
                 ${isActive
                   ? 'bg-amber-300 border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e] -translate-y-[2px]'
                   : 'bg-white border-transparent hover:bg-amber-50'
                 }`}
             >
-              <span aria-hidden="true" className={`text-2xl leading-none ${isActive ? 'scale-110' : ''} transition-transform`}>
+              <span aria-hidden="true" className={`text-xl leading-none ${isActive ? 'scale-110' : ''} transition-transform`}>
                 {tab.icon}
               </span>
-              <span className={`text-[11px] font-black ${isActive ? 'text-[#1a1a2e]' : 'text-[#1a1a2e]/50'}`}>
+              <span className={`text-[10px] font-black ${isActive ? 'text-[#1a1a2e]' : 'text-[#1a1a2e]/50'}`}>
                 {tab.label}
               </span>
             </button>
