@@ -12,13 +12,14 @@
 // 5. 暴露 window.__audioDebug 供开发时实时观测状态
 // ======================================================================
 
-type SoundKey = 'click' | 'select' | 'submit' | 'anti' | 'smartClick' | 'caw' | 'success' | 'unlockBeep';
+type SoundKey = 'click' | 'select' | 'submit' | 'anti' | 'smartClick' | 'caw' | 'success' | 'unlockBeep' | 'woodfish';
 
 class AudioManager {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private bgmGain: GainNode | null = null;
   private sfxGain: GainNode | null = null;
+  private compressor: DynamicsCompressorNode | null = null;
 
   // 预生成的 AudioBuffer（可重复播放）
   private buffers: Record<string, AudioBuffer | null> = {};
@@ -165,13 +166,22 @@ class AudioManager {
       this.masterGain.gain.value = 0.8;
       this.masterGain.connect(this.ctx.destination);
 
+      // 【音量修复】添加 DynamicsCompressorNode，自动限制峰值，避免多 buffer 叠加爆音
+      this.compressor = this.ctx.createDynamicsCompressor();
+      this.compressor.threshold.value = -10;
+      this.compressor.knee.value = 10;
+      this.compressor.ratio.value = 4;
+      this.compressor.attack.value = 0.003;
+      this.compressor.release.value = 0.1;
+      this.compressor.connect(this.masterGain);
+
       this.sfxGain = this.ctx.createGain();
-      this.sfxGain.gain.value = 0.7;
-      this.sfxGain.connect(this.masterGain);
+      this.sfxGain.gain.value = 0.55; // 从 0.7 降到 0.55，与首次解锁音量更接近
+      this.sfxGain.connect(this.compressor);
 
       this.bgmGain = this.ctx.createGain();
-      this.bgmGain.gain.value = 0.35;
-      this.bgmGain.connect(this.masterGain);
+      this.bgmGain.gain.value = 0.28; // 从 0.35 降到 0.28，让 BGM 更柔和
+      this.bgmGain.connect(this.compressor);
 
       // 预生成多个可复用的 AudioBuffer（替代 OscillatorNode）
       this.precreateBuffers();
@@ -243,6 +253,8 @@ class AudioManager {
     this.buffers.anti = createBeep(200, 0.3, 0.35, 'sawtooth');
     this.buffers.smartClick = createArpeggio([784, 988, 1175, 1568, 2093], 0.04, 0.3);
     this.buffers.caw = createBeep(250, 0.25, 0.35, 'sawtooth');
+    // 木鱼音效：低频 triangle 波，模拟真实木鱼声
+    this.buffers.woodfish = createBeep(200, 0.12, 0.45, 'triangle');
 
     // BGM 循环旋律的 buffer（整个 4 拍的简短旋律）
     const melody = [523, 659, 784, 659, 523, 784, 659, 523,
@@ -298,15 +310,15 @@ class AudioManager {
     const ok = this.ensureContext(true);
     if (!ok || !this.ctx || !this.sfxGain) return false;
 
-    // 2. 同步播放解锁 beep（AudioBufferSourceNode，iOS 最可靠）
-    //    同时播放 deferKey（如果有）
+    // 2. 同步播放解锁音效（AudioBufferSourceNode，iOS 最可靠）
+    //    【音量修复】只播 deferKey（不播 unlockBeep），避免多 buffer 叠加爆音
     try {
-      if (this.buffers.unlockBeep) {
-        this.playBuffer(this.buffers.unlockBeep, this.sfxGain, 0.5);
-      }
       if (deferKey && deferKey !== 'unlockBeep') {
         const buffer = this.buffers[deferKey];
-        if (buffer) this.playBuffer(buffer, this.sfxGain, 0.5);
+        if (buffer) this.playBuffer(buffer, this.sfxGain, 0.4);
+      } else if (this.buffers.unlockBeep) {
+        // 没有 deferKey 时才播 unlockBeep
+        this.playBuffer(this.buffers.unlockBeep, this.sfxGain, 0.4);
       }
     } catch { /* ignore */ }
 
@@ -320,10 +332,7 @@ class AudioManager {
         const p = this.ctx.resume();
         if (p && typeof p.then === 'function') {
           p.then(() => {
-            // resumed 之后再补播一次 unlock beep，确保 iOS 听到声音
-            if (this.buffers.unlockBeep && this.sfxGain) {
-              this.playBuffer(this.buffers.unlockBeep, this.sfxGain, 0.4);
-            }
+            // 【音量修复】不再补播 unlockBeep，避免叠加爆音
             this.markUnlocked();
           }).catch(() => { /* ignore */ });
         } else {
@@ -431,7 +440,7 @@ class AudioManager {
         if (p && typeof p.then === 'function') {
           p.then(() => {
             const buffer = this.buffers[key];
-            if (buffer && this.sfxGain) this.playBuffer(buffer, this.sfxGain, 0.7);
+            if (buffer && this.sfxGain) this.playBuffer(buffer, this.sfxGain, 0.55);
           }).catch(() => { /* ignore */ });
         }
       } catch { /* ignore */ }
@@ -440,7 +449,7 @@ class AudioManager {
 
     // 正常播放
     const buffer = this.buffers[key];
-    if (buffer) this.playBuffer(buffer, this.sfxGain, 0.7);
+    if (buffer) this.playBuffer(buffer, this.sfxGain, 0.55);
   }
 
   toggle(): boolean {

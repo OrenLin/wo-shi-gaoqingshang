@@ -7,9 +7,12 @@ import { calculateEQCoefficient, getUnlockedCount } from '../utils/eqTrajectory'
 import ReportHistory from '../components/profile/ReportHistory';
 import EQTrajectory from '../components/profile/EQTrajectory';
 import PersonalAdvice from '../components/profile/PersonalAdvice';
+import EQPlan from '../components/profile/EQPlan';
+import AnxietyQuiz from '../components/profile/AnxietyQuiz';
+import WoodfishZen from '../components/profile/WoodfishZen';
 import SurveyLink from '../components/ui/SurveyLink';
 
-type Tab = 'history' | 'trajectory' | 'advice';
+type Tab = 'history' | 'trajectory' | 'advice' | 'plan' | 'anxiety' | 'zen';
 
 export default function Profile() {
   const language = useI18n((s) => s.language);
@@ -25,9 +28,12 @@ export default function Profile() {
   const unlockedTitles = useMemo(() => getUnlockedCount(reports), [reports]);
 
   const tabs: { key: Tab; emoji: string; label: string }[] = [
-    { key: 'history', emoji: '📊', label: zh ? '报告历史' : 'Reports' },
-    { key: 'trajectory', emoji: '📈', label: zh ? '情商轨迹' : 'Trajectory' },
-    { key: 'advice', emoji: '💡', label: zh ? '个性化建议' : 'Advice' },
+    { key: 'history', emoji: '📊', label: zh ? '报告' : 'Reports' },
+    { key: 'trajectory', emoji: '📈', label: zh ? '轨迹' : 'Trajectory' },
+    { key: 'advice', emoji: '💡', label: zh ? '建议' : 'Advice' },
+    { key: 'plan', emoji: '📚', label: zh ? '计划' : 'Plan' },
+    { key: 'anxiety', emoji: '🧘', label: zh ? '急救' : 'Anxiety' },
+    { key: 'zen', emoji: '🪘', label: zh ? '木鱼' : 'Woodfish' },
   ];
 
   return (
@@ -85,29 +91,33 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Tab 切换 */}
-        <div className="flex gap-1.5 mb-4 bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] p-1.5">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => {
-                audioManager.userTapped();
-                audioManager.play('click');
-                setActiveTab(tab.key);
-              }}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl border-[2px] transition-all ${
-                activeTab === tab.key
-                  ? 'bg-amber-300 border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]'
-                  : 'bg-white border-transparent'
-              }`}
-              aria-pressed={activeTab === tab.key}
-            >
-              <span className="text-lg" aria-hidden="true">{tab.emoji}</span>
-              <span className={`text-[10px] font-black ${activeTab === tab.key ? 'text-[#1a1a2e]' : 'text-[#1a1a2e]/40'}`}>
-                {tab.label}
-              </span>
-            </button>
-          ))}
+        {/* Tab 切换 —— 横向滚动布局（6 个 Tab） */}
+        <div className="mb-4 bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] p-1.5">
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide" role="tablist">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                onClick={() => {
+                  audioManager.userTapped();
+                  audioManager.play('click');
+                  setActiveTab(tab.key);
+                }}
+                className={`flex-shrink-0 min-w-[58px] flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl border-[2px] transition-all ${
+                  activeTab === tab.key
+                    ? 'bg-amber-300 border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]'
+                    : 'bg-white border-transparent'
+                }`}
+                aria-pressed={activeTab === tab.key}
+              >
+                <span className="text-lg" aria-hidden="true">{tab.emoji}</span>
+                <span className={`text-[9px] font-black whitespace-nowrap ${activeTab === tab.key ? 'text-[#1a1a2e]' : 'text-[#1a1a2e]/40'}`}>
+                  {tab.label}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Tab 内容 */}
@@ -115,6 +125,9 @@ export default function Profile() {
           {activeTab === 'history' && <ReportHistory />}
           {activeTab === 'trajectory' && <EQTrajectory />}
           {activeTab === 'advice' && <PersonalAdvice />}
+          {activeTab === 'plan' && <EQPlan />}
+          {activeTab === 'anxiety' && <AnxietyQuiz />}
+          {activeTab === 'zen' && <WoodfishZen />}
         </div>
 
         {/* 问卷链接 */}
