@@ -100,9 +100,151 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @keyframes stripe-move {
   0% { background-position: 0 0; }
   100% { background-position: 40px 0; }
+}
+
+/* ============ 抽签工具专用动画 ============ */
+
+/* 竹筒摇动 */
+@keyframes divination-shake {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  8%  { transform: rotate(-4deg) translateY(-2px); }
+  16% { transform: rotate(4deg)  translateY(-1px); }
+  24% { transform: rotate(-3.5deg) translateY(-2px); }
+  32% { transform: rotate(3.5deg)  translateY(-1px); }
+  40% { transform: rotate(-3deg)   translateY(-2px); }
+  48% { transform: rotate(3deg)    translateY(-1px); }
+  56% { transform: rotate(-2deg)   translateY(-1px); }
+  64% { transform: rotate(2deg)    translateY(0); }
+  72% { transform: rotate(-1.5deg) translateY(0); }
+  80% { transform: rotate(1.5deg)  translateY(0); }
+  88% { transform: rotate(-0.5deg) translateY(0); }
+}
+.divination-shake {
+  animation: divination-shake 1.5s ease-in-out;
+}
+
+/* 签条抖动 */
+@keyframes divination-lots-jitter {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-0.5px, 0.5px); }
+}
+.divination-lots-jitter {
+  animation: divination-lots-jitter 0.15s ease-in-out infinite;
+}
+
+/* 中签升起 */
+@keyframes divination-lot-rise {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-22px); }
+}
+.divination-lot-rise {
+  animation: divination-lot-rise 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 0.2s;
+}
+
+/* 光晕脉冲 */
+@keyframes divination-glow {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+  40% { opacity: 1; transform: translate(-50%, 0) scale(1.2); }
+  100% { opacity: 0.3; transform: translate(-50%, 0) scale(1); }
+}
+.divination-glow {
+  animation: divination-glow 1.2s ease-out forwards;
+}
+
+/* 粒子上升 */
+@keyframes divination-particle {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  20% { opacity: 1; transform: translateY(-10px) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(0.3); }
+}
+.divination-particle {
+  animation: divination-particle 1.5s ease-out forwards;
+}
+
+/* 面板入场 */
+@keyframes divination-panel-enter {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.divination-panel-enter {
+  animation: divination-panel-enter 0.5s ease-out both;
+}
+
+/* 卷轴展开 */
+@keyframes divination-scroll-unfold {
+  from { opacity: 0; transform: scaleY(0.3) translateY(-20px); transform-origin: top; }
+  to { opacity: 1; transform: scaleY(1) translateY(0); transform-origin: top; }
+}
+.divination-scroll-unfold {
+  animation: divination-scroll-unfold 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 印章盖印 */
+@keyframes divination-seal-stamp {
+  0% { opacity: 0; transform: scale(2) rotate(-15deg); }
+  60% { opacity: 1; transform: scale(0.9) rotate(3deg); }
+  80% { transform: scale(1.05) rotate(-1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+.divination-seal-stamp {
+  animation: divination-seal-stamp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: 0.3s;
+}
+
+/* 文字淡入 */
+@keyframes divination-text-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.divination-text-fade {
+  animation: divination-text-fade 0.6s ease-out both;
+}
+
+/* 背景入场 */
+@keyframes divination-bg-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.divination-bg-enter {
+  animation: divination-bg-enter 1.2s ease-out both;
+}
+
+/* 提示脉冲 */
+@keyframes divination-hint-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+.divination-hint-pulse {
+  animation: divination-hint-pulse 2s ease-in-out infinite;
+}
+
+/* 呼吸效果 */
+@keyframes divination-breathe {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(90, 141, 94, 0.4); }
+  50% { transform: scale(1.03); box-shadow: 0 0 0 8px rgba(90, 141, 94, 0); }
+}
+.divination-breathe {
+  animation: divination-breathe 2.5s ease-in-out infinite;
+}
+
+/* 进度点弹跳 */
+@keyframes divination-dot-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-6px); opacity: 1; }
+}
+.divination-dot-bounce {
+  animation: divination-dot-bounce 0.6s ease-in-out infinite;
 }
 
 @keyframes spin-slow {
@@ -135,6 +277,14 @@ body {
 
 .animate-pop-in {
   animation: pop-in 500ms var(--squish-ease) both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 450ms var(--squish-ease) both;
+}
+
+.animate-page-enter {
+  animation: page-enter 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-pulse-glow {
@@ -247,7 +397,9 @@ a:focus-visible,
 
 /* 但保留弹出/进入动画（内容出现需要过渡，否则屏幕阅读器会错过） */
 .reduce-motion .animate-pop-in,
-.reduce-motion .animate-slide-down {
+.reduce-motion .animate-slide-down,
+.reduce-motion .animate-slide-in-right,
+.reduce-motion .animate-page-enter {
   animation-duration: 0.01ms !important;
 }
 

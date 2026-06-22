@@ -163,7 +163,7 @@ class AudioManager {
 
       this.ctx = new AC();
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.8;
+      this.masterGain.gain.value = 0.85;
       this.masterGain.connect(this.ctx.destination);
 
       // 【音量修复】添加 DynamicsCompressorNode，自动限制峰值，避免多 buffer 叠加爆音
@@ -176,11 +176,11 @@ class AudioManager {
       this.compressor.connect(this.masterGain);
 
       this.sfxGain = this.ctx.createGain();
-      this.sfxGain.gain.value = 0.55; // 从 0.7 降到 0.55，与首次解锁音量更接近
+      this.sfxGain.gain.value = 0.65; // 提升按键声，更清脆
       this.sfxGain.connect(this.compressor);
 
       this.bgmGain = this.ctx.createGain();
-      this.bgmGain.gain.value = 0.28; // 从 0.35 降到 0.28，让 BGM 更柔和
+      this.bgmGain.gain.value = 0.35; // 提升背景音乐，更明显但不抢戏
       this.bgmGain.connect(this.compressor);
 
       // 预生成多个可复用的 AudioBuffer（替代 OscillatorNode）
@@ -440,7 +440,7 @@ class AudioManager {
         if (p && typeof p.then === 'function') {
           p.then(() => {
             const buffer = this.buffers[key];
-            if (buffer && this.sfxGain) this.playBuffer(buffer, this.sfxGain, 0.55);
+            if (buffer && this.sfxGain) this.playBuffer(buffer, this.sfxGain, 0.65);
           }).catch(() => { /* ignore */ });
         }
       } catch { /* ignore */ }
@@ -449,7 +449,7 @@ class AudioManager {
 
     // 正常播放
     const buffer = this.buffers[key];
-    if (buffer) this.playBuffer(buffer, this.sfxGain, 0.55);
+    if (buffer) this.playBuffer(buffer, this.sfxGain, 0.65);
   }
 
   toggle(): boolean {

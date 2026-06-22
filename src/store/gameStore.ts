@@ -14,7 +14,7 @@ import type { SceneModule } from '../data/types';
 import { getOptionLevel } from '../data/levels';
 import { scoreCustomInput, scorePresetOption, type ScoringResult } from '../utils/scoring';
 
-export type PageName = 'home' | 'modules' | 'select' | 'game' | 'result' | 'report' | 'profile';
+export type PageName = 'home' | 'modules' | 'select' | 'game' | 'result' | 'report' | 'profile' | 'tools';
 
 // 每一次答题的记录
 export interface AnswerRecord {
@@ -95,6 +95,7 @@ interface GameState {
     percentile: number;      // 击败全球 XX% 玩家
   };
   getCompletedSceneIds: () => Set<string>;
+  getAllCompletedSceneIds: () => Set<string>;
 }
 
 // --- 击败百分比计算：基于合理的正态分布模拟 ---
@@ -380,6 +381,20 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
     const ids = new Set<string>();
     for (const s of moduleScenes) {
+      const cnt = map.get(s.id) ?? 0;
+      if (cnt >= s.questions.length) ids.add(s.id);
+    }
+    return ids;
+  },
+
+  // 【Bug 修复】新增全模块场景完成统计，避免跨模块切换时完成状态判断不一致
+  getAllCompletedSceneIds: () => {
+    const map = new Map<string, number>();
+    for (const a of get().answers) {
+      map.set(a.sceneId, (map.get(a.sceneId) ?? 0) + 1);
+    }
+    const ids = new Set<string>();
+    for (const s of scenes) {
       const cnt = map.get(s.id) ?? 0;
       if (cnt >= s.questions.length) ids.add(s.id);
     }

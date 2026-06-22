@@ -10,7 +10,7 @@ import { audioManager } from '../utils/audioManager';
 import { useI18n, pickLocalized } from '../i18n';
 
 export default function SceneSelect() {
-  const { selectScene, getCompletedSceneIds, setPage, consented, setConsented } = useGameStore();
+  const { selectScene, getAllCompletedSceneIds, setPage, consented, setConsented } = useGameStore();
   const currentModule = useGameStore((s) => s.currentModule);
   const language = useI18n((s) => s.language);
   const setLanguage = useI18n((s) => s.setLanguage);
@@ -27,7 +27,7 @@ export default function SceneSelect() {
   const [accept, setAccept] = useState(true);
   const [pendingScene, setPendingScene] = useState<{ scene: typeof scenes[0]; index: number } | null>(null);
 
-  const completedIds = getCompletedSceneIds();
+  const completedIds = getAllCompletedSceneIds();
   const doneCount = completedIds.size;
   const totalCount = scenes.length;
   const allDone = doneCount === totalCount;

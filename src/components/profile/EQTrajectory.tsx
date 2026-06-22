@@ -5,6 +5,21 @@ import { getReportHistory, type StoredReport } from '../../utils/reportStorage';
 import { calculateEQCoefficient, calculateTrend, getTitlesWithStatus, getUnlockedCount } from '../../utils/eqTrajectory';
 import { audioManager } from '../../utils/audioManager';
 
+// 最小二乘法线性回归 —— 用于成长曲线趋势预测
+function linearRegression(pts: { x: number; y: number }[]): { slope: number; intercept: number } {
+  const n = pts.length;
+  if (n < 2) return { slope: 0, intercept: pts[0]?.y ?? 0 };
+  const sumX = pts.reduce((s, p) => s + p.x, 0);
+  const sumY = pts.reduce((s, p) => s + p.y, 0);
+  const sumXY = pts.reduce((s, p) => s + p.x * p.y, 0);
+  const sumXX = pts.reduce((s, p) => s + p.x * p.x, 0);
+  const denom = n * sumXX - sumX * sumX;
+  if (Math.abs(denom) < 1e-9) return { slope: 0, intercept: sumY / n };
+  const slope = (n * sumXY - sumX * sumY) / denom;
+  const intercept = (sumY - slope * sumX) / n;
+  return { slope, intercept };
+}
+
 export default function EQTrajectory() {
   const language = useI18n((s) => s.language);
   const setPage = useGameStore((s) => s.setPage);
@@ -61,11 +76,64 @@ export default function EQTrajectory() {
   const innerW = chartWidth - padding.left - padding.right;
   const innerH = chartHeight - padding.top - padding.bottom;
 
-  const points = chartReports.map((r, i) => {
-    const x = padding.left + (chartReports.length === 1 ? innerW / 2 : (i / (chartReports.length - 1)) * innerW);
-    const y = padding.top + innerH - (r.averageScore / 100) * innerH;
-    return { x, y, report: r };
-  });
+  // 仅当数据点 ≥ 3 时启用趋势预测（延伸 2 个预测点）
+  const showPrediction = chartReports.length >= 3;
+  const predictCount = showPrediction ? 2 : 0;
+  const totalSlots = Math.max(chartReports.length + predictCount, 1);
+
+  const xForIndex = (i: number) =>
+    padding.left + (totalSlots === 1 ? innerW / 2 : (i / (totalSlots - 1)) * innerW);
+  const yForScore = (score: number) =>
+    padding.top + innerH - (Math.max(0, Math.min(100, score)) / 100) * innerH;
+
+  const points = chartReports.map((r, i) => ({
+    x: xForIndex(i),
+    y: yForScore(r.averageScore),
+    report: r,
+  }));
+
+  // 线性回归拟合（基于 index ↔ score）
+  const regressionInput = chartReports.map((r, i) => ({ x: i, y: r.averageScore }));
+  const { slope, intercept } = linearRegression(regressionInput);
+
+  // 预测点（夹紧到 0~100）
+  const predictionPoints = showPrediction
+    ? Array.from({ length: predictCount }, (_, k) => {
+        const idx = chartReports.length + k;
+        const predictedScore = Math.max(0, Math.min(100, slope * idx + intercept));
+        return {
+          x: xForIndex(idx),
+          y: yForScore(predictedScore),
+          predictedScore: Math.round(predictedScore),
+          idx,
+        };
+      })
+    : [];
+
+  // 趋势线（从首个实际点延伸到最后一个预测点）
+  const trendStartIdx = 0;
+  const trendEndIdx = chartReports.length - 1 + predictCount;
+  const trendLine = {
+    x1: xForIndex(trendStartIdx),
+    y1: yForScore(Math.max(0, Math.min(100, intercept))),
+    x2: xForIndex(trendEndIdx),
+    y2: yForScore(Math.max(0, Math.min(100, slope * trendEndIdx + intercept))),
+  };
+
+  // 预测区间带状（±8 分的半透明带，仅预测段）
+  const bandWidth = 8;
+  const lastActual = points[points.length - 1];
+  const lastPredict = predictionPoints[predictionPoints.length - 1];
+  const predictBand = showPrediction && lastActual && lastPredict
+    ? {
+        x1: lastActual.x,
+        y1Top: yForScore(Math.max(0, Math.min(100, (slope * (chartReports.length - 1) + intercept) + bandWidth))),
+        y1Bot: yForScore(Math.max(0, Math.min(100, (slope * (chartReports.length - 1) + intercept) - bandWidth))),
+        x2: lastPredict.x,
+        y2Top: yForScore(Math.max(0, Math.min(100, (slope * trendEndIdx + intercept) + bandWidth))),
+        y2Bot: yForScore(Math.max(0, Math.min(100, (slope * trendEndIdx + intercept) - bandWidth))),
+      }
+    : null;
 
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
@@ -105,10 +173,28 @@ export default function EQTrajectory() {
       {/* 成长曲线 SVG */}
       {reports.length >= 2 && (
         <div className="bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] p-4 animate-pop-in" style={{ animationDelay: '0.1s' }}>
-          <div className="text-xs font-black text-[#1a1a2e]/60 mb-2">
-            {zh ? '📊 成长曲线' : '📊 Growth Curve'}
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs font-black text-[#1a1a2e]/60">
+              {zh ? '📊 成长曲线' : '📊 Growth Curve'}
+            </div>
+            {showPrediction && (
+              <div className="text-[10px] font-black text-purple-600 bg-purple-50 rounded-full px-2 py-0.5 border border-purple-200 flex items-center gap-1">
+                <span aria-hidden="true">🔮</span>
+                {zh ? '趋势预测' : 'Forecast'}
+              </div>
+            )}
           </div>
           <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" role="img" aria-label={zh ? '情商成长曲线' : 'EQ growth curve'}>
+            <defs>
+              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#6366f1" />
+                <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="predictBandGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#a855f7" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#a855f7" stopOpacity="0.05" />
+              </linearGradient>
+            </defs>
             {/* Y 轴刻度线 */}
             {[0, 25, 50, 75, 100].map((v) => {
               const y = padding.top + innerH - (v / 100) * innerH;
@@ -119,6 +205,39 @@ export default function EQTrajectory() {
                 </g>
               );
             })}
+            {/* 预测区间带状（仅预测段） */}
+            {predictBand && (
+              <path
+                d={`M ${predictBand.x1} ${predictBand.y1Top} L ${predictBand.x2} ${predictBand.y2Top} L ${predictBand.x2} ${predictBand.y2Bot} L ${predictBand.x1} ${predictBand.y1Bot} Z`}
+                fill="url(#predictBandGradient)"
+              />
+            )}
+            {/* 趋势线（实际段实线 + 预测段虚线） */}
+            {showPrediction && (
+              <>
+                {/* 实际段趋势线（淡） */}
+                <line
+                  x1={trendLine.x1}
+                  y1={trendLine.y1}
+                  x2={points[points.length - 1].x}
+                  y2={points[points.length - 1].y}
+                  stroke="#a855f7"
+                  strokeWidth="1"
+                  opacity="0.35"
+                />
+                {/* 预测段趋势线（虚线） */}
+                <line
+                  x1={points[points.length - 1].x}
+                  y1={points[points.length - 1].y}
+                  x2={trendLine.x2}
+                  y2={trendLine.y2}
+                  stroke="#a855f7"
+                  strokeWidth="1.8"
+                  strokeDasharray="4 3"
+                  opacity="0.7"
+                />
+              </>
+            )}
             {/* 折线 */}
             <path d={pathD} fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             {/* 折线下方渐变填充 */}
@@ -129,12 +248,6 @@ export default function EQTrajectory() {
                 opacity="0.2"
               />
             )}
-            <defs>
-              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#6366f1" />
-                <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-              </linearGradient>
-            </defs>
             {/* 数据点 */}
             {points.map((p, i) => (
               <g key={i}>
@@ -152,6 +265,26 @@ export default function EQTrajectory() {
                 {/* X 轴日期标签 */}
                 <text x={p.x} y={chartHeight - 8} textAnchor="middle" fontSize="7" fill="#1a1a2e" opacity="0.4" fontWeight="bold">
                   {formatDate(p.report.timestamp)}
+                </text>
+              </g>
+            ))}
+            {/* 预测点（虚线圆 + 预测分值） */}
+            {predictionPoints.map((p, i) => (
+              <g key={`pred-${i}`}>
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={3.5}
+                  fill="#faf5ff"
+                  stroke="#a855f7"
+                  strokeWidth="1.8"
+                  strokeDasharray="2 1.5"
+                />
+                <text x={p.x} y={p.y - 7} textAnchor="middle" fontSize="7.5" fill="#a855f7" fontWeight="bold">
+                  {p.predictedScore}
+                </text>
+                <text x={p.x} y={chartHeight - 8} textAnchor="middle" fontSize="6.5" fill="#a855f7" opacity="0.7" fontWeight="bold">
+                  {zh ? '预测' : 'FCST'}
                 </text>
               </g>
             ))}
@@ -179,6 +312,15 @@ export default function EQTrajectory() {
               </g>
             )}
           </svg>
+          {/* 预测说明 */}
+          {showPrediction && (
+            <div className="mt-2 text-[10px] font-bold text-[#1a1a2e]/45 leading-relaxed flex items-center gap-1.5">
+              <span aria-hidden="true">🔮</span>
+              {zh
+                ? '基于最小二乘法线性回归预测未来 2 次测评趋势，仅供参考'
+                : 'Linear-regression forecast for next 2 assessments, for reference only'}
+            </div>
+          )}
         </div>
       )}
 

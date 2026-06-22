@@ -11,6 +11,7 @@ import Result from './pages/Result';
 import FinalReport from './pages/FinalReport';
 import SceneModules from './pages/SceneModules';
 import Profile from './pages/Profile';
+import Tools from './pages/Tools';
 import BottomNav from './components/ui/BottomNav';
 import { AccessibilityProvider } from './components/a11y/AccessibilityProvider';
 import A11yControlPanel from './components/a11y/A11yControlPanel';
@@ -49,6 +50,7 @@ export default function App() {
       case 'result':   return <Result />;
       case 'report':   return <FinalReport />;
       case 'profile':  return <Profile />;
+      case 'tools':    return <Tools />;
       default:         return <Home />;
     }
   };
@@ -63,7 +65,9 @@ export default function App() {
       <div className="App" lang={language === 'zh' ? 'zh-CN' : 'en'}>
         {/* 主内容区域 — role="main" + id="main-content" 是 skip-link 的跳转目标 */}
         <main id="main-content" role="main" className="pb-20">
-          {renderPage()}
+          <div key={currentPage} className="animate-page-enter">
+            {renderPage()}
+          </div>
         </main>
 
         {/* 底部导航栏 */}

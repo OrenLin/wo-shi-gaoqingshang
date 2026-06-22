@@ -204,31 +204,6 @@ export default function Home() {
           {codename.trim().length > 0 ? t('home.startWithName') : t('home.startAnon')}
         </MangaButton>
 
-        {/* 地狱模式入口 */}
-        <button
-          aria-label={t('report.hellMode')}
-          onClick={() => {
-            audioManager.userTapped();
-            audioManager.play('caw');
-            if (!consented) {
-              setConsentOpen(true);
-              return;
-            }
-            const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '';
-            setCodename(name);
-            const randomIdx = Math.floor(Math.random() * 3);
-            selectScene(randomIdx, { hellMode: true });
-          }}
-          className="mt-3 w-full !py-4 !text-sm inline-flex items-center justify-center gap-2 bg-gradient-to-r from-rose-500 via-red-500 to-orange-500 text-white font-black rounded-2xl border-[3px] border-[#1a1a2e] shadow-[4px_4px_0_0_#1a1a2e] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
-        >
-          <span aria-hidden="true" className="text-2xl animate-bounce" style={{ animationDuration: '1s' }}>🔥</span>
-          {t('report.hellMode')}
-        </button>
-
-        <div className="mt-3 text-center text-[10px] font-bold text-[#1a1a2e]/60">
-          {t('report.hellModeDesc')}
-        </div>
-
         <div className="mt-3 text-center">
           <div className="inline-flex items-center gap-2 bg-white/80 border-[2px] border-[#1a1a2e] rounded-full px-4 py-1.5 text-xs font-black text-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]">
             {t('home.hint')}
