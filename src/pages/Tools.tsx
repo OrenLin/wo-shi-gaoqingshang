@@ -16,9 +16,6 @@ export default function Tools() {
   const zh = language === 'zh';
   const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
 
-  // 抽签工具全屏沉浸式渲染，不走 ToolWrapper
-  if (activeTool === 'divination') return <Divination />;
-
   const handleBack = () => {
     audioManager.userTapped();
     audioManager.play('click');
@@ -28,6 +25,10 @@ export default function Tools() {
       setPage('home');
     }
   };
+
+  // 抽签工具全屏沉浸式渲染，不走 ToolWrapper
+  // 传入 onBack 回调，由 Tools 控制 activeTool 状态（修复返回按钮无效）
+  if (activeTool === 'divination') return <Divination onBack={handleBack} />;
 
   // 渲染具体工具页面
   if (activeTool === 'philosophy') return <ToolWrapper title={zh ? '🧠 哲学思辨' : '🧠 Philosophy'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><PhilosophyInsight /></ToolWrapper>;

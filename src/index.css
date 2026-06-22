@@ -247,6 +247,31 @@ body {
   animation: divination-dot-bounce 0.6s ease-in-out infinite;
 }
 
+/* 竹叶飘落（风吹竹叶飘过背景） */
+@keyframes divination-leaf-drift {
+  0% {
+    transform: translate(0, 0) rotate(var(--leaf-rotate, 0deg));
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(calc(var(--leaf-drift, 30px) * 0.5), 50vh) rotate(calc(var(--leaf-rotate, 0deg) + 180deg));
+    opacity: 0.5;
+  }
+  92% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(var(--leaf-drift, 30px), 110vh) rotate(calc(var(--leaf-rotate, 0deg) + 360deg));
+    opacity: 0;
+  }
+}
+.divination-leaf-drift {
+  animation: divination-leaf-drift linear infinite;
+}
+
 @keyframes spin-slow {
   from { transform: rotate(0); }
   to { transform: rotate(360deg); }
