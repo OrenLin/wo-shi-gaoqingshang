@@ -145,6 +145,10 @@ body {
   animation: spin-slow 20s linear infinite;
 }
 
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
 /* ============ 漫画速度线背景 ============ */
 .manga-stripes {
   background-image: repeating-linear-gradient(

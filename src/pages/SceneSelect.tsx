@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { scenes } from '../data';
+import { getScenesByModule, getModuleById } from '../data';
 import SceneCard from '../components/scene/SceneCard';
 import ImmersiveScenePreview from '../components/scene/ImmersiveScenePreview';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
@@ -9,12 +9,16 @@ import { audioManager } from '../utils/audioManager';
 import { useI18n, pickLocalized } from '../i18n';
 
 export default function SceneSelect() {
-  const { selectScene, reset, getCompletedSceneIds, setPage } = useGameStore();
+  const { selectScene, getCompletedSceneIds, setPage } = useGameStore();
+  const currentModule = useGameStore((s) => s.currentModule);
   const language = useI18n((s) => s.language);
   const setLanguage = useI18n((s) => s.setLanguage);
   const t = useI18n((s) => s.t);
   const tLocal = (field: string | { zh: string; en: string } | undefined) =>
     pickLocalized(field, language);
+
+  const scenes = getScenesByModule(currentModule);
+  const currentModConfig = getModuleById(currentModule);
 
   const [previewScene, setPreviewScene] = useState<{ scene: typeof scenes[0]; index: number } | null>(null);
 
@@ -32,7 +36,7 @@ export default function SceneSelect() {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden py-8 px-4"
+      className="min-h-screen relative overflow-hidden pt-8 pb-24 px-4"
       style={{ background: 'linear-gradient(180deg, #fef3c7 0%, #fde68a 55%, #fbbf24 100%)' }}
     >
       <div className="absolute inset-0 manga-stripes opacity-30 pointer-events-none" />
@@ -49,11 +53,16 @@ export default function SceneSelect() {
 
         {/* 顶栏 */}
         <div className="flex items-start justify-between mb-6">
-          <MangaButton variant="secondary" onClick={reset} className="!py-2 !px-4 !text-sm">
+          <MangaButton variant="secondary" onClick={() => setPage('modules')} className="!py-2 !px-4 !text-sm">
             {t('select.home')}
           </MangaButton>
 
           <div className="flex items-center gap-2">
+            {currentModConfig && (
+              <div className="bg-white text-[#1a1a2e] text-xs font-black rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24]">
+                {currentModConfig.emoji} {tLocal(currentModConfig.title)}
+              </div>
+            )}
             <div className="bg-[#1a1a2e] text-white text-xs font-black rounded-full px-3 py-1 border-[3px] border-[#1a1a2e]">
               {t('select.progress')} {doneCount}{t('common.of')}{totalCount}
             </div>

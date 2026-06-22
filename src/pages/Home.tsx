@@ -53,7 +53,7 @@ export default function Home() {
     }
     const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '';
     setCodename(name);
-    setPage('select');
+    setPage('modules');
   };
 
   const handleConsentConfirm = () => {
@@ -62,12 +62,12 @@ export default function Home() {
     setConsentOpen(false);
     const name = codename.trim().length > 0 ? codename.trim().slice(0, 20) : '';
     setCodename(name);
-    setPage('select');
+    setPage('modules');
   };
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden flex flex-col items-center justify-between py-12 px-5"
+      className="min-h-screen relative overflow-hidden flex flex-col items-center justify-between py-12 px-5 pb-24"
       style={{ background: 'linear-gradient(180deg, #fef3c7 0%, #fde68a 55%, #fbbf24 100%)' }}
     >
       <div className="absolute inset-0 manga-stripes opacity-30 pointer-events-none" />

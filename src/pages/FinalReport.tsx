@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOptionLevel, levelGradient, bonusReco } from '../data/levels';
-import { scenes } from '../data';
+import { scenes, getScenesByModule } from '../data';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 import ScoreBoard from '../components/ui/ScoreBoard';
@@ -17,14 +17,19 @@ export default function FinalReport() {
     selectScene,
     maxStreakAnti,
     maxStreakLow,
+    setPage,
   } = useGameStore();
+  const currentModule = useGameStore((s) => s.currentModule);
   const [show, setShow] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const report = getFinalReport();
 
-  // 基于答题分布计算 5 个情商维度得分
+  // 基于答题分布计算 5 个情商维度得分（仅统计当前模块的答题记录）
   const eqDims = useMemo(() => {
-    const allAnswers = report.scenes.flatMap((sr) => sr.answers);
+    const moduleSceneIds = new Set(getScenesByModule(currentModule).map((s) => s.id));
+    const allAnswers = report.scenes
+      .flatMap((sr) => sr.answers)
+      .filter((a) => moduleSceneIds.has(a.sceneId));
     if (allAnswers.length === 0) {
       return [];
     }
@@ -84,7 +89,7 @@ export default function FinalReport() {
         value: Math.min(100, Math.round(report.averageScore + (counts.god ?? 0) * 5)),
       },
     ];
-  }, [report]);
+  }, [report, currentModule]);
 
   const levelName = pickLocalized(report.level.name, language);
   const levelTag = pickLocalized(report.level.tag, language);
@@ -159,7 +164,7 @@ export default function FinalReport() {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden py-8 px-4"
+      className="min-h-screen relative overflow-hidden pt-8 pb-24 px-4"
       style={{
         background:
           'linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fbbf24 100%)',
@@ -177,7 +182,7 @@ export default function FinalReport() {
 
       <div className="relative z-20 max-w-2xl mx-auto mb-4 flex items-center justify-between">
         <button
-          onClick={() => reset()}
+          onClick={() => setPage('modules')}
           className="inline-flex items-center gap-1 bg-white border-[3px] border-[#1a1a2e] rounded-full px-3 py-1.5 shadow-[3px_3px_0_0_#1a1a2e] font-black text-sm text-[#1a1a2e] transition-transform active:scale-95 hover:scale-105"
         >
           {t('select.home')}

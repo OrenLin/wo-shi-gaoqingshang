@@ -9,11 +9,12 @@
 // ============================================================
 import { create } from 'zustand';
 import type { Scene, Level } from '../data/types';
-import { scenes, getSceneById } from '../data';
+import { scenes, getSceneById, getScenesByModule } from '../data';
+import type { SceneModule } from '../data/types';
 import { getOptionLevel } from '../data/levels';
 import { scoreCustomInput, scorePresetOption, type ScoringResult } from '../utils/scoring';
 
-export type PageName = 'home' | 'select' | 'game' | 'result' | 'report';
+export type PageName = 'home' | 'modules' | 'select' | 'game' | 'result' | 'report' | 'profile';
 
 // 每一次答题的记录
 export interface AnswerRecord {
@@ -47,6 +48,9 @@ export interface HiddenAchievement {
 interface GameState {
   currentPage: PageName;
   setPage: (page: PageName) => void;
+
+  currentModule: SceneModule;
+  selectModule: (moduleId: SceneModule) => void;
 
   codename: string;
   setCodename: (name: string) => void;
@@ -124,6 +128,9 @@ function estimatePercentile(avg: number): number {
 export const useGameStore = create<GameState>((set, get) => ({
   currentPage: 'home',
   setPage: (page) => set({ currentPage: page }),
+
+  currentModule: 'eq-challenge',
+  selectModule: (moduleId) => set({ currentModule: moduleId, currentPage: 'select', currentSceneIndex: 0, currentQuestionIndex: 0 }),
 
   codename: '',
   setCodename: (name) => set({ codename: name }),
@@ -240,13 +247,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   goToNextScene: () => {
-    const { currentSceneIndex, getCompletedSceneIds } = get();
+    const { currentSceneIndex, currentModule, getCompletedSceneIds } = get();
+    const moduleScenes = getScenesByModule(currentModule);
     const completed = getCompletedSceneIds();
     let nextIndex = currentSceneIndex + 1;
-    while (nextIndex < scenes.length && completed.has(scenes[nextIndex].id)) {
+    while (nextIndex < moduleScenes.length && completed.has(moduleScenes[nextIndex].id)) {
       nextIndex++;
     }
-    if (nextIndex >= scenes.length) {
+    if (nextIndex >= moduleScenes.length) {
       set({ currentPage: 'report' });
     } else {
       set({ currentSceneIndex: nextIndex, currentQuestionIndex: 0, currentPage: 'select' });
@@ -268,10 +276,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       achieved: new Set(),
     }),
 
-  getCurrentScene: () => scenes[get().currentSceneIndex] ?? null,
+  getCurrentScene: () => {
+    const moduleScenes = getScenesByModule(get().currentModule);
+    return moduleScenes[get().currentSceneIndex] ?? null;
+  },
 
   getCurrentQuestion: () => {
-    const s = scenes[get().currentSceneIndex];
+    const moduleScenes = getScenesByModule(get().currentModule);
+    const s = moduleScenes[get().currentSceneIndex];
     if (!s) return null;
     const qi = Math.min(get().currentQuestionIndex, s.questions.length - 1);
     return { questionIndex: qi, question: s.questions[qi] };
@@ -298,7 +310,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   getFinalReport: () => {
-    const completed = scenes
+    const moduleScenes = getScenesByModule(get().currentModule);
+    const completed = moduleScenes
       .map((s) => get().getCompletedSceneResult(s.id))
       .filter((r): r is SceneResult => !!r);
     if (completed.length === 0) {
@@ -329,12 +342,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   getCompletedSceneIds: () => {
+    const moduleScenes = getScenesByModule(get().currentModule);
     const map = new Map<string, number>();
     for (const a of get().answers) {
       map.set(a.sceneId, (map.get(a.sceneId) ?? 0) + 1);
     }
     const ids = new Set<string>();
-    for (const s of scenes) {
+    for (const s of moduleScenes) {
       const cnt = map.get(s.id) ?? 0;
       if (cnt >= s.questions.length) ids.add(s.id);
     }

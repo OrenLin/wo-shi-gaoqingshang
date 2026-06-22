@@ -72,3 +72,16 @@ export interface Level {
   socialCopy: string | Localized;
   recos: Recommendation[];   // 段位精准推荐：书+影
 }
+
+// ---------- 场景模块 ----------
+export type SceneModule = 'eq-challenge' | 'academic';
+
+export interface ModuleConfig {
+  id: SceneModule;
+  title: string | Localized;
+  emoji: string;
+  description: string | Localized;
+  bgColor: string;       // Tailwind 渐变色类
+  accentColor: string;
+  scenes: Scene[];
+}

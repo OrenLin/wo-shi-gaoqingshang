@@ -9,6 +9,9 @@ import SceneSelect from './pages/SceneSelect';
 import Game from './pages/Game';
 import Result from './pages/Result';
 import FinalReport from './pages/FinalReport';
+import SceneModules from './pages/SceneModules';
+import Profile from './pages/Profile';
+import BottomNav from './components/ui/BottomNav';
 import { AccessibilityProvider } from './components/a11y/AccessibilityProvider';
 import A11yControlPanel from './components/a11y/A11yControlPanel';
 
@@ -40,10 +43,12 @@ export default function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':     return <Home />;
+      case 'modules':  return <SceneModules />;
       case 'select':   return <SceneSelect />;
       case 'game':     return <Game />;
       case 'result':   return <Result />;
       case 'report':   return <FinalReport />;
+      case 'profile':  return <Profile />;
       default:         return <Home />;
     }
   };
@@ -57,9 +62,12 @@ export default function App() {
     <AccessibilityProvider>
       <div className="App" lang={language === 'zh' ? 'zh-CN' : 'en'}>
         {/* 主内容区域 — role="main" + id="main-content" 是 skip-link 的跳转目标 */}
-        <main id="main-content" role="main">
+        <main id="main-content" role="main" className="pb-20">
           {renderPage()}
         </main>
+
+        {/* 底部导航栏 */}
+        <BottomNav />
 
         {/* Vercel Analytics：自动统计访问者与页面浏览 */}
         <Analytics />
