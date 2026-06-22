@@ -186,6 +186,10 @@ export default function Result() {
         <div className="space-y-3">
           {sceneFinished ? (
             <>
+              {/* 已通关徽章 */}
+              <div className="bg-gradient-to-r from-emerald-400 to-teal-400 text-[#1a1a2e] font-black text-center py-3 rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] animate-pop-in">
+                <span className="text-lg">✅ {t('result.sceneCleared')}</span>
+              </div>
               {hasNext ? (
                 <MangaButton variant="primary" onClick={() => { audioManager.userTapped(); audioManager.play('click'); goToNextScene(); }} className="w-full !py-5 !text-xl">
                   <span className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>🚀</span>
@@ -196,6 +200,14 @@ export default function Result() {
                   <span className="text-2xl">🎉</span> {t('result.viewFinal')}
                 </MangaButton>
               )}
+              {/* 再次挑战本场景 */}
+              <MangaButton variant="secondary" onClick={() => {
+                audioManager.userTapped();
+                audioManager.play('click');
+                setPage('select');
+              }} className="w-full !py-3 !text-sm">
+                🔄 {t('result.retryScene')}
+              </MangaButton>
             </>
           ) : (
             <MangaButton variant="primary" onClick={() => { audioManager.userTapped(); audioManager.play('click'); setPage('game'); }} className="w-full !py-5 !text-xl">

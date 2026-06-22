@@ -497,6 +497,18 @@ export default function FinalReport() {
           <MangaButton variant="secondary" aria-label={t('report.retry')} onClick={reset} className="w-full !py-5 !text-xl">
             {t('report.retry')}
           </MangaButton>
+
+          {/* 解锁其他场景 / 返回场景列表 */}
+          <MangaButton
+            variant="secondary"
+            aria-label={t('result.unlockMore')}
+            onClick={() => {
+              setPage('select');
+            }}
+            className="w-full !py-4 !text-base"
+          >
+            🔓 {t('result.unlockMore')}
+          </MangaButton>
         </div>
 
         {/* 问卷反馈链接 */}

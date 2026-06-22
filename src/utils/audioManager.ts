@@ -68,6 +68,14 @@ class AudioManager {
         if (!this.unlocked && this.unlockAttempts < 3) {
           this.unlockByUserGesture().catch(() => { /* ignore */ });
         }
+        // 【iOS 修复】即已解锁，每次手势也确保 context 处于 running 状态
+        // 因为 iOS 切后台/锁屏后 context 可能被自动 suspend
+        if (this.unlocked && this.ctx && this.ctx.state !== 'running') {
+          try {
+            const p = this.ctx.resume();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          } catch { /* ignore */ }
+        }
       };
       this.persistentHandlers.push(() =>
         document.removeEventListener(ev, handler, { capture: true } as any));
@@ -86,15 +94,41 @@ class AudioManager {
       document.addEventListener('WeixinJSBridgeReady', wxHandler as any, { once: true });
     }
 
-    // 页面可见性恢复：从后台切回时尝试 resume
+    // 页面可见性恢复：从后台切回时尝试 resume + 重启 BGM
+    // 【iOS 关键修复】iOS Safari 切后台会暂停 AudioContext 和 setInterval
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         if (this.ctx && this.ctx.state === 'suspended') {
           const p = this.ctx.resume();
           if (p && typeof p.catch === 'function') p.catch(() => {});
         }
+        // 重启 BGM（如果应该播放但 timer 已死）
+        if (this.unlocked && !this.muted && this.bgmTimer === null) {
+          setTimeout(() => this.startBGM(), 200);
+        }
       }
     });
+
+    // 【iOS 修复】窗口获得焦点时也尝试恢复
+    window.addEventListener('focus', () => {
+      if (this.unlocked && this.ctx && this.ctx.state !== 'running') {
+        try {
+          const p = this.ctx.resume();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        } catch { /* ignore */ }
+      }
+      if (this.unlocked && !this.muted && this.bgmTimer === null) {
+        setTimeout(() => this.startBGM(), 100);
+      }
+    });
+
+    // 【iOS 修复】BGM 健康检查：每 10 秒检查一次 BGM 是否还在播放
+    // 如果 timer 死了但应该播放，重启它
+    setInterval(() => {
+      if (this.unlocked && !this.muted && this.bgmTimer === null && this.ctx?.state === 'running') {
+        this.startBGM();
+      }
+    }, 10000);
 
     // 暴露调试接口
     if (typeof window !== 'undefined') {

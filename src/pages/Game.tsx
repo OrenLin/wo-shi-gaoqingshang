@@ -267,12 +267,30 @@ export default function Game() {
                 badgeText={t('game.toggleCustom')}
               />
             ) : (
-              <OptionList
-                options={shuffledOptions.length > 0 ? shuffledOptions : question.options}
-                selectedId={selectedOption}
-                onSelect={setSelectedOption}
-                renderContent={(opt) => pickLocalized(opt.content, language)}
-              />
+              <>
+                <OptionList
+                  options={shuffledOptions.length > 0 ? shuffledOptions : question.options}
+                  selectedId={selectedOption}
+                  onSelect={setSelectedOption}
+                  renderContent={(opt) => pickLocalized(opt.content, language)}
+                />
+                {/* 选项底部"自由发挥"按钮 —— 更便捷的入口 */}
+                {question.allowCustomInput !== false && (
+                  <button
+                    onClick={() => {
+                      audioManager.userTapped();
+                      audioManager.play('click');
+                      setUseCustom(true);
+                      setSelectedOption(null);
+                    }}
+                    className="mt-3 w-full p-3 rounded-2xl border-[3px] border-dashed border-[#1a1a2e]/50 bg-white/40 hover:bg-white/70 hover:border-[#1a1a2e] transition-all text-[#1a1a2e]/70 hover:text-[#1a1a2e] font-bold text-sm flex items-center justify-center gap-2"
+                    aria-label={t('game.toggleCustom')}
+                  >
+                    <span className="text-base">✍️</span>
+                    <span>{language === 'zh' ? '我有更好的回应 · 自由发挥' : 'I have a better response · Freestyle'}</span>
+                  </button>
+                )}
+              </>
             )}
           </div>
 

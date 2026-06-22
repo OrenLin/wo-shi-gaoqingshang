@@ -23,7 +23,7 @@ const zh: Dict = {
   'home.hint': '⭐ 多个场景 · 每题多选项 · 解锁你的段位',
   'home.guide': '👇 看看你是 情商之神 还是 社交杀手',
   'home.author': '✏️ 作者 · 森 SEN',
-  'home.version': 'v1.5.0 · 2026',
+  'home.version': 'v1.6.0 · 2026',
   'home.loading1': '正在加载社死现场…',
   'home.loading2': '正在收集七大姑八大姨的灵魂拷问…',
   'home.loading3': '正在预热你的嘴替…',
@@ -79,6 +79,9 @@ const zh: Dict = {
   'result.scene': '💫 场景',
   'result.beatGlobal': '🌍 已超越全球',
   'result.beatGlobalPlayers': '的玩家',
+  'result.sceneCleared': '本场景已通关！可再次挑战刷分',
+  'result.retryScene': '再次挑战本场景',
+  'result.unlockMore': '🔓 解锁其他场景',
 
   // ----- Final Report -----
   'report.allDone': '🏆 全部场景通关！',
@@ -149,7 +152,7 @@ const en: Dict = {
   'home.hint': '⭐ Multiple scenes · Several options each · Discover your rank',
   'home.guide': '👇 Are you an EQ God or a Social Killer?',
   'home.author': '✏️ By · SEN',
-  'home.version': 'v1.5.0 · 2026',
+  'home.version': 'v1.6.0 · 2026',
   'home.loading1': 'Loading social-death scenarios…',
   'home.loading2': 'Collecting soul-searching questions from aunties…',
   'home.loading3': 'Warming up your social retort…',
@@ -205,6 +208,9 @@ const en: Dict = {
   'result.scene': '💫 Scene',
   'result.beatGlobal': '🌍 Beat',
   'result.beatGlobalPlayers': 'of players worldwide',
+  'result.sceneCleared': 'Scene Cleared! Retry to beat your score',
+  'result.retryScene': 'Retry This Scene',
+  'result.unlockMore': '🔓 Unlock More Scenes',
 
   // ----- Final Report -----
   'report.allDone': '🏆 All Scenes Cleared!',
