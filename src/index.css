@@ -91,8 +91,8 @@ body {
 }
 
 @keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(40px) rotate(-3deg); }
-  to { opacity: 1; transform: translateX(0) rotate(0); }
+  from { opacity: 0; transform: translateX(24px) scale(0.98); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 @keyframes slide-in-up {
@@ -280,7 +280,7 @@ body {
 }
 
 .animate-slide-in-right {
-  animation: slide-in-right 450ms var(--squish-ease) both;
+  animation: slide-in-right 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-page-enter {

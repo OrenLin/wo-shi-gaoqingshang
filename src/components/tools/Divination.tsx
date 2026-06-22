@@ -2,9 +2,10 @@
 // Divination — 沉浸式抽签减压工具
 // 设计理念：进入禅意空间，与 App 漫画风格形成反差
 // 布局：竖屏上下分栏（竹筒 38% + 解签面板 62%）
+// 使用 min-h-screen 而非 fixed，避免 stacking context 问题
 // ============================================================
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useI18n } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
 import { audioManager } from '../../utils/audioManager';
@@ -28,31 +29,52 @@ export default function Divination() {
   const [currentLot, setCurrentLot] = useState<DivinationLot | null>(null);
   const [drawCount, setDrawCount] = useState(0);
   const [karma, setKarma] = useState(0);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // 清理所有定时器（组件卸载时）
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((t) => clearTimeout(t));
+    timersRef.current = [];
+  }, []);
 
   useEffect(() => {
     setDrawCount(getTodayDrawCount());
-    // 缘分 = 历史抽签次数
     try {
       const history = JSON.parse(localStorage.getItem('eq_divination_history') || '[]');
       setKarma(history.length);
     } catch {}
-  }, []);
+    return clearTimers;
+  }, [clearTimers]);
 
   const handleDraw = useCallback(() => {
     if (phase === 'shaking' || phase === 'revealing') return;
 
     audioManager.userTapped();
     audioManager.play('click');
+
+    // 如果已抽过签，先重置到 idle 再开始新一轮（让动画有过渡）
+    if (phase === 'revealed') {
+      setCurrentLot(null);
+      setPhase('idle');
+      // 短暂延迟后开始摇签
+      const t0 = setTimeout(() => {
+        audioManager.play('click');
+        setPhase('shaking');
+      }, 200);
+      timersRef.current.push(t0);
+      return;
+    }
+
     setPhase('shaking');
 
     // 摇签 1.5s
-    setTimeout(() => {
+    const t1 = setTimeout(() => {
       const lot = drawRandomLot();
       setCurrentLot(lot);
       setPhase('revealing');
 
       // 升签 1.2s
-      setTimeout(() => {
+      const t2 = setTimeout(() => {
         setPhase('revealed');
         audioManager.play('success');
 
@@ -69,15 +91,24 @@ export default function Divination() {
           setKarma(history.length);
         } catch {}
       }, 1200);
+      timersRef.current.push(t2);
     }, 1500);
+    timersRef.current.push(t1);
   }, [phase]);
+
+  const handleBack = useCallback(() => {
+    audioManager.userTapped();
+    audioManager.play('click');
+    clearTimers();
+    setPage('tools');
+  }, [clearTimers, setPage]);
 
   const levelCfg = currentLot ? LEVEL_CONFIG[currentLot.level] : null;
   const elemCfg = currentLot ? ELEMENT_CONFIG[currentLot.element] : null;
 
   return (
     <div
-      className="fixed inset-0 overflow-hidden divination-root"
+      className="min-h-screen relative overflow-hidden divination-root divination-bg-enter"
       style={{
         background: `
           radial-gradient(ellipse 120% 60% at 50% 0%, rgba(245,235,210,0.4) 0%, transparent 50%),
@@ -88,7 +119,7 @@ export default function Divination() {
       }}
     >
       {/* ===== 背景层：水墨山水 ===== */}
-      <div className="absolute inset-0 pointer-events-none divination-bg-enter">
+      <div className="absolute inset-0 pointer-events-none">
         {/* 远山 */}
         <svg className="absolute bottom-0 left-0 w-full h-1/2 opacity-25" viewBox="0 0 375 300" preserveAspectRatio="xMidYMax slice">
           <path d="M0,300 L0,180 Q50,140 100,160 Q150,130 200,150 Q250,120 300,145 Q350,130 375,150 L375,300 Z" fill="#5a6b5a" opacity="0.4" />
@@ -113,17 +144,6 @@ export default function Divination() {
             <ellipse cx="315" cy="10" rx="20" ry="4" transform="rotate(15 315 10)" />
           </g>
         </svg>
-        {/* 暗纹书法底 */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: zh
-              ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ctext x='50' y='80' font-size='60' fill='%23000' font-family='serif'%3E禅%3C/text%3E%3Ctext x='120' y='160' font-size='50' fill='%23000' font-family='serif'%3E缘%3C/text%3E%3C/svg%3E")`
-              : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ctext x='30' y='80' font-size='40' fill='%23000' font-family='serif' font-style='italic'%3EZen%3C/text%3E%3Ctext x='100' y='160' font-size='35' fill='%23000' font-family='serif' font-style='italic'%3ECalm%3C/text%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '200px 200px',
-          }}
-        />
       </div>
 
       {/* ===== 顶部导航 ===== */}
@@ -132,42 +152,41 @@ export default function Divination() {
         style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       >
         <button
-          onClick={() => {
-            audioManager.userTapped();
-            audioManager.play('click');
-            setPage('tools');
-          }}
+          onClick={handleBack}
           aria-label={zh ? '返回工具箱' : 'Back to tools'}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-full border-[2px] border-[#3d2817]/30 bg-white/40 backdrop-blur-sm font-bold text-xs text-[#3d2817] transition-transform active:scale-95 hover:bg-white/60"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full border-[2px] border-[#3d2817]/30 bg-white/50 backdrop-blur-sm font-bold text-xs text-[#3d2817] transition-all active:scale-95 hover:bg-white/70 shadow-sm"
         >
-          <span aria-hidden="true">←</span>
+          <span aria-hidden="true" className="text-base leading-none">←</span>
           {zh ? '工具' : 'Tools'}
         </button>
         <div className="flex items-center gap-2">
           {/* 缘分计数 */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border-[2px] border-[#3d2817]/30 bg-white/40 backdrop-blur-sm">
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border-[2px] border-[#3d2817]/30 bg-white/50 backdrop-blur-sm">
             <span className="text-sm" aria-hidden="true">🌸</span>
             <span className="text-[10px] font-black text-[#3d2817]">{zh ? '缘' : 'Karma'}</span>
             <span className="text-xs font-black text-[#c89b3c]">{karma}</span>
           </div>
           {/* 今日抽签次数 */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border-[2px] border-[#3d2817]/30 bg-white/40 backdrop-blur-sm">
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border-[2px] border-[#3d2817]/30 bg-white/50 backdrop-blur-sm">
             <span className="text-[10px] font-bold text-[#3d2817]/60">{zh ? `今日 ${drawCount}` : `Today ${drawCount}`}</span>
           </div>
         </div>
       </div>
 
       {/* ===== 主内容区 ===== */}
-      <div className="relative z-10 flex flex-col" style={{ height: 'calc(100vh - 60px - env(safe-area-inset-top))' }}>
-        {/* ===== 上部：竹筒交互区（38%） ===== */}
-        <div className="flex items-end justify-center" style={{ flex: '0 0 36%' }}>
+      <div className="relative z-10 flex flex-col px-4" style={{ minHeight: 'calc(100vh - 60px - env(safe-area-inset-top))' }}>
+        {/* ===== 上部：竹筒交互区 ===== */}
+        <div className="flex items-end justify-center pt-2 pb-1" style={{ flex: '0 0 36%' }}>
           <BambooTube phase={phase} lot={currentLot} levelChar={levelCfg?.shortLabel.zh ?? ''} onDraw={handleDraw} zh={zh} />
         </div>
 
-        {/* ===== 下部：解签面板（62%） ===== */}
-        <div className="flex-1 px-4 pb-4 overflow-hidden" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+        {/* ===== 下部：解签面板 ===== */}
+        <div
+          className="flex-1 pb-4"
+          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        >
           {phase === 'idle' && <IdlePanel zh={zh} onDraw={handleDraw} />}
-          {(phase === 'shaking') && <ShakingPanel zh={zh} />}
+          {phase === 'shaking' && <ShakingPanel zh={zh} />}
           {(phase === 'revealing' || phase === 'revealed') && currentLot && levelCfg && elemCfg && (
             <InterpretationPanel
               lot={currentLot}
@@ -202,9 +221,10 @@ function BambooTube({
 }) {
   const isShaking = phase === 'shaking';
   const isRevealing = phase === 'revealing';
+  const isInteractive = phase === 'idle' || phase === 'revealed';
 
   return (
-    <div className="relative flex flex-col items-center" style={{ marginBottom: '-10px' }}>
+    <div className="relative flex flex-col items-center">
       {/* 光晕（revealing 时显示） */}
       {isRevealing && lot && (
         <div
@@ -238,14 +258,13 @@ function BambooTube({
       {/* 竹筒 SVG */}
       <button
         onClick={onDraw}
-        disabled={phase === 'shaking' || phase === 'revealing'}
+        disabled={!isInteractive}
         aria-label={zh ? '点击竹筒抽签' : 'Tap bamboo tube to draw a lot'}
-        className={`relative ${isShaking ? 'divination-shake' : ''} ${phase === 'idle' ? 'cursor-pointer hover:scale-[1.02]' : 'cursor-default'} transition-transform`}
+        className={`relative bg-transparent border-0 p-0 ${isShaking ? 'divination-shake' : ''} ${isInteractive ? 'cursor-pointer hover:scale-[1.03] active:scale-95' : 'cursor-default'} transition-transform duration-300`}
         style={{ transformOrigin: 'bottom center' }}
       >
-        <svg width="180" height="240" viewBox="0 0 180 240" className="overflow-visible">
+        <svg width="160" height="220" viewBox="0 0 180 240" className="overflow-visible">
           <defs>
-            {/* 竹身渐变 */}
             <linearGradient id="bambooGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#3d6b41" />
               <stop offset="12%" stopColor="#5a8d5e" />
@@ -255,25 +274,21 @@ function BambooTube({
               <stop offset="88%" stopColor="#4a7c4e" />
               <stop offset="100%" stopColor="#2d5b31" />
             </linearGradient>
-            {/* 木签渐变 */}
             <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#9a7a5a" />
               <stop offset="50%" stopColor="#c9a878" />
               <stop offset="100%" stopColor="#8a7050" />
             </linearGradient>
-            {/* 选中签渐变（更亮） */}
             <linearGradient id="selWoodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#b89868" />
               <stop offset="50%" stopColor="#e8c898" />
               <stop offset="100%" stopColor="#a08858" />
             </linearGradient>
-            {/* 麻绳渐变 */}
             <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#8b7355" />
               <stop offset="50%" stopColor="#a08868" />
               <stop offset="100%" stopColor="#6b5b40" />
             </linearGradient>
-            {/* 筒口暗影 */}
             <radialGradient id="openingGrad" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#0a0a0a" />
               <stop offset="70%" stopColor="#1a1a1a" />
@@ -286,7 +301,6 @@ function BambooTube({
 
           {/* ===== 木签组（筒口后方） ===== */}
           <g className={isShaking ? 'divination-lots-jitter' : ''}>
-            {/* 背景虚化签 */}
             <rect x="48" y="80" width="6" height="70" rx="2" fill="url(#woodGrad)" transform="rotate(-10 51 115)" opacity="0.5" filter="blur(1.2px)" />
             <rect x="62" y="70" width="6" height="80" rx="2" fill="url(#woodGrad)" transform="rotate(-5 65 110)" opacity="0.65" filter="blur(0.6px)" />
             <rect x="115" y="72" width="6" height="78" rx="2" fill="url(#woodGrad)" transform="rotate(5 118 111)" opacity="0.6" filter="blur(0.8px)" />
@@ -295,9 +309,7 @@ function BambooTube({
             {/* 选中签（中央，清晰，更高） */}
             <g className={isRevealing || phase === 'revealed' ? 'divination-lot-rise' : ''}>
               <rect x="83" y="45" width="10" height="105" rx="3" fill="url(#selWoodGrad)" />
-              {/* 签头倒角高光 */}
               <rect x="83" y="45" width="10" height="6" rx="3" fill="rgba(255,255,255,0.25)" />
-              {/* 签身文字 */}
               {lot && (
                 <text
                   x="88"
@@ -311,34 +323,27 @@ function BambooTube({
                   {levelChar}
                 </text>
               )}
-              {/* 木纹细节 */}
               <line x1="86" y1="50" x2="86" y2="148" stroke="rgba(0,0,0,0.1)" strokeWidth="0.5" />
               <line x1="90" y1="50" x2="90" y2="148" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
             </g>
           </g>
 
           {/* ===== 竹筒主体 ===== */}
-          {/* 筒口（暗色椭圆） */}
           <ellipse cx="90" cy="150" rx="42" ry="6" fill="url(#openingGrad)" />
           <ellipse cx="90" cy="148" rx="40" ry="4" fill="#0a0a0a" opacity="0.6" />
 
-          {/* 筒身 */}
           <path d="M 48 150 L 48 240 L 132 240 L 132 150 Z" fill="url(#bambooGrad)" />
 
-          {/* 纵向纤维纹理 */}
           <g opacity="0.2">
             {[58, 66, 74, 82, 90, 98, 106, 114, 122].map((x) => (
               <line key={x} x1={x} y1="150" x2={x} y2="240" stroke="#2a4c2e" strokeWidth="0.4" />
             ))}
           </g>
 
-          {/* 竹节横纹 1 */}
           <rect x="46" y="178" width="88" height="2.5" fill="#2d5b31" opacity="0.7" />
           <rect x="46" y="180.5" width="88" height="1.5" fill="#8cbd8e" opacity="0.4" />
 
-          {/* 麻绳绑带 */}
           <rect x="44" y="200" width="92" height="13" fill="url(#ropeGrad)" />
-          {/* 绳纹斜线 */}
           <g opacity="0.35">
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
               <line
@@ -352,24 +357,20 @@ function BambooTube({
               />
             ))}
           </g>
-          {/* 绳结 */}
           <circle cx="90" cy="206.5" r="4" fill="#6b5b40" />
           <circle cx="90" cy="206.5" r="2.5" fill="#8b7355" />
 
-          {/* 竹节横纹 2 */}
           <rect x="46" y="225" width="88" height="2.5" fill="#2d5b31" opacity="0.7" />
           <rect x="46" y="227.5" width="88" height="1.5" fill="#8cbd8e" opacity="0.4" />
 
-          {/* 左侧高光 */}
           <rect x="48" y="150" width="6" height="90" fill="rgba(255,255,255,0.12)" rx="2" />
-          {/* 右侧暗影 */}
           <rect x="126" y="150" width="6" height="90" fill="rgba(0,0,0,0.2)" rx="2" />
         </svg>
       </button>
 
       {/* 提示文字 */}
       {phase === 'idle' && (
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold text-[#3d2817]/50 divination-hint-pulse">
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold text-[#3d2817]/50 divination-hint-pulse">
           {zh ? '👆 轻触竹筒 · 诚心摇签' : '👆 Tap the tube · Draw with intention'}
         </div>
       )}
@@ -382,7 +383,7 @@ function BambooTube({
 // ============================================================
 function IdlePanel({ zh, onDraw }: { zh: boolean; onDraw: () => void }) {
   return (
-    <div className="h-full flex flex-col items-center justify-center divination-panel-enter">
+    <div className="flex flex-col items-center justify-center py-4 divination-panel-enter">
       <div className="text-center px-6">
         <div className="text-4xl mb-3 opacity-40" aria-hidden="true">禅</div>
         <div className="text-sm font-bold text-[#3d2817]/50 leading-relaxed mb-2" style={{ fontFamily: "'STKaiti', 'KaiTi', serif" }}>
@@ -409,7 +410,7 @@ function IdlePanel({ zh, onDraw }: { zh: boolean; onDraw: () => void }) {
 // ============================================================
 function ShakingPanel({ zh }: { zh: boolean }) {
   return (
-    <div className="h-full flex flex-col items-center justify-center divination-panel-enter">
+    <div className="flex flex-col items-center justify-center py-4 divination-panel-enter">
       <div className="text-center">
         <div className="text-3xl mb-3 animate-bounce" style={{ animationDuration: '0.8s' }} aria-hidden="true">
           🎋
@@ -420,7 +421,6 @@ function ShakingPanel({ zh }: { zh: boolean }) {
         <div className="mt-2 text-[10px] font-bold text-[#3d2817]/35">
           {zh ? '签与签碰撞，缘分正在落定' : 'Lots are settling, fate is being woven'}
         </div>
-        {/* 摇签进度点 */}
         <div className="flex gap-1.5 mt-4 justify-center">
           {[0, 1, 2].map((i) => (
             <span
@@ -456,17 +456,15 @@ function InterpretationPanel({
   const poemLines = (zh ? lot.poem.zh : lot.poem.en).split('\n');
 
   return (
-    <div className="h-full flex flex-col divination-panel-enter">
+    <div className="flex flex-col divination-panel-enter" style={{ maxHeight: '52vh' }}>
       {/* 木框笺纸 */}
       <div
-        className="flex-1 flex flex-col overflow-hidden divination-scroll-unfold"
+        className="relative flex flex-col overflow-hidden divination-scroll-unfold"
         style={{
           borderRadius: '4px',
           border: '3px solid #3d2817',
           boxShadow: '0 4px 12px rgba(61,40,23,0.2), inset 0 0 0 1px #7a5d47',
-          background: `
-            linear-gradient(135deg, rgba(245,235,210,0.95) 0%, rgba(237,228,208,0.95) 50%, rgba(230,220,200,0.95) 100%)
-          `,
+          background: 'linear-gradient(135deg, rgba(245,235,210,0.95) 0%, rgba(237,228,208,0.95) 50%, rgba(230,220,200,0.95) 100%)',
         }}
       >
         {/* 四角回纹雕花 */}
@@ -474,14 +472,6 @@ function InterpretationPanel({
         <CornerOrnament className="top-0 right-0 rotate-90" />
         <CornerOrnament className="bottom-0 left-0 -rotate-90" />
         <CornerOrnament className="bottom-0 right-0 rotate-180" />
-
-        {/* 纸张纹理 */}
-        <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' /%3E%3C/svg%3E")`,
-          }}
-        />
 
         {/* 内容区 */}
         <div className="relative flex-1 overflow-y-auto px-4 py-3" style={{ scrollbarWidth: 'thin' }}>
@@ -519,7 +509,7 @@ function InterpretationPanel({
             <div
               className={`relative w-11 h-11 flex items-center justify-center ${revealed ? 'divination-seal-stamp' : 'opacity-0'}`}
               style={{
-                background: levelCfg.accentColor === '#c89b3c' ? '#a93226' : '#a93226',
+                background: '#a93226',
                 borderRadius: '4px',
                 border: '2px solid #8b2820',
                 boxShadow: '1px 1px 2px rgba(0,0,0,0.2)',
@@ -574,7 +564,7 @@ function InterpretationPanel({
           <div
             className="text-center py-2 px-3 rounded-lg divination-text-fade"
             style={{
-              background: `${levelCfg.glowColor}`,
+              background: levelCfg.glowColor,
               animationDelay: '0.9s',
             }}
           >

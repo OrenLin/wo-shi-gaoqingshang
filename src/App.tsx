@@ -55,6 +55,12 @@ export default function App() {
     }
   };
 
+  // 抽签工具由 Tools 内部 activeTool 状态控制渲染（全屏沉浸式），
+  // 但当用户从抽签返回时 currentPage 仍是 'tools'，此时 Tools 会重新挂载。
+  // 注意：Tools 内部切换到 Divination 时，Divination 使用 fixed 布局，
+  // 不能被带 transform 的容器包裹（否则 fixed 失效），所以这里对 tools
+  // 页面不做 page-enter 动画包裹。
+
   // 音频按钮显示的文字 & 状态
   // —— audioTick 确保状态变化时按钮重新渲染
   const audioState = audioManager.state;
@@ -64,10 +70,18 @@ export default function App() {
     <AccessibilityProvider>
       <div className="App" lang={language === 'zh' ? 'zh-CN' : 'en'}>
         {/* 主内容区域 — role="main" + id="main-content" 是 skip-link 的跳转目标 */}
-        <main id="main-content" role="main" className="pb-20">
-          <div key={currentPage} className="animate-page-enter">
-            {renderPage()}
-          </div>
+        <main
+          id="main-content"
+          role="main"
+          className={currentPage === 'tools' ? '' : 'pb-20'}
+        >
+          {currentPage === 'tools' ? (
+            renderPage()
+          ) : (
+            <div key={currentPage} className="animate-page-enter">
+              {renderPage()}
+            </div>
+          )}
         </main>
 
         {/* 底部导航栏 */}

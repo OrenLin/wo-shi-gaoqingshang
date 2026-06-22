@@ -30,10 +30,10 @@ export default function Tools() {
   };
 
   // 渲染具体工具页面
-  if (activeTool === 'philosophy') return <ToolWrapper title={zh ? '🧠 哲学思辨' : '🧠 Philosophy'} onBack={handleBack}><PhilosophyInsight /></ToolWrapper>;
-  if (activeTool === 'anxiety') return <ToolWrapper title={zh ? '🧘 焦虑急救' : '🧘 Anxiety First-Aid'} onBack={handleBack}><AnxietyQuiz /></ToolWrapper>;
-  if (activeTool === 'woodfish') return <ToolWrapper title={zh ? '🪘 敲木鱼' : '🪘 Woodfish Zen'} onBack={handleBack}><WoodfishZen /></ToolWrapper>;
-  if (activeTool === 'debate') return <ToolWrapper title={zh ? '🎯 辩论技巧' : '🎯 Debate Skills'} onBack={handleBack}><DebateSkills /></ToolWrapper>;
+  if (activeTool === 'philosophy') return <ToolWrapper title={zh ? '🧠 哲学思辨' : '🧠 Philosophy'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><PhilosophyInsight /></ToolWrapper>;
+  if (activeTool === 'anxiety') return <ToolWrapper title={zh ? '🧘 焦虑急救' : '🧘 Anxiety First-Aid'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><AnxietyQuiz /></ToolWrapper>;
+  if (activeTool === 'woodfish') return <ToolWrapper title={zh ? '🪘 敲木鱼' : '🪘 Woodfish Zen'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><WoodfishZen /></ToolWrapper>;
+  if (activeTool === 'debate') return <ToolWrapper title={zh ? '🎯 辩论技巧' : '🎯 Debate Skills'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><DebateSkills /></ToolWrapper>;
 
   // ===== 工具列表页 =====
   // 特色工具（抽签）— 全宽卡片
@@ -259,22 +259,30 @@ function ToolDecoration({ icon }: { icon: string }) {
   return null;
 }
 
-// 工具页面包装器（带返回按钮）
-function ToolWrapper({ title, onBack, children }: { title: string; onBack: () => void; children: React.ReactNode }) {
+// 工具页面包装器（带粘性返回按钮，始终可见）
+function ToolWrapper({ title, backLabel, onBack, children }: { title: string; backLabel: string; onBack: () => void; children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-rose-50 px-4 py-6 pb-24">
-      <div className="max-w-md mx-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="text-xl font-black text-[#1a1a2e]">{title}</h1>
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-rose-50">
+      {/* 粘性顶栏 — 返回按钮始终可见 */}
+      <div
+        className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b-[3px] border-[#1a1a2e] shadow-[0_2px_0_0_#fbbf24]"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <div className="max-w-md mx-auto flex items-center justify-between px-4 py-3">
           <button
             onClick={onBack}
-            aria-label="返回工具箱"
-            className="inline-flex items-center gap-1 bg-white border-[3px] border-[#1a1a2e] rounded-full px-3 py-1.5 shadow-[2px_2px_0_0_#1a1a2e] font-black text-sm text-[#1a1a2e] transition-transform active:scale-95 hover:scale-105"
+            aria-label={backLabel}
+            className="inline-flex items-center gap-1.5 bg-amber-300 border-[3px] border-[#1a1a2e] rounded-full px-4 py-2 shadow-[2px_2px_0_0_#1a1a2e] font-black text-sm text-[#1a1a2e] transition-all active:translate-y-[2px] active:shadow-[0_0_0_0_#1a1a2e] hover:bg-amber-400"
           >
-            <span aria-hidden="true">←</span>
-            <span className="text-[11px]">工具</span>
+            <span aria-hidden="true" className="text-base leading-none">←</span>
+            <span className="text-xs">{backLabel}</span>
           </button>
+          <h1 className="text-base font-black text-[#1a1a2e] truncate ml-3">{title}</h1>
         </div>
+      </div>
+
+      {/* 内容区 */}
+      <div className="max-w-md mx-auto px-4 py-5 pb-24">
         <div key={title} className="animate-slide-in-right">
           {children}
         </div>
