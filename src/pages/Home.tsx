@@ -8,7 +8,7 @@ import ConsentModal from '../components/ui/ConsentModal';
 import SurveyLink from '../components/ui/SurveyLink';
 
 export default function Home() {
-  const { setPage, setCodename, consented, setConsented, selectScene, reset } = useGameStore();
+  const { setPage, setCodename, consented, setConsented, selectScene, reset, codename: storedCodename } = useGameStore();
   const language = useI18n((s) => s.language);
   const setLanguage = useI18n((s) => s.setLanguage);
   const t = useI18n((s) => s.t);
@@ -22,9 +22,20 @@ export default function Home() {
 
   const zh = language === 'zh';
 
-  // 搞怪 loading 文案循环显示
+  useEffect(() => {
+    if (codename.trim() === '' && storedCodename) {
+      setCodenameInput(storedCodename);
+    }
+  }, [storedCodename]);
+
   useEffect(() => {
     if (!loading) return;
+    // 根据网络状况智能调整 loading 时长
+    const conn = (navigator as any).connection;
+    const effectiveType = conn?.effectiveType || '4g';
+    const isSlow = effectiveType === '2g' || effectiveType === 'slow-2g';
+    const duration = isSlow ? 1500 : 400;
+
     const texts = [
       t('home.loading1'),
       t('home.loading2'),
@@ -36,9 +47,8 @@ export default function Home() {
     const timer = setInterval(() => {
       idx = (idx + 1) % texts.length;
       setLoadingText(texts[idx]);
-    }, 800);
-    // 0.8 秒后结束 loading（轻量级不打断用户）
-    const done = setTimeout(() => setLoading(false), 1200);
+    }, 600);
+    const done = setTimeout(() => setLoading(false), duration);
     return () => {
       clearInterval(timer);
       clearTimeout(done);

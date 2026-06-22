@@ -125,6 +125,27 @@ function estimatePercentile(avg: number): number {
   return friendly;
 }
 
+const STORAGE_KEY_CONSENT = 'eq_consented';
+const STORAGE_KEY_CODENAME = 'eq_codename';
+
+function loadConsent(): boolean {
+  try {
+    const val = localStorage.getItem(STORAGE_KEY_CONSENT);
+    return val === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function loadCodename(): string {
+  try {
+    const val = localStorage.getItem(STORAGE_KEY_CODENAME);
+    return val || '';
+  } catch {
+    return '';
+  }
+}
+
 export const useGameStore = create<GameState>((set, get) => ({
   currentPage: 'home',
   setPage: (page) => set({ currentPage: page }),
@@ -132,11 +153,21 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentModule: 'eq-challenge',
   selectModule: (moduleId) => set({ currentModule: moduleId, currentPage: 'select', currentSceneIndex: 0, currentQuestionIndex: 0 }),
 
-  codename: '',
-  setCodename: (name) => set({ codename: name }),
+  codename: loadCodename(),
+  setCodename: (name) => {
+    set({ codename: name });
+    try {
+      localStorage.setItem(STORAGE_KEY_CODENAME, name);
+    } catch {}
+  },
 
-  consented: false,
-  setConsented: (v) => set({ consented: v }),
+  consented: loadConsent(),
+  setConsented: (v) => {
+    set({ consented: v });
+    try {
+      localStorage.setItem(STORAGE_KEY_CONSENT, String(v));
+    } catch {}
+  },
 
   currentSceneIndex: 0,
   currentQuestionIndex: 0,

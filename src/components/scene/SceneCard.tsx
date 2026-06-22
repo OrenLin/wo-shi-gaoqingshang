@@ -17,19 +17,17 @@ export default function SceneCard({ scene, completed, index, onClick }: Props) {
 
   return (
     <button
-      disabled={completed}
       onClick={onClick}
       aria-label={
         completed
-          ? `${sceneTitle}，${language === 'zh' ? '已完成' : 'Completed'}`
+          ? `${sceneTitle}，${language === 'zh' ? '已完成，点击再次挑战' : 'Completed, click to retry'}`
           : `${sceneTitle}，${sceneDesc}，${qs}${language === 'zh' ? '题' : ' questions'}`
       }
-      aria-disabled={completed}
       className={`relative w-full text-left rounded-[28px] border-[4px] border-[#1a1a2e]
                   shadow-[6px_6px_0_0_#1a1a2e] p-5
                   transition-all duration-200
                   ${completed
-                    ? 'bg-white/80 opacity-80 cursor-not-allowed'
+                    ? 'bg-gradient-to-b from-emerald-50 to-teal-50/50 hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#1a1a2e]'
                     : 'bg-gradient-to-b from-white to-yellow-50 hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#1a1a2e]'}`}
     >
       <div
@@ -76,15 +74,13 @@ export default function SceneCard({ scene, completed, index, onClick }: Props) {
         <div className="mt-3">
           {completed ? (
             <div
-              role="status"
-              className="w-full text-center py-2 bg-green-100 text-green-700 font-black rounded-xl border-[3px] border-[#1a1a2e]"
+              className="w-full text-center py-2 bg-gradient-to-r from-emerald-400 to-teal-400 text-[#1a1a2e] font-black rounded-xl border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]"
             >
-              {t('select.challengeDone')}
+              🔄 {language === 'zh' ? '再次挑战' : 'Retry'}
             </div>
           ) : (
             <div
-              aria-hidden="true"
-              className="w-full text-center py-2 bg-[#1a1a2e] text-white font-black rounded-xl border-[3px] border-[#1a1a2e]"
+              className="w-full text-center py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-[#1a1a2e] font-black rounded-xl border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e]"
             >
               🎯 {qs}{t('select.qs')}
             </div>

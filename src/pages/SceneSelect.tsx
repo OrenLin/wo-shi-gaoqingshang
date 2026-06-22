@@ -5,11 +5,12 @@ import SceneCard from '../components/scene/SceneCard';
 import ImmersiveScenePreview from '../components/scene/ImmersiveScenePreview';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
+import ConsentModal from '../components/ui/ConsentModal';
 import { audioManager } from '../utils/audioManager';
 import { useI18n, pickLocalized } from '../i18n';
 
 export default function SceneSelect() {
-  const { selectScene, getCompletedSceneIds, setPage } = useGameStore();
+  const { selectScene, getCompletedSceneIds, setPage, consented, setConsented } = useGameStore();
   const currentModule = useGameStore((s) => s.currentModule);
   const language = useI18n((s) => s.language);
   const setLanguage = useI18n((s) => s.setLanguage);
@@ -21,6 +22,10 @@ export default function SceneSelect() {
   const currentModConfig = getModuleById(currentModule);
 
   const [previewScene, setPreviewScene] = useState<{ scene: typeof scenes[0]; index: number } | null>(null);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [accept, setAccept] = useState(true);
+  const [pendingScene, setPendingScene] = useState<{ scene: typeof scenes[0]; index: number } | null>(null);
 
   const completedIds = getCompletedSceneIds();
   const doneCount = completedIds.size;
@@ -33,6 +38,25 @@ export default function SceneSelect() {
 
   // 根据在原始 scenes 数组中的索引重新确定显示 index
   const getSceneOriginalIndex = (sceneId: string) => scenes.findIndex((s) => s.id === sceneId);
+
+  const handleSceneClick = (scene: typeof scenes[0], index: number) => {
+    if (!consented) {
+      setPendingScene({ scene, index });
+      setConsentOpen(true);
+      return;
+    }
+    setPreviewScene({ scene, index });
+  };
+
+  const handleConsentConfirm = () => {
+    if (!accept) return;
+    setConsented(true);
+    setConsentOpen(false);
+    if (pendingScene) {
+      setPreviewScene(pendingScene);
+      setPendingScene(null);
+    }
+  };
 
   return (
     <div
@@ -146,7 +170,7 @@ export default function SceneSelect() {
                       onClick={() => {
                         audioManager.userTapped();
                         audioManager.play('click');
-                        setPreviewScene({ scene, index: getSceneOriginalIndex(scene.id) });
+                        handleSceneClick(scene, getSceneOriginalIndex(scene.id));
                       }}
                     />
                   </div>
@@ -189,7 +213,7 @@ export default function SceneSelect() {
                       onClick={() => {
                         audioManager.userTapped();
                         audioManager.play('click');
-                        setPreviewScene({ scene, index: getSceneOriginalIndex(scene.id) });
+                        handleSceneClick(scene, getSceneOriginalIndex(scene.id));
                       }}
                     />
                   </div>
@@ -211,6 +235,15 @@ export default function SceneSelect() {
           onClose={() => setPreviewScene(null)}
         />
       )}
+
+      <ConsentModal
+        open={consentOpen}
+        accepted={accept}
+        showPrivacy={showPrivacy}
+        onToggleAccept={setAccept}
+        onTogglePrivacy={setShowPrivacy}
+        onConfirm={handleConsentConfirm}
+      />
     </div>
   );
 }

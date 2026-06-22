@@ -121,6 +121,17 @@ export default function ReportHistory() {
             const isExpanded = expandedId === r.id;
             const modName = zh ? r.moduleName.zh : r.moduleName.en;
             const lvlName = zh ? r.levelName.zh : r.levelName.en;
+            // 与同模块上一条报告对比，计算趋势
+            const sameModuleReports = reports.filter((rep) => rep.module === r.module);
+            const sortedByTime = [...sameModuleReports].sort(
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+            );
+            const currentIdxInModule = sortedByTime.findIndex((rep) => rep.id === r.id);
+            const prevReport = currentIdxInModule >= 0 && currentIdxInModule < sortedByTime.length - 1
+              ? sortedByTime[currentIdxInModule + 1]
+              : null;
+            const diff = prevReport ? r.averageScore - prevReport.averageScore : 0;
+            const hasTrend = prevReport !== null;
             return (
               <div
                 key={r.id}
@@ -138,9 +149,26 @@ export default function ReportHistory() {
                       <span className="font-black text-sm text-[#1a1a2e]">{modName}</span>
                       <span className="text-[10px] font-bold text-[#1a1a2e]/40">{formatDate(r.timestamp)}</span>
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <span className="text-lg font-black text-amber-600">{r.averageScore}</span>
                       <span className="text-[11px] font-bold text-[#1a1a2e]/50">{lvlName}</span>
+                      {hasTrend && diff !== 0 && (
+                        <span
+                          className={`text-[10px] font-black px-1.5 py-0.5 rounded-full border ${
+                            diff > 0
+                              ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                              : 'bg-rose-100 text-rose-700 border-rose-300'
+                          }`}
+                          aria-label={zh ? `与上次相比${diff > 0 ? '提升' : '下降'} ${Math.abs(diff)} 分` : `${diff > 0 ? 'Up' : 'Down'} ${Math.abs(diff)} vs last`}
+                        >
+                          {diff > 0 ? '↑' : '↓'} {Math.abs(diff)}
+                        </span>
+                      )}
+                      {hasTrend && diff === 0 && (
+                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full border bg-amber-100 text-amber-700 border-amber-300">
+                          = {zh ? '持平' : 'Same'}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex-shrink-0 text-right">

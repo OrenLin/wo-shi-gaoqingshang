@@ -23,6 +23,7 @@ export default function ImmersiveScenePreview({ scene, index, onEnter, onClose }
     const img = new Image();
     img.onload = () => setImageLoaded(true);
     img.src = scene.bgImage;
+    setTimeout(() => setImageLoaded(true), 300);
   }, [scene.bgImage]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -39,26 +40,30 @@ export default function ImmersiveScenePreview({ scene, index, onEnter, onClose }
   }, [handleMouseMove]);
 
   const handleEnter = useCallback(() => {
-    audioManager.userTapped();
-    audioManager.play('success');
+    requestAnimationFrame(() => {
+      audioManager.userTapped();
+      audioManager.play('success');
+    });
     setIsExiting(true);
-    setTimeout(onEnter, 500);
+    setTimeout(onEnter, 300);
   }, [onEnter]);
 
   const handleClose = useCallback(() => {
-    audioManager.userTapped();
-    audioManager.play('click');
+    requestAnimationFrame(() => {
+      audioManager.userTapped();
+      audioManager.play('click');
+    });
     setIsExiting(true);
-    setTimeout(onClose, 500);
+    setTimeout(onClose, 300);
   }, [onClose]);
 
-  const parallaxX = (mousePos.x - 0.5) * 20;
-  const parallaxY = (mousePos.y - 0.5) * 15;
+  const parallaxX = (mousePos.x - 0.5) * 15;
+  const parallaxY = (mousePos.y - 0.5) * 10;
 
   return (
     <div
       ref={containerRef}
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#1a1a2e] transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#1a1a2e] transition-opacity duration-300 ${
         imageLoaded ? 'opacity-100' : 'opacity-0'
       } ${isExiting ? 'opacity-0' : ''}`}
       style={{
