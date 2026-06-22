@@ -155,9 +155,15 @@ export default function Divination({ onBack }: DivinationProps) {
 
       {/* ===== 主内容区（flex-1 撑满，底部操作区始终可见） ===== */}
       <main className="relative z-10 flex flex-col flex-1 px-4 min-h-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {/* ===== 上部：竹筒交互区（缩小比例，留更多空间给面板） ===== */}
-        <div className="flex items-end justify-center flex-shrink-0" style={{ height: '32vh', minHeight: '180px' }}>
-          <BambooTube phase={phase} lot={currentLot} levelChar={levelCfg?.shortLabel.zh ?? ''} sealChar={levelCfg?.sealChar ?? ''} onDraw={handleDraw} zh={zh} />
+        {/* ===== 上部：竹筒交互区（revealed 阶段缩小，留更多空间给面板） ===== */}
+        <div
+          className="flex items-end justify-center flex-shrink-0 transition-all duration-500"
+          style={{
+            height: phase === 'revealed' || phase === 'revealing' ? '20vh' : '30vh',
+            minHeight: phase === 'revealed' || phase === 'revealing' ? '120px' : '170px',
+          }}
+        >
+          <BambooTube phase={phase} lot={currentLot} levelChar={levelCfg?.shortLabel.zh ?? ''} sealChar={levelCfg?.sealChar ?? ''} onDraw={handleDraw} zh={zh} compact={phase === 'revealed' || phase === 'revealing'} />
         </div>
 
         {/* ===== 提示文字（独立行，不与竹筒重叠） ===== */}
@@ -379,6 +385,7 @@ function BambooTube({
   sealChar,
   onDraw,
   zh,
+  compact,
 }: {
   phase: Phase;
   lot: DivinationLot | null;
@@ -386,12 +393,16 @@ function BambooTube({
   sealChar: string;
   onDraw: () => void;
   zh: boolean;
+  compact?: boolean;
 }) {
   const isShaking = phase === 'shaking';
   const isRevealing = phase === 'revealing';
   const isInteractive = phase === 'idle' || phase === 'revealed';
   // 签文显示：用印章字（吉/福/平/守/忍），单字，楷体，渐显
   const displayChar = lot ? sealChar : '';
+  // compact 模式下缩小竹筒（revealed 阶段留更多空间给面板）
+  const svgWidth = compact ? 100 : 140;
+  const svgHeight = compact ? 140 : 195;
 
   return (
     <div className="relative flex flex-col items-center">
@@ -433,7 +444,7 @@ function BambooTube({
         className={`relative bg-transparent border-0 p-0 ${isShaking ? 'divination-shake' : ''} ${isInteractive ? 'cursor-pointer hover:scale-[1.04] active:scale-95' : 'cursor-default'} transition-transform duration-300`}
         style={{ transformOrigin: 'bottom center' }}
       >
-        <svg width="140" height="195" viewBox="0 0 180 240" className="overflow-visible">
+        <svg width={svgWidth} height={svgHeight} viewBox="0 0 180 240" className="overflow-visible">
           <defs>
             {/* 竹筒主体渐变（增强3D感：左暗→中亮→右暗） */}
             <linearGradient id="bambooGrad3d" x1="0%" y1="0%" x2="100%" y2="0%">

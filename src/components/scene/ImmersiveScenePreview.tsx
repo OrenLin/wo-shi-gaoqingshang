@@ -20,6 +20,11 @@ export default function ImmersiveScenePreview({ scene, index, onEnter, onClose }
   const t = useI18n((s) => s.t);
 
   useEffect(() => {
+    // 无背景图时立即标记为已加载（避免空 src 导致 onload 不触发而走 300ms 兜底延迟）
+    if (!scene.bgImage) {
+      setImageLoaded(true);
+      return;
+    }
     const img = new Image();
     img.onload = () => setImageLoaded(true);
     img.src = scene.bgImage;
@@ -67,19 +72,21 @@ export default function ImmersiveScenePreview({ scene, index, onEnter, onClose }
         imageLoaded ? 'opacity-100' : 'opacity-0'
       } ${isExiting ? 'opacity-0' : ''}`}
       style={{
-        background: `linear-gradient(180deg, ${scene.bgColor})`,
+        background: scene.bgGradient || `linear-gradient(180deg, ${scene.bgColor})`,
       }}
     >
-      {/* 背景大图层 */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${scene.bgImage})`,
-          transform: `scale(1.1) translate(${parallaxX}px, ${parallaxY}px)`,
-          transition: 'transform 0.3s ease-out',
-          animation: 'breathing-lens 8s ease-in-out infinite',
-        }}
-      />
+      {/* 背景大图层（有 bgImage 时才渲染，避免空 url） */}
+      {scene.bgImage && (
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${scene.bgImage})`,
+            transform: `scale(1.1) translate(${parallaxX}px, ${parallaxY}px)`,
+            transition: 'transform 0.3s ease-out',
+            animation: 'breathing-lens 8s ease-in-out infinite',
+          }}
+        />
+      )}
 
       {/* 渐变遮罩（底部向上） */}
       <div

@@ -138,12 +138,12 @@ export default function Game() {
   return (
     <div
       className="min-h-screen relative overflow-hidden"
-      style={{ background: scene.bgColor }}
+      style={{ background: scene.bgGradient || scene.bgColor }}
     >
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url(${scene.bgImage})`,
+          backgroundImage: scene.bgImage ? `url(${scene.bgImage})` : 'none',
           transform: 'scale(1.05)',
           opacity: 0.95,
         }}

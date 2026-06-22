@@ -79,13 +79,15 @@ export default function Result() {
   return (
     <div
       className="min-h-screen relative overflow-hidden py-8 px-4"
-      style={{ background: scene.bgColor }}
+      style={{ background: scene.bgGradient || scene.bgColor }}
     >
-      {/* 背景图 */}
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
-           style={{ backgroundImage: `url(${scene.bgImage})` }}>
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
+      {/* 背景图（有 bgImage 时才渲染） */}
+      {scene.bgImage && (
+        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
+             style={{ backgroundImage: `url(${scene.bgImage})` }}>
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+      )}
 
       <FloatingEmojis
         items={[

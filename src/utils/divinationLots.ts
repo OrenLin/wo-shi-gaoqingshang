@@ -262,15 +262,286 @@ export const divinationLots: DivinationLot[] = [
     },
     blessing: { zh: '善待自己，因果不负', en: 'Be kind to yourself; kindness returns' },
   },
+  // ===== 新增 18 组签（编号 13-30）=====
+  {
+    id: 'lot-13',
+    number: 13,
+    level: 'supreme',
+    element: 'fire',
+    poem: {
+      zh: '云开月朗照乾坤\n万里山河一片明\n莫道前路无知己\n天下谁人不识君',
+      en: 'Clouds part, the moon illuminates all,\nA thousand miles of mountains and rivers glow bright.\nDo not say the road ahead lacks friends,\nWho in this world does not know you?',
+    },
+    interpretation: {
+      zh: '你正处在被看见、被认可的时刻。过去的努力没有白费，此刻光芒开始外显。不必再自我怀疑——你的价值不需要别人批准，但别人的认可会自然到来。继续保持真诚，让光照向更远的地方。',
+      en: 'You are in a moment of being seen and recognized. Past efforts were not in vain; your light is now shining outward. No need for self-doubt — your worth needs no approval, yet recognition will come naturally. Keep being authentic and let your light reach further.',
+    },
+    blessing: { zh: '云开月明，光芒自现', en: 'Clouds part, the moon reveals your light' },
+  },
+  {
+    id: 'lot-14',
+    number: 14,
+    level: 'supreme',
+    element: 'wood',
+    poem: {
+      zh: '春风得意马蹄疾\n一日看尽长安花\n好事近在不远处\n只待君心一念通',
+      en: 'Spring wind rides swift hooves,\nIn one day, all of Chang\'an\'s flowers seen.\nGood things are near at hand,\nAwaiting only your heart\'s alignment.',
+    },
+    interpretation: {
+      zh: '好消息正在路上。你不需要拼命追赶，只需要保持开放的心态去接收。有时候最大的障碍不是外部世界，而是我们内心"我不配"的声音。今天，允许自己相信：好事可以发生在我身上。',
+      en: 'Good news is on its way. You need not chase desperately — only stay open to receive. Sometimes the greatest obstacle is not the external world, but the inner voice saying "I don\'t deserve this." Today, allow yourself to believe: good things can happen to me.',
+    },
+    blessing: { zh: '春风得意，好事将近', en: 'Spring wind favors you; good things draw near' },
+  },
+  {
+    id: 'lot-15',
+    number: 15,
+    level: 'supreme',
+    element: 'water',
+    poem: {
+      zh: '久旱逢甘霖\n他乡遇故知\n洞房花烛夜\n金榜题名时',
+      en: 'Long drought meets sweet rain,\nIn a foreign land, an old friend appears.\nWedding night by candlelight,\nThe moment your name tops the list.',
+    },
+    interpretation: {
+      zh: '这是人生四大喜事的签。你渴望已久的某件事，正在从"等待"转向"到来"。喜悦不是罪过，允许自己尽情享受。记住这份感觉——它会成为你未来低谷时的力量源泉。',
+      en: 'This is the lot of life\'s four great joys. Something you have long awaited is shifting from "waiting" to "arriving." Joy is not a sin — allow yourself to feel it fully. Remember this feeling; it will be your strength in future low moments.',
+    },
+    blessing: { zh: '四喜临门，久盼终至', en: 'Four joys arrive; long hopes fulfilled' },
+  },
+  {
+    id: 'lot-16',
+    number: 16,
+    level: 'supreme',
+    element: 'earth',
+    poem: {
+      zh: '厚积薄发有时辰\n静水深流不显痕\n一朝破壁乘风去\n万里长空任我行',
+      en: 'Deep accumulation, slow release, in due time,\nStill waters run deep, leaving no trace.\nOne day you break the wall and ride the wind,\nTen thousand miles of sky are yours to roam.',
+    },
+    interpretation: {
+      zh: '你积累的能量即将爆发。那些看似"没有进展"的日子，其实都在暗中蓄力。不要因为暂时看不到结果就否定过程。破壁的时刻往往来得突然——保持准备，机会来时才能接住。',
+      en: 'The energy you have accumulated is about to burst forth. Those days that seemed "without progress" were actually storing power in the dark. Do not dismiss the process just because results are not yet visible. The breakthrough often comes suddenly — stay prepared so you can catch it when it arrives.',
+    },
+    blessing: { zh: '厚积薄发，一飞冲天', en: 'Deep roots, sudden flight' },
+  },
+  {
+    id: 'lot-17',
+    number: 17,
+    level: 'upper',
+    element: 'metal',
+    poem: {
+      zh: '宝剑锋从磨砺出\n梅花香自苦寒来\n今日辛苦非白费\n他日回首笑开颜',
+      en: 'The sword\'s edge comes from sharpening,\nPlum blossom fragrance born of bitter cold.\nToday\'s hardship is not in vain,\nTomorrow you will look back and smile.',
+    },
+    interpretation: {
+      zh: '你正在经历的困难，是塑造你的工具。不是所有痛苦都有意义，但主动面对的痛苦会让你更强。区分"无意义的消耗"和"有成长的挑战"——前者要远离，后者要拥抱。',
+      en: 'The difficulty you are experiencing is a tool that shapes you. Not all suffering has meaning, but pain you actively face makes you stronger. Distinguish between "meaningless drain" and "growth-bringing challenge" — avoid the former, embrace the latter.',
+    },
+    blessing: { zh: '苦尽甘来，锋芒自现', en: 'After hardship, sweetness; your edge emerges' },
+  },
+  {
+    id: 'lot-18',
+    number: 18,
+    level: 'upper',
+    element: 'fire',
+    poem: {
+      zh: '红日初升照大千\n万物苏醒向晴天\n心中有火不惧冷\n一路向前自生光',
+      en: 'The red sun rises, illuminating all,\nAll things awaken toward the clear sky.\nWith fire in your heart, fear no cold,\nWalk forward and light your own way.',
+    },
+    interpretation: {
+      zh: '你的热情是你最珍贵的资源。当外部环境冷淡时，内在的火种能让你继续前行。但记住：火需要燃料——给自己足够的休息和滋养，让这把火持续燃烧，而不是燃尽自己。',
+      en: 'Your passion is your most precious resource. When the external environment is cold, the inner flame keeps you moving forward. But remember: fire needs fuel — give yourself enough rest and nourishment so this flame sustains, rather than burns you out.',
+    },
+    blessing: { zh: '心有烈火，自带光芒', en: 'Fire within; you carry your own light' },
+  },
+  {
+    id: 'lot-19',
+    number: 19,
+    level: 'upper',
+    element: 'water',
+    poem: {
+      zh: '水到渠成事自顺\n强求反生许多烦\n放下执念随缘去\n柳暗花明又一村',
+      en: 'Water flows, the channel forms, things align,\nForcing only breeds endless trouble.\nRelease attachment, let fate unfold,\nPast the dark willows, another village blooms.',
+    },
+    interpretation: {
+      zh: '有些事越用力越远离。这不是让你放弃，而是让你学会"松弛地努力"——尽人事，听天命。把注意力放在你能控制的部分，把结果交给时间。往往你松手的那一刻，事情反而开始流动。',
+      en: 'Some things recede the harder you push. This is not asking you to give up, but to learn "relaxed effort" — do your best, leave the rest to fate. Focus on what you can control, entrust the outcome to time. Often the moment you let go, things begin to flow.',
+    },
+    blessing: { zh: '随缘而行，柳暗花明', en: 'Flow with fate; a new village appears' },
+  },
+  {
+    id: 'lot-20',
+    number: 20,
+    level: 'upper',
+    element: 'wood',
+    poem: {
+      zh: '青松挺且直\n傲雪凌霜姿\n莫羡百花艳\n岁寒见真知',
+      en: 'The green pine stands tall and straight,\nProud against snow and frost.\nDo not envy the hundred flowers\' brilliance,\nTrue character shows in winter\'s cold.',
+    },
+    interpretation: {
+      zh: '你不需要成为所有人喜欢的样子。松树的美在于它在寒冬依然挺立。你的独特性——那些让你"和别人不一样"的特质——正是你最珍贵的部分。不必迎合，做你自己。',
+      en: 'You need not become what everyone likes. The pine\'s beauty lies in standing tall through winter. Your uniqueness — those traits that make you "different" — are your most precious parts. No need to conform; be yourself.',
+    },
+    blessing: { zh: '岁寒知松，本色长青', en: 'Winter reveals the pine; your true self endures' },
+  },
+  {
+    id: 'lot-21',
+    number: 21,
+    level: 'upper',
+    element: 'earth',
+    poem: {
+      zh: '山高自有客行路\n水深自有渡船人\n莫愁前路无知己\n天下谁人不识君',
+      en: 'High mountains still have travelers\' paths,\nDeep waters still have ferrymen.\nFear not the road ahead without friends,\nWho in this world does not know you?',
+    },
+    interpretation: {
+      zh: '无论眼前的困难看起来多大，总有人走过类似的路。你不是第一个，也不会是最后一个。寻求帮助不是软弱，而是智慧。这个世界上有人愿意帮你——你需要做的是开口。',
+      en: 'However daunting your difficulty seems, someone has walked a similar path. You are neither the first nor the last. Asking for help is not weakness but wisdom. Someone in this world is willing to help — what you need to do is speak up.',
+    },
+    blessing: { zh: '路在脚下，贵人相随', en: 'The path is underfoot; helpers appear' },
+  },
+  {
+    id: 'lot-22',
+    number: 22,
+    level: 'middle',
+    element: 'earth',
+    poem: {
+      zh: '半亩方塘一鉴开\n天光云影共徘徊\n问渠那得清如许\n为有源头活水来',
+      en: 'A half-acre pond opens like a mirror,\nSky light and cloud shadows linger together.\nHow does it stay so clear?\nFrom the living water at its source.',
+    },
+    interpretation: {
+      zh: '保持内心的清明，需要持续输入"活水"——新的体验、新的知识、新的人际关系。如果你感到停滞，可能不是能力问题，而是输入不够。今天去做一件没做过的事，哪怕很小。',
+      en: 'To keep your inner clarity, you need continuous "living water" — new experiences, new knowledge, new relationships. If you feel stagnant, it may not be a capability issue but insufficient input. Today, do one thing you have never done, however small.',
+    },
+    blessing: { zh: '源头活水，心境常清', en: 'Living water at the source; a clear mind endures' },
+  },
+  {
+    id: 'lot-23',
+    number: 23,
+    level: 'middle',
+    element: 'metal',
+    poem: {
+      zh: '千锤百炼始成钢\n烈火焚烧若等闲\n粉骨碎身浑不怕\n要留清白在人间',
+      en: 'A thousand hammerings forge the steel,\nFierce fire is taken in stride.\nShattered bones and crushed body, feared not,\nTo leave integrity in this world.',
+    },
+    interpretation: {
+      zh: '你正在经历一个"锻造"的过程。这很痛，但痛不等于错。问自己：这次经历在把我塑造成什么样的人？如果答案是"更坚韧、更真实"，那就值得。如果只是"更麻木、更愤怒"，需要重新选择。',
+      en: 'You are going through a "forging" process. It hurts, but pain does not mean wrong. Ask yourself: what kind of person is this experience shaping me into? If the answer is "more resilient, more authentic," it is worth it. If only "more numb, more angry," you need to choose again.',
+    },
+    blessing: { zh: '千锤百炼，终成真钢', en: 'A thousand forgings; true steel emerges' },
+  },
+  {
+    id: 'lot-24',
+    number: 24,
+    level: 'middle',
+    element: 'water',
+    poem: {
+      zh: '行到水穷处\n坐看云起时\n偶然值林叟\n谈笑无还期',
+      en: 'Walking to where the water ends,\nSitting to watch the clouds rise.\nBy chance meeting a forest elder,\nTalking and laughing, forgetting to return.',
+    },
+    interpretation: {
+      zh: '当你觉得"走到尽头"时，也许那不是终点，而是转换视角的契机。水穷之处，云正在升起。你不需要立刻找到答案——坐下来，看看，让事情自然展开。有时候"不作为"本身就是一种作为。',
+      en: 'When you feel you have "reached the end," perhaps it is not a dead end but a chance to shift perspective. Where water ends, clouds are rising. You need not find an answer immediately — sit down, observe, let things unfold. Sometimes "non-action" is itself a form of action.',
+    },
+    blessing: { zh: '水穷云起，顺其自然', en: 'Water ends, clouds rise; let nature flow' },
+  },
+  {
+    id: 'lot-25',
+    number: 25,
+    level: 'middle',
+    element: 'fire',
+    poem: {
+      zh: '采菊东篱下\n悠然见南山\n山气日夕佳\n飞鸟相与还',
+      en: 'Picking chrysanthemums by the eastern hedge,\nLeisurely I gaze at the southern mountain.\nMountain air grows fine at dusk,\nBirds fly home together.',
+    },
+    interpretation: {
+      zh: '幸福不在远方，而在你愿意停下来欣赏的瞬间。你一直在追赶目标，却忘了目标本身就是为了此刻的安宁。今天给自己一个"无所事事"的时刻——不是偷懒，而是给灵魂喘息的空间。',
+      en: 'Happiness is not far away, but in the moments you are willing to pause and appreciate. You have been chasing goals, forgetting that goals exist for this very peace. Today give yourself a moment of "doing nothing" — not laziness, but space for the soul to breathe.',
+    },
+    blessing: { zh: '悠然见山，心安即归', en: 'Leisurely gazing at mountains; peace is home' },
+  },
+  {
+    id: 'lot-26',
+    number: 26,
+    level: 'middle',
+    element: 'wood',
+    poem: {
+      zh: '野火烧不尽\n春风吹又生\n远芳侵古道\n晴翠接荒城',
+      en: 'Wildfire cannot burn it all,\nSpring wind blows and it grows again.\nDistant fragrance invades the ancient road,\nSunny green meets the ruined city.',
+    },
+    interpretation: {
+      zh: '你的生命力比你以为的更强。即使经历了"烧毁一切"的打击，只要根还在，春风一吹就能重生。不要用现在的状态定义未来的可能。你现在需要的不是"努力"，而是"等待春天"。',
+      en: 'Your vitality is stronger than you think. Even after a blow that "burned everything," as long as the roots remain, spring wind will bring rebirth. Do not define future possibilities by your current state. What you need now is not "effort" but "waiting for spring."',
+    },
+    blessing: { zh: '野火不尽，春风再生', en: 'Fire cannot end it; spring brings rebirth' },
+  },
+  {
+    id: 'lot-27',
+    number: 27,
+    level: 'lower',
+    element: 'metal',
+    poem: {
+      zh: '独上高楼望尽天涯路\n欲寄彩笺兼尺素\n山长水阔知何处\n灯火阑珊人独立',
+      en: 'Alone on the high tower, gazing at the world\'s end,\nWanting to send a colored note and a letter.\nMountains long, waters wide, where to find you?\nLanterns dim, a figure stands alone.',
+    },
+    interpretation: {
+      zh: '你正感到孤独和迷茫。这不是你的错，也不代表你做错了什么。孤独是人生的常态，学会与它共处比逃避它更重要。今天，试着把这份感受写下来，或者告诉一个信任的人——表达本身就是疗愈。',
+      en: 'You are feeling lonely and lost. This is not your fault, nor does it mean you did something wrong. Loneliness is a normal part of life; learning to coexist with it matters more than escaping it. Today, try writing this feeling down, or telling someone you trust — expression itself is healing.',
+    },
+    blessing: { zh: '独处有时，灯火可亲', en: 'Solitude has its time; lamplight brings warmth' },
+  },
+  {
+    id: 'lot-28',
+    number: 28,
+    level: 'lower',
+    element: 'water',
+    poem: {
+      zh: '昨夜西风凋碧树\n独上高楼望尽天涯路\n欲寄彩笺兼尺素\n山长水阔知何处',
+      en: 'Last night west wind withered the green trees,\nAlone on the high tower, gazing at the world\'s end.\nWanting to send a colored note and a letter,\nMountains long, waters wide, where to find you?',
+    },
+    interpretation: {
+      zh: '有些东西正在离你而去。失去是痛苦的，但紧抓不放更痛。允许自己悲伤——悲伤不是软弱，而是爱的证明。当你准备好时，放手会让空间打开，新的可能才能进入。',
+      en: 'Something is leaving you. Loss is painful, but gripping tighter hurts more. Allow yourself to grieve — grief is not weakness but proof of love. When you are ready, letting go opens space for new possibilities to enter.',
+    },
+    blessing: { zh: '放手有时，新生将至', en: 'A time to release; renewal approaches' },
+  },
+  {
+    id: 'lot-29',
+    number: 29,
+    level: 'lower',
+    element: 'earth',
+    poem: {
+      zh: '山重水复疑无路\n柳暗花明又一村\n莫疑前路无知己\n天下谁人不识君',
+      en: 'Mountains pile, waters wind, doubting there is a way,\nPast dark willows, another village blooms.\nDoubt not the road ahead lacks friends,\nWho in this world does not know you?',
+    },
+    interpretation: {
+      zh: '你正处在"疑无路"的阶段。这种迷茫是真实的，但不是永恒的。你现在看不到出路，不代表出路不存在。给自己一点耐心——很多时候，转机就在你准备放弃的下一刻。坚持不是硬撑，而是带着怀疑继续走。',
+      en: 'You are in the "doubting there is a way" phase. This confusion is real but not eternal. Not seeing a way out now does not mean one does not exist. Give yourself some patience — often the turning point comes the moment after you were ready to give up. Persistence is not forcing; it is continuing with doubt.',
+    },
+    blessing: { zh: '疑路将尽，转机在望', en: 'The doubtful road ends; a turning point nears' },
+  },
+  {
+    id: 'lot-30',
+    number: 30,
+    level: 'bottom',
+    element: 'water',
+    poem: {
+      zh: '寒雨连江夜入吴\n平明送客楚山孤\n洛阳亲友如相问\n一片冰心在玉壶',
+      en: 'Cold rain joins the river, night entering Wu,\nAt dawn I see you off, Chu mountains lonely.\nIf Luoyang friends ask of me,\nA heart of ice in a jade jug.',
+    },
+    interpretation: {
+      zh: '这是最艰难的时刻，但也是最考验真心的时刻。外界寒冷，但你内心的"冰心"——那份清明和坚守——是你最大的财富。这段经历会过去，而你会带着更深的自己走出来。不必假装坚强，真实的脆弱也是力量。寻求支持，不要独自承受。',
+      en: 'This is the hardest moment, but also the one that most tests your true heart. The outside is cold, but your inner "heart of ice" — that clarity and steadfastness — is your greatest wealth. This experience will pass, and you will emerge with a deeper self. No need to pretend strength; authentic vulnerability is also power. Seek support; do not bear it alone.',
+    },
+    blessing: { zh: '冰心玉壶，守得云开', en: 'Ice heart in jade; clouds will part' },
+  },
 ];
 
-// 随机抽签（加权概率：中签最多，下签/下下签极少，尽量讨喜）
+// 随机抽签（加权概率：上上签/上签较多给惊喜，中签最多，下签/下下签略少但保留）
 const WEIGHTS: Record<LotLevel, number> = {
-  supreme: 2,   // 上上签 — 略增，给用户惊喜
+  supreme: 3,   // 上上签 — 较多，给用户惊喜与鼓励
   upper: 4,     // 上签 — 较多
-  middle: 6,    // 中签 — 最多，平和稳妥
-  lower: 1,     // 下签 — 很少
-  bottom: 1,    // 下下签 — 极少
+  middle: 5,    // 中签 — 最多，平和稳妥
+  lower: 2,     // 下签 — 略少但保留
+  bottom: 1,    // 下下签 — 最少但保留
 };
 
 export function drawRandomLot(): DivinationLot {

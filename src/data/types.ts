@@ -45,6 +45,7 @@ export interface Scene {
   description: string | Localized;
   bgImage: string;
   bgColor: string;
+  bgGradient?: string; // 有效 CSS 渐变（当 bgImage 为空时使用）
   accentColor: string;
   characters: Character[];
   questions: Question[];

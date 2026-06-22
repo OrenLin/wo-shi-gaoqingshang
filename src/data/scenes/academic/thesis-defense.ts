@@ -13,6 +13,7 @@ const scene: Scene = {
   },
   bgImage: '',
   bgColor: 'from-indigo-500/80 via-blue-400/60 to-cyan-500/70',
+  bgGradient: 'linear-gradient(180deg, #4f46e5 0%, #3b82f6 50%, #06b6d4 100%)',
   accentColor: 'indigo',
   characters: [
     {
