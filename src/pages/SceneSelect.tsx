@@ -236,6 +236,7 @@ export default function SceneSelect() {
         onToggleAccept={setAccept}
         onTogglePrivacy={setShowPrivacy}
         onConfirm={handleConsentConfirm}
+        onClose={() => setConsentOpen(false)}
       />
     </div>
   );

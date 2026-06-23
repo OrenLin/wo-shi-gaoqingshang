@@ -213,7 +213,7 @@ export default function Home() {
         <p className="mt-5 text-center text-xs font-bold text-[#1a1a2e]/60">{t('home.guide')}</p>
 
         {/* 底部：作者 + 版本号 */}
-        <div className="mt-6 pb-2 text-center flex flex-col items-center gap-2">
+        <div className="mt-6 pb-2 text-center flex flex-col items-center gap-2.5">
           <span className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-[11px] rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24]">
             {t('home.author')}
           </span>
@@ -221,7 +221,7 @@ export default function Home() {
             {t('home.version')}
           </span>
 
-          {/* 问卷反馈链接 */}
+          {/* 问卷反馈链接 —— 独立一行，更突出 */}
           <SurveyLink variant="compact" />
 
           {/* 隐私小按钮 —— 任何时候都可以查看 */}
@@ -260,6 +260,7 @@ export default function Home() {
         onToggleAccept={setAccept}
         onTogglePrivacy={setShowPrivacy}
         onConfirm={handleConsentConfirm}
+        onClose={() => setConsentOpen(false)}
       />
     </div>
   );

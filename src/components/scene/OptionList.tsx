@@ -29,8 +29,8 @@ export default function OptionList({
         const optionText = renderContent ? renderContent(opt) : pickLocalized(opt.content, language);
         const levelText = pickLocalized(levelLabel[opt.level], language);
         return (
+          <div key={opt.id} className="animate-pop-in" style={{ animationDelay: `${idx * 60}ms` }}>
           <button
-            key={opt.id}
             disabled={disabled}
             aria-pressed={isSelected}
             aria-disabled={disabled}
@@ -46,7 +46,6 @@ export default function OptionList({
                           ? 'bg-white shadow-[5px_5px_0_0_#1a1a2e] scale-[1.01] ring-4 ring-yellow-300'
                           : 'bg-white/95 shadow-[3px_3px_0_0_#1a1a2e] hover:shadow-[5px_5px_0_0_#1a1a2e] hover:-translate-y-[1px]'}
                         ${disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
-            style={{ animationDelay: `${idx * 60}ms` }}
           >
             {isSelected && (
               <div
@@ -82,6 +81,7 @@ export default function OptionList({
               </div>
             </div>
           </button>
+          </div>
         );
       })}
     </div>

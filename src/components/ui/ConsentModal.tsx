@@ -18,6 +18,7 @@ interface Props {
   onToggleAccept: (value: boolean) => void;
   onTogglePrivacy: (value: boolean) => void;
   onConfirm: () => void;
+  onClose?: () => void;
 }
 
 export default function ConsentModal({
@@ -27,6 +28,7 @@ export default function ConsentModal({
   onToggleAccept,
   onTogglePrivacy,
   onConfirm,
+  onClose,
 }: Props) {
   const language = useI18n((s) => s.language);
   const t = useI18n((s) => s.t);
@@ -35,13 +37,17 @@ export default function ConsentModal({
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        // ESC 仅在展开完整隐私条款时收起条款
-        onTogglePrivacy(false);
+        // ESC：若展开了完整条款先收起，否则关闭弹窗
+        if (showPrivacy) {
+          onTogglePrivacy(false);
+        } else if (onClose) {
+          onClose();
+        }
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onTogglePrivacy]);
+  }, [open, showPrivacy, onTogglePrivacy, onClose]);
 
   if (!open) return null;
 
@@ -49,16 +55,23 @@ export default function ConsentModal({
 
   return (
     <div className="fixed inset-0 z-[180] flex items-end md:items-center justify-center px-3 md:px-5">
-      {/* 背景遮罩 */}
+      {/* 背景遮罩 — 点击关闭弹窗（若展开了条款先收起条款） */}
       <div
         className="absolute inset-0 bg-[#1a1a2e]/70 backdrop-blur-sm"
-        onClick={() => onTogglePrivacy(false)}
+        onClick={() => {
+          if (showPrivacy) {
+            onTogglePrivacy(false);
+          } else if (onClose) {
+            audioManager.play('click');
+            onClose();
+          }
+        }}
       />
 
       {/* 弹窗主体 */}
       <div className="relative w-full max-w-lg bg-white rounded-[28px] border-[4px] border-[#1a1a2e] shadow-[8px_8px_0_0_#1a1a2e] overflow-hidden animate-pop-in">
-        {/* 顶部：彩色横幅 */}
-        <div className="bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 px-5 pt-5 pb-4 border-b-[3px] border-[#1a1a2e]">
+        {/* 顶部：彩色横幅 + 关闭按钮 */}
+        <div className="relative bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 px-5 pt-5 pb-4 border-b-[3px] border-[#1a1a2e]">
           <div className="flex items-center gap-3">
             <div className="text-3xl">🔒</div>
             <div className="flex-1">
@@ -70,6 +83,19 @@ export default function ConsentModal({
                 {zh ? '· 仅 30 秒阅读' : '· Takes 30 seconds to read'}
               </div>
             </div>
+            {onClose && (
+              <button
+                onClick={() => {
+                  audioManager.userTapped();
+                  audioManager.play('click');
+                  onClose();
+                }}
+                aria-label={zh ? '关闭' : 'Close'}
+                className="w-9 h-9 rounded-full bg-white/25 backdrop-blur-md border-2 border-white/50 flex items-center justify-center text-white font-black text-base hover:bg-white/40 active:scale-90 transition-all"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 
@@ -251,8 +277,8 @@ export default function ConsentModal({
 
           <div className="text-center text-[10px] font-bold text-[#1a1a2e]/50">
             {zh
-              ? 'v1.9.6 · 匿名访问 · 数据不出你浏览器'
-              : 'v1.9.6 · Anonymous access · Data stays in your browser'}
+              ? 'v1.9.7 · 匿名访问 · 数据不出你浏览器'
+              : 'v1.9.7 · Anonymous access · Data stays in your browser'}
           </div>
         </div>
       </div>

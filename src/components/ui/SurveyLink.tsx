@@ -22,7 +22,7 @@ export default function SurveyLink({ variant = 'full' }: Props) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={ariaLabel}
-        className="inline-flex items-center gap-1 bg-emerald-400 text-[#1a1a2e] font-black text-[10px] rounded-full px-3 py-1 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e] transition-transform active:scale-95 hover:scale-105 no-underline"
+        className="inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-400 to-teal-500 text-[#1a1a2e] font-black text-xs rounded-full px-4 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#1a1a2e] transition-transform active:scale-95 hover:scale-105 hover:-translate-y-[1px] no-underline"
       >
         <span aria-hidden="true">📝</span>
         {zh ? '问卷反馈' : 'Survey'}
