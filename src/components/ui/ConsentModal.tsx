@@ -251,8 +251,8 @@ export default function ConsentModal({
 
           <div className="text-center text-[10px] font-bold text-[#1a1a2e]/50">
             {zh
-              ? 'v1.9.4 · 匿名访问 · 数据不出你浏览器'
-              : 'v1.9.4 · Anonymous access · Data stays in your browser'}
+              ? 'v1.9.5 · 匿名访问 · 数据不出你浏览器'
+              : 'v1.9.5 · Anonymous access · Data stays in your browser'}
           </div>
         </div>
       </div>

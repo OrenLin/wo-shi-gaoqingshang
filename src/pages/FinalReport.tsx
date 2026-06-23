@@ -6,7 +6,9 @@ import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 import ScoreBoard from '../components/ui/ScoreBoard';
 import SurveyLink from '../components/ui/SurveyLink';
+import HellModeConfirm from '../components/ui/HellModeConfirm';
 import { saveReport } from '../utils/reportStorage';
+import { audioManager } from '../utils/audioManager';
 import { useI18n, pickLocalized } from '../i18n';
 
 export default function FinalReport() {
@@ -20,10 +22,13 @@ export default function FinalReport() {
     maxStreakAnti,
     maxStreakLow,
     setPage,
+    getAllCompletedSceneIds,
   } = useGameStore();
   const currentModule = useGameStore((s) => s.currentModule);
   const codename = useGameStore((s) => s.codename);
+  const hellMode = useGameStore((s) => s.hellMode);
   const [show, setShow] = useState(false);
+  const [hellConfirmOpen, setHellConfirmOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const report = getFinalReport();
   const savedRef = useRef(false);
@@ -132,6 +137,10 @@ export default function FinalReport() {
   };
 
   const isAntiKing = report.averageScore === 100;
+
+  // 地狱模式解锁条件：完成所有场景
+  const allCompletedIds = getAllCompletedSceneIds();
+  const hellUnlocked = allCompletedIds.size >= scenes.length;
   const gradient = isAntiKing
     ? 'anti'
     : report.averageScore >= 90
@@ -239,15 +248,37 @@ export default function FinalReport() {
         <div
           className={`bg-white rounded-[28px] border-[4px] border-[#1a1a2e] shadow-[8px_8px_0_0_#1a1a2e] p-6 md:p-8 mb-5 transition-all duration-500 relative overflow-hidden ${
             show ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
-          }`}
+          } ${hellMode ? 'hell-border-flicker' : ''}`}
         >
+          {/* 地狱模式横幅 */}
+          {hellMode && (
+            <div
+              className="absolute top-0 left-0 right-0 h-12 flex items-center justify-center z-10"
+              style={{
+                background: 'linear-gradient(90deg, #dc2626 0%, #f59e0b 50%, #dc2626 100%)',
+                borderBottom: '3px solid #1a1a2e',
+              }}
+            >
+              <span className="font-black text-sm text-white flex items-center gap-1.5" style={{ textShadow: '1px 1px 0 rgba(0,0,0,0.4)' }}>
+                <span className="hell-fire-bounce">🔥</span>
+                {language === 'zh' ? '地狱模式通关' : 'HELL MODE CLEARED'}
+                <span className="hell-fire-bounce" style={{ animationDelay: '0.2s' }}>🔥</span>
+              </span>
+            </div>
+          )}
+
           {/* Hero visual */}
-          <div className="text-center mb-5">
+          <div className={`text-center mb-5 ${hellMode ? 'mt-10' : ''}`}>
             <div className="text-7xl mb-3 animate-wiggle" style={{ filter: 'drop-shadow(3px 4px 0 rgba(26,26,46,0.25))' }}>
               {report.level.emoji}
             </div>
-            <div className="inline-block bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black text-xs rounded-full px-4 py-1.5 mb-3 shadow-[3px_3px_0_0_#1a1a2e]">
+            <div className={`inline-block text-white font-black text-xs rounded-full px-4 py-1.5 mb-3 shadow-[3px_3px_0_0_#1a1a2e] ${
+              hellMode
+                ? 'bg-gradient-to-r from-red-600 to-orange-500'
+                : 'bg-gradient-to-r from-rose-500 to-orange-500'
+            }`}>
               {levelTag}
+              {hellMode && <span className="ml-1">· 🔥HELL</span>}
             </div>
             <h2
               className="text-3xl md:text-4xl font-black text-[#1a1a2e] leading-tight"
@@ -478,21 +509,49 @@ export default function FinalReport() {
             {t('report.shareBtn')}
           </MangaButton>
 
-          {/* 地狱模式按钮 */}
-          <MangaButton
-            variant="danger"
-            aria-label={t('report.hellMode')}
-            onClick={() => {
+          {/* 地狱模式按钮（需解锁：完成所有场景） */}
+          {hellUnlocked ? (
+            <button
+              onClick={() => {
+                audioManager.userTapped();
+                audioManager.play('click');
+                setHellConfirmOpen(true);
+              }}
+              aria-label={t('report.hellMode')}
+              className="w-full py-5 rounded-2xl border-[4px] border-[#1a1a2e] font-black text-xl text-white transition-all active:translate-y-[2px] hell-btn-pulse relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(180deg, #dc2626 0%, #991b1b 60%, #7f1d1d 100%)',
+                boxShadow: '0 0 20px rgba(220,38,38,0.5), 6px 6px 0 0 #1a1a2e',
+              }}
+            >
+              <span className="relative flex items-center justify-center gap-2">
+                <span aria-hidden="true" className="text-2xl hell-fire-bounce">🔥</span>
+                <span aria-hidden="true" className="text-2xl hell-fire-bounce" style={{ animationDelay: '0.2s' }}>💀</span>
+                {t('report.hellMode')}
+                <span aria-hidden="true" className="text-2xl hell-fire-bounce" style={{ animationDelay: '0.4s' }}>🔥</span>
+              </span>
+            </button>
+          ) : (
+            <div
+              className="w-full py-4 rounded-2xl border-[3px] border-[#1a1a2e]/30 font-bold text-sm text-[#1a1a2e]/40 text-center bg-gray-200/50"
+              aria-label={t('report.hellModeLocked')}
+            >
+              {t('report.hellModeLocked')}
+              <span className="ml-2 text-xs">
+                ({allCompletedIds.size}/{scenes.length})
+              </span>
+            </div>
+          )}
+
+          <HellModeConfirm
+            open={hellConfirmOpen}
+            onConfirm={() => {
+              setHellConfirmOpen(false);
               const randomIdx = Math.floor(Math.random() * scenes.length);
               selectScene(randomIdx, { hellMode: true });
             }}
-            className="w-full !py-5 !text-xl"
-          >
-            <span aria-hidden="true" className="text-2xl animate-bounce" style={{ animationDuration: '1.2s' }}>
-              🔥
-            </span>
-            {t('report.hellMode')}
-          </MangaButton>
+            onCancel={() => setHellConfirmOpen(false)}
+          />
 
           <MangaButton variant="secondary" aria-label={t('report.retry')} onClick={reset} className="w-full !py-5 !text-xl">
             {t('report.retry')}

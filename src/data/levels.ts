@@ -32,8 +32,8 @@ export const levels: Level[] = [
       },
     },
     socialCopy: {
-      zh: '别人忙着人情世故，我忙着守住自己舒服的边界，本季社交整顿选手就位🔥',
-      en: "Everyone else is busy performing social niceties — I'm busy defending my peace of mind. Certified boundary-setter of the season 🔥",
+      zh: '别人忙着人情世故，我忙着守住自己舒服的边界。本季社交整顿 MVP 就位，专治各种无效盘问🔥',
+      en: "Everyone else is busy performing social niceties — I'm busy defending my peace. This season's Social Cleanup MVP, specialist in shutting down nonsense 🔥",
     },
     recos: [
       {
@@ -85,8 +85,8 @@ export const levels: Level[] = [
       },
     },
     socialCopy: {
-      zh: '行走的人际关系教科书，但凡有我在，就没有聊崩的局👑',
-      en: 'A walking textbook on human relations. If I\'m in the room, there is no conversation that can go wrong 👑',
+      zh: '行走的人际关系教科书，但凡有我在，就没有聊崩的局。社交天花板，人间清醒本醒👑',
+      en: 'A walking textbook on human relations. If I\'m in the room, no conversation can go wrong. The social ceiling, walking clarity 👑',
     },
     recos: [
       {
@@ -138,8 +138,8 @@ export const levels: Level[] = [
       },
     },
     socialCopy: {
-      zh: '日常社交基本稳赢，偶尔小翻车，但绝不社死😎',
-      en: 'Winning at social life on autopilot, minor missteps happen — total social death? Never 😎',
+      zh: '日常社交基本稳赢，偶尔小翻车但绝不社死。情商在线，氛围组组长就是我😎',
+      en: 'Winning at social life on autopilot, minor missteps but never social death. EQ online, I am the vibe captain 😎',
     },
     recos: [
       {
@@ -191,8 +191,8 @@ export const levels: Level[] = [
       },
     },
     socialCopy: {
-      zh: '社交苟住型选手，不出错就是我的最大胜利😅',
-      en: 'Survival-mode socializer — "not messing up" counts as my biggest win 😅',
+      zh: '社交苟住型选手，不出错就是我的最大胜利。主打一个安全下车，稳如老狗😅',
+      en: 'Survival-mode socializer — "not messing up" is my biggest win. Safe landing every time, steady as a rock 😅',
     },
     recos: [
       {
@@ -244,8 +244,8 @@ export const levels: Level[] = [
       },
     },
     socialCopy: {
-      zh: '主打一个真诚坦荡，嘴比脑子跑得快，社死专业户本人💀',
-      en: "Champion of unfiltered honesty — mouth outruns brain, official spokesperson for social death 💀",
+      zh: '主打一个真诚坦荡，嘴比脑子跑得快，社死专业户本人。但我快乐，你管我💀',
+      en: "Champion of unfiltered honesty — mouth outruns brain, official spokesperson for social death. But I\'m happy, mind your own business 💀",
     },
     recos: [
       {

@@ -17,6 +17,7 @@ export default function Result() {
     currentSceneIndex,
     setPage,
   } = useGameStore();
+  const currentModule = useGameStore((s) => s.currentModule);
   const language = useI18n((s) => s.language);
   const setLanguage = useI18n((s) => s.setLanguage);
   const t = useI18n((s) => s.t);
@@ -97,8 +98,8 @@ export default function Result() {
         ]}
       />
 
-      {/* 抗压之王自动弹出的幽默气泡（不打断操作） */}
-      {isAntiKing && <AntiKingToast auto onClose={() => {}} />}
+      {/* 抗压之王自动弹出的幽默气泡（不打断操作，区分模块） */}
+      {isAntiKing && <AntiKingToast auto module={currentModule} onClose={() => {}} />}
 
       <div className="relative z-10 max-w-2xl mx-auto">
 

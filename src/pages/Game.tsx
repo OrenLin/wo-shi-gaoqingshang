@@ -137,15 +137,49 @@ export default function Game() {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden"
-      style={{ background: scene.bgGradient || scene.bgColor }}
+      className={`min-h-screen relative overflow-hidden ${hellMode ? 'hell-bg-pulse' : ''}`}
+      style={{
+        background: hellMode
+          ? 'linear-gradient(180deg, #1a0505 0%, #2a0a0a 40%, #3d1010 80%, #4a1414 100%)'
+          : (scene.bgGradient || scene.bgColor),
+      }}
     >
+      {/* 地狱模式：血红色氛围层 + 火焰粒子 */}
+      {hellMode && (
+        <>
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse 80% 50% at 50% 100%, rgba(220,38,38,0.25) 0%, transparent 60%)',
+            }}
+          />
+          {/* 火焰粒子背景 */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <span
+                key={i}
+                className="absolute hell-flame-particle"
+                style={{
+                  left: `${5 + i * 12}%`,
+                  bottom: '0%',
+                  fontSize: `${14 + (i % 3) * 5}px`,
+                  animationDelay: `${i * 0.4}s`,
+                  animationDuration: `${3 + (i % 2) * 1.2}s`,
+                }}
+              >
+                {i % 2 === 0 ? '🔥' : '💀'}
+              </span>
+            ))}
+          </div>
+        </>
+      )}
+
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: scene.bgImage ? `url(${scene.bgImage})` : 'none',
+          backgroundImage: scene.bgImage && !hellMode ? `url(${scene.bgImage})` : 'none',
           transform: 'scale(1.05)',
-          opacity: 0.95,
+          opacity: hellMode ? 0.3 : 0.95,
         }}
       >
         <div
@@ -212,7 +246,7 @@ export default function Game() {
             onBack={() => setPage('select')}
             backText={t('game.back')}
             title={`${scene.emoji} ${pickLocalized(scene.title, language)}${
-              hellMode ? (language === 'zh' ? ' · 地狱模式' : ' · Hell Mode') : ''
+              hellMode ? (language === 'zh' ? ' · 🔥地狱模式🔥' : ' · 🔥Hell Mode🔥') : ''
             }`}
             rightSlot={langSwitch}
           />
