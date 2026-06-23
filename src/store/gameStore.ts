@@ -128,6 +128,7 @@ function estimatePercentile(avg: number): number {
 
 const STORAGE_KEY_CONSENT = 'eq_consented';
 const STORAGE_KEY_CODENAME = 'eq_codename';
+const STORAGE_KEY_ANSWERS = 'eq_answers';
 
 function loadConsent(): boolean {
   try {
@@ -145,6 +146,24 @@ function loadCodename(): string {
   } catch {
     return '';
   }
+}
+
+// 持久化加载答题记录，刷新后场景完成状态/地狱模式解锁/总报告数据全部恢复
+function loadAnswers(): AnswerRecord[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_ANSWERS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveAnswers(answers: AnswerRecord[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY_ANSWERS, JSON.stringify(answers));
+  } catch {}
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -174,6 +193,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentQuestionIndex: 0,
   selectScene: (index, optsIn) => {
     const opts = typeof optsIn === 'object' && optsIn !== null ? optsIn : {};
+    const state = get();
+    // 重玩场景时，先清除该场景旧答题记录，避免累积导致分数失真
+    const moduleScenes = getScenesByModule(state.currentModule);
+    const targetScene = moduleScenes[index];
+    let nextAnswers = state.answers;
+    if (targetScene) {
+      const filtered = state.answers.filter((a) => a.sceneId !== targetScene.id);
+      if (filtered.length !== state.answers.length) {
+        nextAnswers = filtered;
+        saveAnswers(nextAnswers);
+      }
+    }
     set({
       currentSceneIndex: index,
       currentQuestionIndex: 0,
@@ -184,10 +215,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       maxStreakAnti: 0,
       maxStreakLow: 0,
       achieved: new Set(),
+      answers: nextAnswers,
     });
   },
 
-  answers: [],
+  answers: loadAnswers(),
   customInputs: {},
   setCustomInput: (key, value) =>
     set((s) => ({ customInputs: { ...s.customInputs, [key]: value } })),
@@ -266,8 +298,10 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const isLastInScene = q.questionIndex + 1 >= scene.questions.length;
 
+    const nextAnswers = [...state.answers, record];
+    saveAnswers(nextAnswers);
     set({
-      answers: [...state.answers, record],
+      answers: nextAnswers,
       currentQuestionIndex: isLastInScene ? 0 : q.questionIndex + 1,
       currentPage: 'result',
       streakAnti: nextStreakAnti,
@@ -293,7 +327,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  reset: () =>
+  reset: () => {
+    saveAnswers([]);
     set({
       currentPage: 'home',
       currentSceneIndex: 0,
@@ -306,7 +341,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       maxStreakAnti: 0,
       maxStreakLow: 0,
       achieved: new Set(),
-    }),
+    });
+  },
 
   getCurrentScene: () => {
     const moduleScenes = getScenesByModule(get().currentModule);

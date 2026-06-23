@@ -8,6 +8,7 @@ import ReportHistory from '../components/profile/ReportHistory';
 import EQTrajectory from '../components/profile/EQTrajectory';
 import EQPlan from '../components/profile/EQPlan';
 import SurveyLink from '../components/ui/SurveyLink';
+import PageHeader from '../components/ui/PageHeader';
 
 type Tab = 'history' | 'trajectory' | 'plan';
 
@@ -43,25 +44,18 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-rose-50 px-4 py-6 pb-24">
       <div className="max-w-md mx-auto">
-        {/* 顶部标题区 */}
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="text-2xl font-black text-[#1a1a2e] flex items-center gap-2">
-            <span aria-hidden="true">👤</span>
-            {zh ? '个人中心' : 'My Profile'}
-          </h1>
-          <button
-            onClick={() => {
-              audioManager.userTapped();
-              audioManager.play('click');
-              setPage('home');
-            }}
-            aria-label={zh ? '返回首页' : 'Back to home'}
-            className="inline-flex items-center gap-1 bg-white border-[3px] border-[#1a1a2e] rounded-full px-3 py-1.5 shadow-[2px_2px_0_0_#1a1a2e] font-black text-sm text-[#1a1a2e] transition-transform active:scale-95 hover:scale-105"
-          >
-            <span aria-hidden="true">←</span>
-            {zh ? '首页' : 'Home'}
-          </button>
-        </div>
+        {/* 统一主标题 */}
+        <PageHeader
+          emoji="👤"
+          title={zh ? '个人中心' : 'My Profile'}
+          subtitle={zh ? '📊 你的情商成长档案' : '📊 Your EQ growth archive'}
+          onBack={() => {
+            audioManager.userTapped();
+            audioManager.play('click');
+            setPage('home');
+          }}
+          backLabel={zh ? '首页' : 'Home'}
+        />
 
         {/* 用户信息卡片 —— 视觉升级 */}
         <div className="relative bg-gradient-to-br from-amber-100 via-orange-50 to-rose-100 rounded-[28px] border-[3px] border-[#1a1a2e] shadow-[6px_6px_0_0_#1a1a2e] p-5 mb-4 overflow-hidden animate-pop-in">

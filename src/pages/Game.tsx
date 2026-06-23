@@ -240,7 +240,7 @@ export default function Game() {
         </div>
       )}
 
-      <div className="relative z-10 min-h-screen py-5 px-3 md:px-5 flex flex-col">
+      <div className="relative z-10 px-3 md:px-5 pt-3 pb-6 flex flex-col items-center">
         <div className="max-w-2xl mx-auto w-full">
           <PageTopBar
             onBack={() => setPage('select')}
@@ -251,7 +251,7 @@ export default function Game() {
             rightSlot={langSwitch}
           />
 
-          <div className="mb-4">
+          <div className="mb-3">
             <ProgressBar current={qIndex + 1} total={totalQs} />
           </div>
 

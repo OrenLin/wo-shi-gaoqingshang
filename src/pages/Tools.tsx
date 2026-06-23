@@ -7,6 +7,7 @@ import AnxietyQuiz from '../components/profile/AnxietyQuiz';
 import WoodfishZen from '../components/profile/WoodfishZen';
 import DebateSkills from '../components/tools/DebateSkills';
 import Divination from '../components/tools/Divination';
+import PageHeader from '../components/ui/PageHeader';
 
 type ToolKey = 'divination' | 'philosophy' | 'anxiety' | 'woodfish' | 'debate';
 
@@ -85,30 +86,14 @@ export default function Tools() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-rose-50 px-4 py-6 pb-24">
       <div className="max-w-md mx-auto">
-        {/* 顶部标题区 */}
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="text-2xl font-black text-[#1a1a2e] flex items-center gap-2">
-            <span aria-hidden="true">🧰</span>
-            {zh ? '工具箱' : 'Toolkit'}
-          </h1>
-          <button
-            onClick={handleBack}
-            aria-label={zh ? '返回首页' : 'Back to home'}
-            className="inline-flex items-center gap-1 bg-white border-[3px] border-[#1a1a2e] rounded-full px-3 py-1.5 shadow-[2px_2px_0_0_#1a1a2e] font-black text-sm text-[#1a1a2e] transition-transform active:scale-95 hover:scale-105"
-          >
-            <span aria-hidden="true">←</span>
-            {zh ? '首页' : 'Home'}
-          </button>
-        </div>
-
-        {/* 副标题 */}
-        <div className="mb-5 text-center">
-          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border-[2px] border-[#1a1a2e]/20 shadow-[2px_2px_0_0_#1a1a2e]/10">
-            <span className="text-[11px] font-black text-[#1a1a2e]/70">
-              {zh ? '✨ 现代人应对压力的智慧工具集' : '✨ Wisdom tools for modern stress'}
-            </span>
-          </div>
-        </div>
+        {/* 统一主标题 */}
+        <PageHeader
+          emoji="🧰"
+          title={zh ? '工具箱' : 'Toolkit'}
+          subtitle={zh ? '✨ 现代人应对压力的智慧工具集' : '✨ Wisdom tools for modern stress'}
+          onBack={handleBack}
+          backLabel={zh ? '首页' : 'Home'}
+        />
 
         {/* ===== 特色工具：抽签（全宽卡片） ===== */}
         <button

@@ -6,6 +6,7 @@ import ImmersiveScenePreview from '../components/scene/ImmersiveScenePreview';
 import FloatingEmojis from '../components/ui/FloatingEmojis';
 import MangaButton from '../components/ui/MangaButton';
 import ConsentModal from '../components/ui/ConsentModal';
+import PageHeader from '../components/ui/PageHeader';
 import { audioManager } from '../utils/audioManager';
 import { useI18n, pickLocalized } from '../i18n';
 
@@ -75,45 +76,37 @@ export default function SceneSelect() {
 
       <div className="relative z-10 max-w-5xl mx-auto">
 
-        {/* 顶栏 */}
-        <div className="flex items-start justify-between mb-6">
-          <MangaButton variant="secondary" onClick={() => setPage('modules')} className="!py-2 !px-4 !text-sm">
-            {t('select.home')}
-          </MangaButton>
-
-          <div className="flex items-center gap-2">
-            {currentModConfig && (
-              <div className="bg-white text-[#1a1a2e] text-xs font-black rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24]">
-                {currentModConfig.emoji} {tLocal(currentModConfig.title)}
+        {/* 统一主标题 + 模块标签/进度 */}
+        <PageHeader
+          emoji="🎯"
+          title={`${t('select.title1')}${t('select.title2')}${t('select.title3')}`}
+          subtitle={t('select.tip')}
+          onBack={() => setPage('modules')}
+          backLabel={t('select.home')}
+          rightSlot={
+            <>
+              {currentModConfig && (
+                <div className="bg-white text-[#1a1a2e] text-xs font-black rounded-full px-3 py-1 border-[3px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24]">
+                  {currentModConfig.emoji} {tLocal(currentModConfig.title)}
+                </div>
+              )}
+              <div className="bg-[#1a1a2e] text-white text-xs font-black rounded-full px-3 py-1 border-[3px] border-[#1a1a2e]">
+                {t('select.progress')} {doneCount}{t('common.of')}{totalCount}
               </div>
-            )}
-            <div className="bg-[#1a1a2e] text-white text-xs font-black rounded-full px-3 py-1 border-[3px] border-[#1a1a2e]">
-              {t('select.progress')} {doneCount}{t('common.of')}{totalCount}
-            </div>
-            <button
-              onClick={() => {
-                audioManager.userTapped();
-                audioManager.play('click');
-                setLanguage(language === 'zh' ? 'en' : 'zh');
-              }}
-              className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
-            >
-              <span>🌐</span>
-              <span>{language === 'zh' ? 'EN' : '中文'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 标题 */}
-        <div className="text-center mb-8">
-          <h2 className="text-4xl md:text-5xl font-black text-[#1a1a2e] leading-tight"
-              style={{ WebkitTextStroke: '2px #1a1a2e', textShadow: '4px 4px 0 #fbbf24' }}>
-            {t('select.title1')}<span className="text-red-500">{t('select.title2')}</span>{t('select.title3')}
-          </h2>
-          <div className="mt-3 inline-flex items-center gap-2 bg-white border-[3px] border-[#1a1a2e] rounded-full px-4 py-1.5 shadow-[3px_3px_0_0_#1a1a2e]">
-            <span className="text-sm font-bold text-[#1a1a2e]">{t('select.tip')}</span>
-          </div>
-        </div>
+              <button
+                onClick={() => {
+                  audioManager.userTapped();
+                  audioManager.play('click');
+                  setLanguage(language === 'zh' ? 'en' : 'zh');
+                }}
+                className="inline-flex items-center gap-1.5 bg-[#1a1a2e] text-white font-black text-xs rounded-full px-3 py-1.5 border-[2px] border-[#1a1a2e] shadow-[2px_2px_0_0_#fbbf24] hover:-translate-y-[2px] active:translate-y-[1px] transition-transform"
+              >
+                <span>🌐</span>
+                <span>{language === 'zh' ? 'EN' : '中文'}</span>
+              </button>
+            </>
+          }
+        />
 
         {/* 全部完成 → 报告入口 */}
         {allDone && (
