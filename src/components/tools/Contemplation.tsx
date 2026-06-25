@@ -6,10 +6,30 @@ import GalaxyBackground from './contemplation/GalaxyBackground';
 import FerrofluidBackground from './contemplation/FerrofluidBackground';
 import LetterGlitchBackground from './contemplation/LetterGlitchBackground';
 import BalatroBackground from './contemplation/BalatroBackground';
+import AuroraBackground from './contemplation/AuroraBackground';
+import BeamsBackground from './contemplation/BeamsBackground';
+import IridescenceBackground from './contemplation/IridescenceBackground';
+import ColorBendsBackground from './contemplation/ColorBendsBackground';
+import EvilEyeBackground from './contemplation/EvilEyeBackground';
+import HyperspeedBackground from './contemplation/HyperspeedBackground';
 
 interface Props {
   onBack: () => void;
 }
+
+// 主题背景映射
+const backgroundMap: Record<string, () => JSX.Element> = {
+  universe: GalaxyBackground,
+  electromagnetism: FerrofluidBackground,
+  digital: LetterGlitchBackground,
+  cycle: BalatroBackground,
+  light: ColorBendsBackground,
+  inspiration: IridescenceBackground,
+  nature: AuroraBackground,
+  rules: BeamsBackground,
+  chaos: EvilEyeBackground,
+  time: HyperspeedBackground,
+};
 
 export default function Contemplation({ onBack }: Props) {
   const language = useI18n((s) => s.language);
@@ -21,12 +41,22 @@ export default function Contemplation({ onBack }: Props) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [quoteVisible, setQuoteVisible] = useState(true);
   const [quoteExpanded, setQuoteExpanded] = useState(true);
+  const [hintVisible, setHintVisible] = useState(false);
 
   const currentTheme = contemplationThemes[currentThemeIndex];
   const currentQuote = currentTheme.quotes[currentQuoteIndex];
-
-  // 卡片是否可见 = 语录可见 && 卡片展开
   const cardVisible = quoteVisible && quoteExpanded;
+
+  // 折叠时显示提示，1.2秒后自动消失
+  useEffect(() => {
+    if (quoteExpanded) {
+      setHintVisible(false);
+      return;
+    }
+    setHintVisible(true);
+    const timer = setTimeout(() => setHintVisible(false), 1200);
+    return () => clearTimeout(timer);
+  }, [quoteExpanded, currentThemeIndex]);
 
   // 语录自动轮播（12秒）— 仅在展开时
   useEffect(() => {
@@ -98,26 +128,15 @@ export default function Contemplation({ onBack }: Props) {
     onBack();
   };
 
-  // 根据主题渲染背景
+  // 渲染当前主题背景
   const renderBackground = () => {
-    switch (currentTheme.id) {
-      case 'universe':
-        return <GalaxyBackground />;
-      case 'electromagnetism':
-        return <FerrofluidBackground />;
-      case 'digital':
-        return <LetterGlitchBackground />;
-      case 'cycle':
-        return <BalatroBackground />;
-      default:
-        return <GalaxyBackground />;
-    }
+    const Bg = backgroundMap[currentTheme.id] || GalaxyBackground;
+    return <Bg />;
   };
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black" style={{ height: '100dvh' }}>
       {/* === 特效背景层 === */}
-      {/* 展开时 pointer-events-none（让卡片接收点击）；折叠时 auto（可玩背景） */}
       <div
         className={`absolute inset-0 transition-opacity duration-500 ${
           isTransitioning ? 'opacity-0' : 'opacity-100'
@@ -127,7 +146,7 @@ export default function Contemplation({ onBack }: Props) {
         {renderBackground()}
       </div>
 
-      {/* 渐变遮罩（增强可读性）— 始终不拦截事件 */}
+      {/* 渐变遮罩 — 始终不拦截事件 */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -138,7 +157,7 @@ export default function Contemplation({ onBack }: Props) {
 
       {/* === 顶部控制栏（左上角：返回 + 语言） === */}
       <div
-        className="absolute top-0 left-0 z-30 flex flex-col gap-2 p-4"
+        className="absolute top-0 left-0 z-40 flex flex-col gap-2 p-4"
         style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
       >
         <button
@@ -159,19 +178,27 @@ export default function Contemplation({ onBack }: Props) {
       </div>
 
       {/* === 语录卡片（居中） === */}
+      {/* 毛玻璃直接使用 inline style，避免 CSS 加载延迟 */}
       <div className="absolute inset-0 z-20 flex items-center justify-center px-4 pointer-events-none">
         <div
-          className={`w-[85%] max-w-[340px] transition-all duration-500 ${
-            cardVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+          className={`w-[85%] max-w-[340px] transition-opacity duration-500 ${
+            cardVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           } ${cardVisible ? 'pointer-events-auto' : ''}`}
         >
           <div
-            className="relative bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-3xl p-6 shadow-2xl cursor-pointer select-none"
+            className="relative rounded-3xl p-6 shadow-2xl cursor-pointer select-none border-2 border-white/20"
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+            }}
             onClick={handleQuoteClick}
           >
             {/* 主题标签 + 进度 */}
             <div className="text-center mb-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/70 text-xs font-bold">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 text-white/70 text-xs font-bold"
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              >
                 <span className="text-base">{currentTheme.emoji}</span>
                 <span>{zh ? currentTheme.name.zh : currentTheme.name.en}</span>
                 <span className="text-white/50">·</span>
@@ -213,7 +240,8 @@ export default function Contemplation({ onBack }: Props) {
                   e.stopPropagation();
                   toggleQuoteExpand();
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white/80 text-xs font-bold hover:bg-white/25 active:scale-95 transition-all"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-white/25 text-white/80 text-xs font-bold hover:bg-white/25 active:scale-95 transition-all"
+                style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
               >
                 <span>{zh ? '🔽 收起' : '🔽 Collapse'}</span>
               </button>
@@ -225,53 +253,68 @@ export default function Contemplation({ onBack }: Props) {
       {/* === 折叠状态：展开按钮 + 滑动提示 === */}
       {!quoteExpanded && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-          {/* 滑动提示 */}
-          <div className="mb-6 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center animate-pulse">
-            <div className="text-white/90 text-sm font-bold mb-1">
-              {zh ? '👆 滑动手指 · 与背景互动' : '👆 Swipe to interact'}
+          {/* 滑动提示 — 1.2秒后消失 */}
+          {hintVisible && (
+            <div className="mb-6 px-5 py-3 rounded-2xl border border-white/20 text-center transition-opacity duration-300"
+              style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+            >
+              <div className="text-white/90 text-sm font-bold mb-1">
+                {zh ? '👆 滑动手指 · 与背景互动' : '👆 Swipe to interact'}
+              </div>
+              <div className="text-white/50 text-xs font-medium">
+                {zh ? '触摸屏幕探索特效' : 'Touch the screen to explore'}
+              </div>
             </div>
-            <div className="text-white/50 text-xs font-medium">
-              {zh ? '触摸屏幕探索特效' : 'Touch the screen to explore'}
-            </div>
-          </div>
+          )}
           {/* 展开按钮 */}
           <button
             onClick={toggleQuoteExpand}
-            className="pointer-events-auto px-6 py-3 rounded-full bg-white/20 backdrop-blur-md border-2 border-white/40 text-white font-black text-sm hover:bg-white/30 active:scale-95 transition-all shadow-lg"
+            className="pointer-events-auto px-6 py-3 rounded-full bg-white/20 border-2 border-white/40 text-white font-black text-sm hover:bg-white/30 active:scale-95 transition-all shadow-lg"
+            style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
           >
             {zh ? '🧘 展开语录' : '🧘 Show Quotes'}
           </button>
         </div>
       )}
 
-      {/* === 底部主题切换栏 === */}
+      {/* === 主题切换：右侧纵向滚动条（不遮挡画面） === */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-30 flex justify-center gap-2 px-4 pb-6"
-        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+        className="absolute top-1/2 -translate-y-1/2 right-3 z-40 flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto py-2 px-1"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
+        }}
       >
-        {/* 半透明背景条，增强可见性 */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-        <div className="relative flex justify-center gap-2">
-          {contemplationThemes.map((theme, idx) => (
-            <button
-              key={theme.id}
-              onClick={() => handleThemeSwitch(idx)}
-              disabled={isTransitioning}
-              aria-label={zh ? theme.name.zh : theme.name.en}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
-                idx === currentThemeIndex
-                  ? 'bg-white/25 backdrop-blur-md border-2 border-white/60 scale-105 shadow-lg'
-                  : 'bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/15'
-              } ${isTransitioning ? 'cursor-not-allowed opacity-50' : 'hover:scale-105 active:scale-95'}`}
-            >
-              <span className="text-xl leading-none">{theme.emoji}</span>
-              <span className={`text-[10px] font-black leading-none ${
-                idx === currentThemeIndex ? 'text-white' : 'text-white/60'
-              }`}>
-                {zh ? theme.name.zh : theme.name.en}
-              </span>
-            </button>
-          ))}
+        {contemplationThemes.map((theme, idx) => (
+          <button
+            key={theme.id}
+            onClick={() => handleThemeSwitch(idx)}
+            disabled={isTransitioning}
+            aria-label={zh ? theme.name.zh : theme.name.en}
+            title={zh ? theme.name.zh : theme.name.en}
+            className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base transition-all duration-300 border-2 ${
+              idx === currentThemeIndex
+                ? 'bg-white/30 border-white/70 scale-110 shadow-lg'
+                : 'bg-white/10 border-white/20 opacity-50 hover:opacity-90'
+            } ${isTransitioning ? 'cursor-not-allowed' : 'hover:scale-110 active:scale-90'}`}
+            style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+          >
+            {theme.emoji}
+          </button>
+        ))}
+      </div>
+
+      {/* === 底部当前主题名称显示 === */}
+      <div
+        className="absolute left-0 right-0 z-30 flex justify-center pointer-events-none"
+        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      >
+        <div
+          className="px-4 py-1.5 rounded-full text-white/80 text-xs font-bold border border-white/15"
+          style={{ backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+        >
+          {currentTheme.emoji} {zh ? currentTheme.name.zh : currentTheme.name.en}
         </div>
       </div>
     </div>
