@@ -2,14 +2,22 @@ import LetterGlitch from '../../LetterGlitch';
 
 export default function LetterGlitchBackground() {
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      <LetterGlitch
-        glitchColors={['#5227FF', '#7cff67', '#ff6b6b']}
-        glitchSpeed={50}
-        centerVignette
-        outerVignette
-        smooth
-      />
+    <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
+      <div
+        className="relative"
+        style={{
+          width: 'max(100vw, 100vh)',
+          height: 'max(100vw, 100vh)',
+        }}
+      >
+        <LetterGlitch
+          glitchColors={['#5227FF', '#7cff67', '#ff6b6b']}
+          glitchSpeed={50}
+          centerVignette
+          outerVignette
+          smooth
+        />
+      </div>
     </div>
   );
 }

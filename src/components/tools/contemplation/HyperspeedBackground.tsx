@@ -1,11 +1,18 @@
 import Hyperspeed from '../../Hyperspeed';
-import { isMobile } from '../../../utils/device';
 
 export default function HyperspeedBackground() {
-  const mobile = isMobile();
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      <Hyperspeed speed={mobile ? 0.8 : 1} />
+    <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
+      {/* 保持正方形比例，居中裁切 */}
+      <div
+        className="relative"
+        style={{
+          width: 'max(100vw, 100vh)',
+          height: 'max(100vw, 100vh)',
+        }}
+      >
+        <Hyperspeed speed={1} />
+      </div>
     </div>
   );
 }
