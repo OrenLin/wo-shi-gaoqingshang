@@ -22,8 +22,6 @@ uniform vec3 uResolution;
 uniform vec2 uMouse;
 uniform float uSpeed;
 
-varying vec2 vUv;
-
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
@@ -40,14 +38,10 @@ float noise(vec2 p) {
 }
 
 void main() {
-  vec2 uv = vUv - 0.5;
-  float aspect = uResolution.x / uResolution.y;
-  // contain模式:保证内容完整显示不变形
-  if (aspect > 1.0) {
-    uv.x *= aspect;
-  } else {
-    uv.y /= aspect;
-  }
+  // 标准归一化：基于像素坐标，y 归一化（自动适配屏幕比例，无黑边）
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uResolution.xy) / uResolution.y;
+  // 缩放至合适视野（zoom out，让隧道效果完整可见）
+  uv /= 1.5;
 
   float t = uTime * uSpeed;
 
@@ -73,10 +67,10 @@ void main() {
   }
 
   // 中心光晕
-  float center = smoothstep(0.5, 0.0, r);
+  float center = smoothstep(0.6, 0.0, r);
 
-  // 鼠标偏移
-  vec2 mouseOffset = (uMouse - 0.5) * 0.2;
+  // 鼠标偏移（uMouse 在 uv 空间）
+  vec2 mouseOffset = uMouse * 0.2;
   float mouseGlow = smoothstep(0.3, 0.0, length(uv - mouseOffset)) * 0.3;
 
   // 颜色
@@ -90,10 +84,10 @@ void main() {
   col += vec3(0.5, 0.3, 1.0) * mouseGlow;
 
   // 中心强光
-  col += vec3(1.0) * smoothstep(0.15, 0.0, r) * 0.8;
+  col += vec3(1.0) * smoothstep(0.2, 0.0, r) * 0.8;
 
-  // 暗角
-  col *= smoothstep(1.0, 0.3, r);
+  // 暗角（仅在角落变暗，保留中心区域）
+  col *= smoothstep(1.3, 0.3, r);
 
   gl_FragColor = vec4(col, 1.0);
 }
@@ -103,7 +97,7 @@ export default function Hyperspeed({
   speed = 1,
 }) {
   const containerRef = useRef(null);
-  const mouseTargetRef = useRef([0.5, 0.5]);
+  const mouseTargetRef = useRef([0, 0]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -122,7 +116,7 @@ export default function Hyperspeed({
       uniforms: {
         uTime: { value: 0 },
         uResolution: { value: [1, 1, 1] },
-        uMouse: { value: [0.5, 0.5] },
+        uMouse: { value: [0, 0] },
         uSpeed: { value: speed },
       },
     });
@@ -132,27 +126,29 @@ export default function Hyperspeed({
     function resize() {
       const { width, height } = container.getBoundingClientRect();
       renderer.setSize(width, height);
-      program.uniforms.uResolution.value = [width, height, width / height];
+      program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
     }
     window.addEventListener('resize', resize);
     resize();
 
-    const smoothMouse = [0.5, 0.5];
+    const smoothMouse = [0, 0];
 
     function onPointerMove(e) {
       const rect = container.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = 1.0 - (e.clientY - rect.top) / rect.height;
-      mouseTargetRef.current = [x, y];
+      const aspect = rect.width / rect.height;
+      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseTargetRef.current = [nx * aspect, ny];
     }
     function onTouchMove(e) {
       if (e.touches.length === 0) return;
       e.preventDefault();
       const touch = e.touches[0];
       const rect = container.getBoundingClientRect();
-      const x = (touch.clientX - rect.left) / rect.width;
-      const y = 1.0 - (touch.clientY - rect.top) / rect.height;
-      mouseTargetRef.current = [x, y];
+      const aspect = rect.width / rect.height;
+      const nx = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((touch.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseTargetRef.current = [nx * aspect, ny];
     }
 
     container.addEventListener('pointermove', onPointerMove);

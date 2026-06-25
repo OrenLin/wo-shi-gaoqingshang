@@ -210,24 +210,24 @@ export default function Contemplation({ onBack }: Props) {
         }}
       />
 
-      {/* === 顶部控制栏（左上角：返回 + 语言） === */}
+      {/* === 顶部控制栏（顶部居中：返回 + 语言，避开左侧主题栏） === */}
       <div
-        className="absolute top-0 left-0 z-40 flex flex-col gap-2 p-4"
-        style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
+        className="absolute top-0 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 p-3"
+        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}
       >
         <button
           onClick={handleBack}
           aria-label={zh ? '返回' : 'Back'}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border-2 border-white/30 text-white font-black text-sm hover:bg-white/25 active:scale-95 transition-all"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 border-2 border-white/30 text-white font-black text-sm hover:bg-white/25 active:scale-95 transition-all"
           style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
         >
           <span className="text-base">←</span>
-          <span>{zh ? '返回' : 'Back'}</span>
+          <span className="hidden sm:inline">{zh ? '返回' : 'Back'}</span>
         </button>
         <button
           onClick={handleLanguageSwitch}
           aria-label={zh ? '切换到英文' : 'Switch to Chinese'}
-          className="px-4 py-2 rounded-full bg-white/15 border-2 border-white/30 text-white font-black text-sm hover:bg-white/25 active:scale-95 transition-all w-fit"
+          className="px-3.5 py-1.5 rounded-full bg-white/15 border-2 border-white/30 text-white font-black text-sm hover:bg-white/25 active:scale-95 transition-all"
           style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
         >
           {language === 'zh' ? 'EN' : '中文'}
@@ -335,13 +335,13 @@ export default function Contemplation({ onBack }: Props) {
         </>
       )}
 
-      {/* === 主题切换：右侧纵向滚动条（简约设计） === */}
+      {/* === 主题切换：左侧纵向滚动条（避开右侧无障碍按钮和语录卡片） === */}
       <div
-        className="absolute top-1/2 -translate-y-1/2 right-3 z-40 flex flex-col gap-2 max-h-[70vh] overflow-y-auto py-2 px-1"
+        className="absolute top-1/2 -translate-y-1/2 left-3 z-40 flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto py-2 px-1"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
+          marginTop: 'calc(2rem + env(safe-area-inset-top))',
         }}
       >
         {contemplationThemes.map((theme, idx) => (
@@ -353,8 +353,8 @@ export default function Contemplation({ onBack }: Props) {
             title={zh ? theme.name.zh : theme.name.en}
             className={`flex-shrink-0 transition-all duration-300 ${
               idx === currentThemeIndex
-                ? 'w-10 h-10 rounded-full flex items-center justify-center text-lg bg-gradient-to-br from-purple-400/40 to-pink-400/40 border-2 border-white/60 scale-110 shadow-lg backdrop-blur-sm'
-                : 'w-8 h-8 rounded-full flex items-center justify-center text-sm bg-white/10 border border-white/20 opacity-40 hover:opacity-80 hover:scale-105'
+                ? 'w-9 h-9 rounded-full flex items-center justify-center text-base bg-gradient-to-br from-purple-400/40 to-pink-400/40 border-2 border-white/60 scale-110 shadow-lg backdrop-blur-sm'
+                : 'w-7 h-7 rounded-full flex items-center justify-center text-xs bg-white/10 border border-white/20 opacity-40 hover:opacity-80 hover:scale-105'
             } ${isTransitioning ? 'cursor-not-allowed' : 'active:scale-90'}`}
           >
             {theme.emoji}

@@ -28,8 +28,6 @@ uniform float uNoiseIntensity;
 uniform float uScale;
 uniform float uRotation;
 
-varying vec2 vUv;
-
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
@@ -50,17 +48,10 @@ mat2 rotate2d(float angle) {
 }
 
 void main() {
-  vec2 uv = vUv;
-  uv -= 0.5;
-  float aspect = uResolution.x / uResolution.y;
-  // contain模式:保证内容完整显示不变形
-  if (aspect > 1.0) {
-    uv.x *= aspect;
-  } else {
-    uv.y /= aspect;
-  }
+  // 标准归一化：基于像素坐标，y 归一化（自动适配屏幕比例，无黑边）
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uResolution.xy) / uResolution.y;
   uv = rotate2d(uRotation) * uv;
-  uv *= uScale;
+  uv /= uScale;
 
   float t = uTime * uSpeed * 0.1;
 
@@ -69,8 +60,8 @@ void main() {
   for (float i = 0.0; i < 24.0; i++) {
     if (i >= uBeamNumber) break;
     float offset = i / uBeamNumber;
-    // 每条光束的位置和宽度
-    float xPos = (fract(offset + t * 0.3) - 0.5) * 4.0;
+    // 每条光束的位置和宽度（位置在 -0.6..0.6，确保在可见范围内）
+    float xPos = (fract(offset + t * 0.3) - 0.5) * 1.2;
     float width = uBeamWidth * 0.01 * (0.5 + noise(vec2(i, t)) * 0.8);
     float height = uBeamHeight * 0.15;
 
@@ -151,7 +142,7 @@ export default function Beams({
     function resize() {
       const { width, height } = container.getBoundingClientRect();
       renderer.setSize(width, height);
-      program.uniforms.uResolution.value = [width, height, width / height];
+      program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
     }
     window.addEventListener('resize', resize);
     resize();

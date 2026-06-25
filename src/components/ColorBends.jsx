@@ -36,8 +36,6 @@ uniform float uIterations;
 uniform float uIntensity;
 uniform float uBandWidth;
 
-varying vec2 vUv;
-
 mat2 rotate2d(float a) {
   return mat2(cos(a), -sin(a), sin(a), cos(a));
 }
@@ -58,21 +56,15 @@ float noise(vec2 p) {
 }
 
 void main() {
-  vec2 uv = vUv - 0.5;
-  float aspect = uResolution.x / uResolution.y;
-  // contain模式:保证内容完整显示不变形
-  if (aspect > 1.0) {
-    uv.x *= aspect;
-  } else {
-    uv.y /= aspect;
-  }
+  // 标准归一化：基于像素坐标，y 归一化（自动适配屏幕比例，无黑边）
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uResolution.xy) / uResolution.y;
   uv = rotate2d(uRotation * 0.0174533) * uv;
-  uv *= uScale;
+  uv /= uScale;
 
   float t = uTime * uSpeed;
 
-  // 鼠标视差
-  vec2 mouseOffset = (uMouse - 0.5) * uParallax * uMouseActive;
+  // 鼠标视差（uMouse 已在 uv 空间：-aspect..aspect, -1..1）
+  vec2 mouseOffset = uMouse * uParallax * uMouseActive;
   uv += mouseOffset;
 
   // 多次迭代扭曲
@@ -97,8 +89,8 @@ void main() {
 
   col *= uIntensity;
 
-  // 鼠标光晕
-  float mouseDist = length(uv - (uMouse - 0.5) * vec2(uResolution.x / uResolution.y, 1.0));
+  // 鼠标光晕（uMouse 在 uv 空间）
+  float mouseDist = length(uv - uMouse);
   col += uColor2 * uMouseActive * smoothstep(0.4, 0.0, mouseDist) * 0.3;
 
   gl_FragColor = vec4(col, 1.0);
@@ -129,7 +121,7 @@ export default function ColorBends({
   bandWidth = 6,
 }) {
   const containerRef = useRef(null);
-  const mouseTargetRef = useRef([0.5, 0.5]);
+  const mouseTargetRef = useRef([0, 0]);
   const mouseActiveRef = useRef(0);
 
   useEffect(() => {
@@ -159,7 +151,7 @@ export default function ColorBends({
         uFrequency: { value: frequency },
         uWarpStrength: { value: warpStrength },
         uMouseInfluence: { value: mouseInfluence },
-        uMouse: { value: [0.5, 0.5] },
+        uMouse: { value: [0, 0] },
         uMouseActive: { value: 0 },
         uParallax: { value: parallax },
         uNoise: { value: noise },
@@ -174,19 +166,20 @@ export default function ColorBends({
     function resize() {
       const { width, height } = container.getBoundingClientRect();
       renderer.setSize(width, height);
-      program.uniforms.uResolution.value = [width, height, width / height];
+      program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
     }
     window.addEventListener('resize', resize);
     resize();
 
-    const smoothMouse = [0.5, 0.5];
+    const smoothMouse = [0, 0];
     let smoothActive = 0;
 
     function onPointerMove(e) {
       const rect = container.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = 1.0 - (e.clientY - rect.top) / rect.height;
-      mouseTargetRef.current = [x, y];
+      const aspect = rect.width / rect.height;
+      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseTargetRef.current = [nx * aspect, ny];
       mouseActiveRef.current = 1;
     }
     function onPointerLeave() {
@@ -197,9 +190,10 @@ export default function ColorBends({
       e.preventDefault();
       const touch = e.touches[0];
       const rect = container.getBoundingClientRect();
-      const x = (touch.clientX - rect.left) / rect.width;
-      const y = 1.0 - (touch.clientY - rect.top) / rect.height;
-      mouseTargetRef.current = [x, y];
+      const aspect = rect.width / rect.height;
+      const nx = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((touch.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseTargetRef.current = [nx * aspect, ny];
       mouseActiveRef.current = 1;
     }
     function onTouchEnd() {

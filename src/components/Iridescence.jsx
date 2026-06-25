@@ -24,8 +24,6 @@ uniform float uSpeed;
 uniform vec2 uMouse;
 uniform float uMouseActive;
 
-varying vec2 vUv;
-
 // HSV to RGB
 vec3 hsv2rgb(vec3 c) {
   vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -49,22 +47,14 @@ float noise(vec2 p) {
 }
 
 void main() {
-  vec2 uv = vUv;
-  float aspect = uResolution.x / uResolution.y;
-  // contain模式:保证内容完整显示不变形
-  if (aspect > 1.0) {
-    uv.x = (uv.x - 0.5) * aspect + 0.5;
-  } else {
-    uv.y = (uv.y - 0.5) / aspect + 0.5;
-  }
+  // 标准归一化：基于像素坐标，y 归一化（自动适配屏幕比例，无黑边）
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uResolution.xy) / uResolution.y;
 
   float t = uTime * uSpeed * 0.3;
 
-  // 鼠标影响
-  vec2 mouseUV = uMouse;
-  mouseUV.x *= uResolution.x / uResolution.y;
-  float mouseDist = length(uv - mouseUV);
-  vec2 mousePush = normalize(uv - mouseUV + 0.001) * (uMouseActive * 0.1 / (mouseDist + 0.3));
+  // 鼠标影响（uMouse 在 uv 空间：-aspect..aspect, -1..1）
+  float mouseDist = length(uv - uMouse);
+  vec2 mousePush = normalize(uv - uMouse + 0.001) * (uMouseActive * 0.1 / (mouseDist + 0.3));
   uv += mousePush;
 
   // 流动的色相
@@ -81,8 +71,8 @@ void main() {
   float ripple = sin(mouseDist * 20.0 - t * 5.0) * 0.5 + 0.5;
   col += vec3(ripple * 0.15 * uMouseActive);
 
-  // 柔和的边缘
-  float fade = smoothstep(1.2, 0.4, length((vUv - 0.5) * vec2(1.6, 1.0)));
+  // 柔和的边缘（基于 uv 距离，适配任意比例）
+  float fade = smoothstep(1.6, 0.4, length(uv * vec2(0.8, 1.0)));
   col *= 0.5 + fade * 0.5;
 
   gl_FragColor = vec4(col, 1.0);
@@ -95,7 +85,7 @@ export default function Iridescence({
   mouseReact = true,
 }) {
   const containerRef = useRef(null);
-  const mouseTargetRef = useRef([0.5, 0.5]);
+  const mouseTargetRef = useRef([0, 0]);
   const mouseActiveRef = useRef(0);
 
   useEffect(() => {
@@ -117,7 +107,7 @@ export default function Iridescence({
         uResolution: { value: [1, 1, 1] },
         uAmplitude: { value: amplitude },
         uSpeed: { value: speed },
-        uMouse: { value: [0.5, 0.5] },
+        uMouse: { value: [0, 0] },
         uMouseActive: { value: 0 },
       },
     });
@@ -127,20 +117,21 @@ export default function Iridescence({
     function resize() {
       const { width, height } = container.getBoundingClientRect();
       renderer.setSize(width, height);
-      program.uniforms.uResolution.value = [width, height, width / height];
+      program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
     }
     window.addEventListener('resize', resize);
     resize();
 
     // 鼠标/触摸交互
-    const smoothMouse = [0.5, 0.5];
+    const smoothMouse = [0, 0];
     let smoothActive = 0;
 
     function onPointerMove(e) {
       const rect = container.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = 1.0 - (e.clientY - rect.top) / rect.height;
-      mouseTargetRef.current = [x, y];
+      const aspect = rect.width / rect.height;
+      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseTargetRef.current = [nx * aspect, ny];
       mouseActiveRef.current = 1;
     }
     function onPointerLeave() {
@@ -151,9 +142,10 @@ export default function Iridescence({
       e.preventDefault();
       const touch = e.touches[0];
       const rect = container.getBoundingClientRect();
-      const x = (touch.clientX - rect.left) / rect.width;
-      const y = 1.0 - (touch.clientY - rect.top) / rect.height;
-      mouseTargetRef.current = [x, y];
+      const aspect = rect.width / rect.height;
+      const nx = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((touch.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseTargetRef.current = [nx * aspect, ny];
       mouseActiveRef.current = 1;
     }
     function onTouchEnd() {

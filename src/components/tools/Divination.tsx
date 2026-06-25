@@ -839,12 +839,13 @@ function InterpretationPanel({
           </div>
         </div>
 
-        {/* 底部操作区（固定，不被遮挡） */}
+        {/* 底部操作区（避开底部导航栏） */}
         <div
           className="relative flex items-center justify-between px-4 py-3 flex-shrink-0"
           style={{
             background: 'linear-gradient(180deg, rgba(61,40,23,0.02) 0%, rgba(61,40,23,0.06) 100%)',
             borderTop: '1px solid rgba(61,40,23,0.08)',
+            marginBottom: 'calc(64px + env(safe-area-inset-bottom))',
           }}
         >
           {/* 铜钱（缘分显示，3D 质感） */}

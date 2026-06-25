@@ -1,18 +1,10 @@
 import Iridescence from '../../Iridescence';
 
 export default function IridescenceBackground() {
+  // 新版 Iridescence 使用 gl_FragCoord 标准归一化，自动适配屏幕比例，无需 100vmax 容器
   return (
-    <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
-      {/* 使用 100vmax 确保移动端保持正方形比例 */}
-      <div
-        className="relative"
-        style={{
-          width: '100vmax',
-          height: '100vmax',
-        }}
-      >
-        <Iridescence speed={1} amplitude={0.1} mouseReact />
-      </div>
+    <div className="absolute inset-0 overflow-hidden">
+      <Iridescence speed={1} amplitude={0.1} mouseReact />
     </div>
   );
 }

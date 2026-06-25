@@ -25,8 +25,6 @@ uniform vec3 uColor1;
 uniform vec3 uColor2;
 uniform vec3 uColor3;
 
-varying vec2 vUv;
-
 // Simplex noise
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -59,14 +57,9 @@ float snoise(vec2 v) {
 }
 
 void main() {
-  vec2 uv = vUv;
-  float aspect = uResolution.x / uResolution.y;
-  // contain模式:保证内容完整显示不变形
-  if (aspect > 1.0) {
-    uv.x = (uv.x - 0.5) * aspect + 0.5;
-  } else {
-    uv.y = (uv.y - 0.5) / aspect + 0.5;
-  }
+  // 标准归一化：基于像素坐标，y 归一化（自动适配屏幕比例，无黑边）
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uResolution.xy) / uResolution.y;
+  // uv.y: -1 (底) .. 1 (顶)，uv.x: -aspect..aspect
 
   float t = uTime * 0.2;
 
@@ -75,16 +68,17 @@ void main() {
   float n2 = snoise(vec2(uv.x * 2.0 - t * 0.3, uv.y * 3.0 + t * 0.7));
   float n = (n1 + n2 * 0.5) * uAmplitude;
 
-  // 极光带：在垂直方向上渐变
-  float band = smoothstep(0.2, 0.8, uv.y + n * 0.3);
-  float band2 = smoothstep(0.1, 0.9, uv.y * 1.2 + n * 0.5);
+  // 极光带：基于垂直位置（映射到 0..1 逻辑）
+  float yNorm = uv.y * 0.5 + 0.5;
+  float band = smoothstep(0.2, 0.8, yNorm + n * 0.3);
+  float band2 = smoothstep(0.1, 0.9, yNorm * 1.2 + n * 0.5);
 
   // 颜色混合
   vec3 col = mix(uColor1, uColor2, band);
   col = mix(col, uColor3, band2 * uBlend);
 
   // 顶部和底部渐隐
-  float fade = smoothstep(0.0, 0.3, uv.y) * smoothstep(1.0, 0.6, uv.y);
+  float fade = smoothstep(0.0, 0.3, yNorm) * smoothstep(1.0, 0.6, yNorm);
   col *= fade * 1.2;
 
   // 一点点星点
@@ -142,7 +136,7 @@ export default function Aurora({
     function resize() {
       const { width, height } = container.getBoundingClientRect();
       renderer.setSize(width, height);
-      program.uniforms.uResolution.value = [width, height, width / height];
+      program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
     }
     window.addEventListener('resize', resize);
     resize();
