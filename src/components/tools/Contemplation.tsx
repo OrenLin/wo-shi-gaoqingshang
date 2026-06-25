@@ -272,17 +272,33 @@ export default function Contemplation({ onBack }: Props) {
               </div>
             </div>
 
-            {/* 收起按钮 */}
-            <div className="flex justify-center">
+            {/* 收起按钮 — 呼吸感圆形图标 */}
+            <div className="flex justify-center mt-4">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleQuoteExpand();
                 }}
-                className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full border border-white/25 text-white/80 text-xs font-bold hover:bg-white/25 active:scale-95 transition-all"
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                className="group relative w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+                aria-label={zh ? '收起语录' : 'Collapse quotes'}
               >
-                <span>{zh ? '🔽 收起' : '🔽 Collapse'}</span>
+                {/* 呼吸光环 */}
+                <span
+                  className="absolute inset-0 rounded-full animate-ping"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    animationDuration: '3s',
+                  }}
+                />
+                {/* 内圆 */}
+                <span
+                  className="relative w-8 h-8 rounded-full flex items-center justify-center border border-white/30 transition-all group-hover:border-white/50"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white/70 group-hover:text-white/90 transition-colors">
+                    <path d="M3 5 L7 9 L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </button>
             </div>
           </div>
@@ -319,9 +335,9 @@ export default function Contemplation({ onBack }: Props) {
         </>
       )}
 
-      {/* === 主题切换：右侧纵向滚动条（不遮挡画面） === */}
+      {/* === 主题切换：右侧纵向滚动条（简约设计） === */}
       <div
-        className="absolute top-1/2 -translate-y-1/2 right-3 z-40 flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto py-2 px-1"
+        className="absolute top-1/2 -translate-y-1/2 right-3 z-40 flex flex-col gap-2 max-h-[70vh] overflow-y-auto py-2 px-1"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -335,12 +351,11 @@ export default function Contemplation({ onBack }: Props) {
             disabled={isTransitioning}
             aria-label={zh ? theme.name.zh : theme.name.en}
             title={zh ? theme.name.zh : theme.name.en}
-            className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base transition-all duration-300 border-2 ${
+            className={`flex-shrink-0 transition-all duration-300 ${
               idx === currentThemeIndex
-                ? 'bg-white/30 border-white/70 scale-110 shadow-lg'
-                : 'bg-white/10 border-white/20 opacity-50 hover:opacity-90'
-            } ${isTransitioning ? 'cursor-not-allowed' : 'hover:scale-110 active:scale-90'}`}
-            style={{ backgroundColor: idx === currentThemeIndex ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)' }}
+                ? 'w-10 h-10 rounded-full flex items-center justify-center text-lg bg-gradient-to-br from-purple-400/40 to-pink-400/40 border-2 border-white/60 scale-110 shadow-lg backdrop-blur-sm'
+                : 'w-8 h-8 rounded-full flex items-center justify-center text-sm bg-white/10 border border-white/20 opacity-40 hover:opacity-80 hover:scale-105'
+            } ${isTransitioning ? 'cursor-not-allowed' : 'active:scale-90'}`}
           >
             {theme.emoji}
           </button>

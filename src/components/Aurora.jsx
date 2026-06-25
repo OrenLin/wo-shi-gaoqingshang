@@ -60,7 +60,13 @@ float snoise(vec2 v) {
 
 void main() {
   vec2 uv = vUv;
-  uv.x *= uResolution.x / uResolution.y;
+  float aspect = uResolution.x / uResolution.y;
+  // contain模式:保证内容在任何屏幕比例下完整显示
+  if (aspect > 1.0) {
+    uv.x *= aspect;
+  } else {
+    uv.y /= aspect;
+  }
 
   float t = uTime * 0.2;
 

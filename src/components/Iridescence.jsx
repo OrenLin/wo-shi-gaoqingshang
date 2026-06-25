@@ -50,7 +50,13 @@ float noise(vec2 p) {
 
 void main() {
   vec2 uv = vUv;
-  uv.x *= uResolution.x / uResolution.y;
+  float aspect = uResolution.x / uResolution.y;
+  // contain模式:保证内容在任何屏幕比例下完整显示
+  if (aspect > 1.0) {
+    uv.y *= aspect;
+  } else {
+    uv.x /= aspect;
+  }
 
   float t = uTime * uSpeed * 0.3;
 

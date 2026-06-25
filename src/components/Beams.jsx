@@ -52,7 +52,10 @@ mat2 rotate2d(float angle) {
 void main() {
   vec2 uv = vUv;
   uv -= 0.5;
-  uv.x *= uResolution.x / uResolution.y;
+  float aspect = uResolution.x / uResolution.y;
+  // contain模式:保证内容在任何屏幕比例下完整显示
+  float s = max(aspect, 1.0 / aspect);
+  uv /= s;
   uv = rotate2d(uRotation) * uv;
   uv *= uScale;
 

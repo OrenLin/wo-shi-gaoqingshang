@@ -196,7 +196,7 @@ export default function Tools() {
             <div className="flex-1 min-w-0">
               <div className="text-xl font-black mb-1 leading-tight">{zh ? '沉思' : 'Contemplation'}</div>
               <div className="text-[11px] font-bold opacity-90 leading-snug">
-                {zh ? '4 主题 · 宇宙与轮回的沉思' : '4 themes · Contemplate universe & cycles'}
+                {zh ? '10 主题 · 宇宙与轮回的沉思' : '10 themes · Contemplate universe & cycles'}
               </div>
               <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-black">
                 <span aria-hidden="true">→</span>
