@@ -7,9 +7,10 @@ import AnxietyQuiz from '../components/profile/AnxietyQuiz';
 import WoodfishZen from '../components/profile/WoodfishZen';
 import DebateSkills from '../components/tools/DebateSkills';
 import Divination from '../components/tools/Divination';
+import Contemplation from '../components/tools/Contemplation';
 import PageHeader from '../components/ui/PageHeader';
 
-type ToolKey = 'divination' | 'philosophy' | 'anxiety' | 'woodfish' | 'debate';
+type ToolKey = 'divination' | 'contemplation' | 'philosophy' | 'anxiety' | 'woodfish' | 'debate';
 
 export default function Tools() {
   const language = useI18n((s) => s.language);
@@ -30,6 +31,9 @@ export default function Tools() {
   // 抽签工具全屏沉浸式渲染，不走 ToolWrapper
   // 传入 onBack 回调，由 Tools 控制 activeTool 状态（修复返回按钮无效）
   if (activeTool === 'divination') return <Divination onBack={handleBack} />;
+  
+  // 沉思工具全屏沉浸式渲染
+  if (activeTool === 'contemplation') return <Contemplation onBack={handleBack} />;
 
   // 渲染具体工具页面
   if (activeTool === 'philosophy') return <ToolWrapper title={zh ? '🧠 哲学思辨' : '🧠 Philosophy'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><PhilosophyInsight /></ToolWrapper>;
@@ -147,6 +151,56 @@ export default function Tools() {
               <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-black">
                 <span aria-hidden="true">→</span>
                 {zh ? '进入禅意空间' : 'Enter zen space'}
+              </div>
+            </div>
+          </div>
+        </button>
+
+        {/* ===== 特色工具：沉思（全宽卡片） ===== */}
+        <button
+          onClick={() => {
+            audioManager.userTapped();
+            audioManager.play('click');
+            setActiveTool('contemplation');
+          }}
+          className="relative w-full overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-700 to-pink-800 rounded-2xl border-[3px] border-[#1a1a2e] shadow-[5px_5px_0_0_#1a1a2e] p-5 text-left text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[7px_7px_0_0_#1a1a2e] active:translate-y-0 active:shadow-[3px_3px_0_0_#1a1a2e] animate-pop-in mb-3"
+          aria-label={zh ? '沉思' : 'Contemplation'}
+        >
+          {/* NEW 徽章 */}
+          <div className="absolute top-3 right-3 z-10 px-2 py-0.5 rounded-full bg-red-500 text-white text-[9px] font-black border-[2px] border-[#1a1a2e] shadow-[1px_1px_0_0_#1a1a2e] animate-bounce" style={{ animationDuration: '2s' }}>
+            NEW
+          </div>
+
+          {/* 装饰元素：星空 */}
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-20 pointer-events-none" aria-hidden="true">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <circle cx="20" cy="20" r="1.5" fill="white" />
+              <circle cx="50" cy="30" r="1" fill="white" />
+              <circle cx="80" cy="15" r="1.5" fill="white" />
+              <circle cx="30" cy="60" r="1" fill="white" />
+              <circle cx="70" cy="70" r="1.5" fill="white" />
+              <circle cx="90" cy="50" r="1" fill="white" />
+              <circle cx="15" cy="80" r="1.5" fill="white" />
+              <circle cx="60" cy="90" r="1" fill="white" />
+            </svg>
+          </div>
+          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10" aria-hidden="true" />
+
+          {/* 内容 */}
+          <div className="relative flex items-center gap-4">
+            {/* 沉思图标 */}
+            <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center text-5xl">
+              🧘
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="text-xl font-black mb-1 leading-tight">{zh ? '沉思' : 'Contemplation'}</div>
+              <div className="text-[11px] font-bold opacity-90 leading-snug">
+                {zh ? '4 主题 · 宇宙与轮回的沉思' : '4 themes · Contemplate universe & cycles'}
+              </div>
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-black">
+                <span aria-hidden="true">→</span>
+                {zh ? '进入沉思空间' : 'Enter contemplation'}
               </div>
             </div>
           </div>

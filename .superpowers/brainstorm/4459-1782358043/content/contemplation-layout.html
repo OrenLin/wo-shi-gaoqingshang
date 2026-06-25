@@ -1,0 +1,138 @@
+<h2>沉思工具 — 布局方案</h2>
+<p class="subtitle">4 个主题 × 6 组语录，特效背景 + 自动轮播语录 + 手动切换主题</p>
+
+<div class="cards">
+  <!-- 方案 A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="position:relative;width:100%;height:320px;background:#0a0a1a;border-radius:12px;overflow:hidden;">
+        <!-- 模拟 Galaxy 特效背景 -->
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #1a0a3a 0%, #0a0a1a 70%);"></div>
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 40%, rgba(100,50,200,0.3) 0%, transparent 50%);"></div>
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 70% 60%, rgba(50,100,200,0.2) 0%, transparent 40%);"></div>
+        
+        <!-- 语录 -->
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;">
+          <div style="text-align:center;max-width:280px;">
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:2px;margin-bottom:8px;">🌌 宇宙 · 01/06</div>
+            <div style="font-size:16px;color:white;font-weight:700;line-height:1.6;text-shadow:0 2px 8px rgba(0,0,0,0.8);">
+              "我们都在阴沟里，但仍有人仰望星空。"
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:8px;">— 王尔德</div>
+          </div>
+        </div>
+        
+        <!-- 底部主题切换 -->
+        <div style="position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;gap:8px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:14px;">🌌</div>
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;opacity:0.6;">⚡</div>
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;opacity:0.6;">💻</div>
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;opacity:0.6;">🔄</div>
+        </div>
+        
+        <!-- 返回按钮 -->
+        <div style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:11px;color:white;font-weight:700;">← 返回</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 全屏沉浸式</h3>
+      <p>特效占满全屏，语录浮在中央，主题按钮在底部。最沉浸，但小屏语录可能被遮挡。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>优点</h4><ul><li>视觉冲击力最强</li><li>完全沉浸感</li></ul></div>
+        <div class="cons"><h4>缺点</h4><ul><li>小屏语录区域受限</li><li>返回按钮需浮层处理</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 方案 B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="position:relative;width:100%;height:320px;background:#f5f0e8;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
+        <!-- 上半：特效背景 -->
+        <div style="position:relative;height:45%;background:#0a0a1a;border-radius:0 0 20px 20px;overflow:hidden;">
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #1a0a3a 0%, #0a0a1a 70%);"></div>
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 40%, rgba(100,50,200,0.3) 0%, transparent 50%);"></div>
+          <div style="position:absolute;top:10px;left:10px;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);border-radius:16px;padding:3px 10px;font-size:10px;color:white;font-weight:700;">← 返回</div>
+          <div style="position:absolute;bottom:8px;right:12px;font-size:10px;color:rgba(255,255,255,0.5);">🌌 宇宙</div>
+        </div>
+        
+        <!-- 下半：语录卡片 -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 20px;">
+          <div style="font-size:10px;color:#999;letter-spacing:1px;margin-bottom:6px;">01 / 06</div>
+          <div style="font-size:14px;color:#1a1a2e;font-weight:700;line-height:1.5;text-align:center;max-width:260px;">
+            "我们都在阴沟里，但仍有人仰望星空。"
+          </div>
+          <div style="font-size:10px;color:#999;margin-top:6px;">— 王尔德</div>
+          
+          <!-- 主题切换 -->
+          <div style="display:flex;gap:6px;margin-top:14px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:2px solid #1a1a2e;display:flex;align-items:center;justify-content:center;font-size:12px;">🌌</div>
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.05);border:2px solid rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0.5;">⚡</div>
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.05);border:2px solid rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0.5;">💻</div>
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.05);border:2px solid rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0.5;">🔄</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 上下分层式</h3>
+      <p>上半部分特效背景（约 45%），下半部分白色卡片显示语录和切换按钮。结构清晰，小屏友好。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>优点</h4><ul><li>语录区域始终清晰可读</li><li>小屏适配好</li><li>返回按钮位置自然</li></ul></div>
+        <div class="cons"><h4>缺点</h4><ul><li>特效展示面积较小</li><li>沉浸感稍弱</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 方案 C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="position:relative;width:100%;height:320px;background:#0a0a1a;border-radius:12px;overflow:hidden;">
+        <!-- 模拟特效背景 -->
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #1a0a3a 0%, #0a0a1a 70%);"></div>
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 40%, rgba(100,50,200,0.3) 0%, transparent 50%);"></div>
+        
+        <!-- 返回按钮 -->
+        <div style="position:absolute;top:12px;left:12px;z-index:10;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:11px;color:white;font-weight:700;">← 返回</div>
+        
+        <!-- 语言切换 -->
+        <div style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 10px;font-size:11px;color:white;font-weight:700;">EN</div>
+        
+        <!-- 毛玻璃语录卡片 -->
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:85%;max-width:300px;background:rgba(255,255,255,0.1);backdrop-filter:blur(16px);border:1.5px solid rgba(255,255,255,0.2);border-radius:20px;padding:24px 20px;text-align:center;">
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:2px;margin-bottom:10px;">🌌 宇宙 · 01/06</div>
+          <div style="font-size:16px;color:white;font-weight:700;line-height:1.6;">
+            "我们都在阴沟里，但仍有人仰望星空。"
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:8px;">— 王尔德</div>
+          
+          <!-- 进度指示 -->
+          <div style="display:flex;justify-content:center;gap:4px;margin-top:14px;">
+            <div style="width:16px;height:3px;border-radius:2px;background:white;"></div>
+            <div style="width:16px;height:3px;border-radius:2px;background:rgba(255,255,255,0.2);"></div>
+            <div style="width:16px;height:3px;border-radius:2px;background:rgba(255,255,255,0.2);"></div>
+            <div style="width:16px;height:3px;border-radius:2px;background:rgba(255,255,255,0.2);"></div>
+            <div style="width:16px;height:3px;border-radius:2px;background:rgba(255,255,255,0.2);"></div>
+            <div style="width:16px;height:3px;border-radius:2px;background:rgba(255,255,255,0.2);"></div>
+          </div>
+        </div>
+        
+        <!-- 底部主题切换 -->
+        <div style="position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;gap:8px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(100,50,200,0.4);">🌌</div>
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;opacity:0.6;">⚡</div>
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;opacity:0.6;">💻</div>
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;opacity:0.6;">🔄</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 毛玻璃卡片式（推荐）</h3>
+      <p>特效全屏，语录在毛玻璃卡片中，主题按钮在底部。兼顾沉浸感和可读性，切换主题时特效平滑过渡。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>优点</h4><ul><li>特效最大化展示</li><li>语录始终清晰可读</li><li>进度条直观</li><li>主题切换有仪式感</li></ul></div>
+        <div class="cons"><h4>缺点</h4><ul><li>毛玻璃在低端机可能卡顿</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
