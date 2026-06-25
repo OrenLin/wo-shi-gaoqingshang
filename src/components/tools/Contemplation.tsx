@@ -259,30 +259,31 @@ export default function Contemplation({ onBack }: Props) {
           onTouchEnd={handleTouchEnd}
         >
           <div
-            className="relative rounded-3xl p-5 shadow-2xl select-none border border-white/30"
+            className="relative rounded-3xl p-5 shadow-2xl select-none border border-white/30 cursor-pointer"
             style={{
               backgroundColor: 'rgba(20,20,40,0.4)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
             }}
+            onClick={() => switchQuote('next')}
           >
             {/* 左箭头 */}
             <button
               onClick={(e) => { e.stopPropagation(); switchQuote('prev'); }}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center opacity-30 hover:opacity-70 active:scale-90 transition-all"
-              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))' }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center opacity-40 hover:opacity-80 active:scale-90 transition-all"
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08))', border: '1px solid rgba(255,255,255,0.15)' }}
               aria-label={zh ? '上一条' : 'Previous'}
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2.5L4 6L7.5 9.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M7.5 2.5L4 6L7.5 9.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
 
             {/* 右箭头 */}
             <button
               onClick={(e) => { e.stopPropagation(); switchQuote('next'); }}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center opacity-30 hover:opacity-70 active:scale-90 transition-all"
-              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15))' }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center opacity-40 hover:opacity-80 active:scale-90 transition-all"
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.2))', border: '1px solid rgba(255,255,255,0.15)' }}
               aria-label={zh ? '下一条' : 'Next'}
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
 
             {/* 主题标签 */}

@@ -18,6 +18,21 @@ export const contemplationThemes: Theme[] = [
     name: { zh: '宇宙', en: 'Universe' },
     quotes: [
       {
+        zh: '在宇宙的尺度上，我们渺小如尘；但在意识的尺度上，我们就是宇宙本身。',
+        en: 'On the scale of the universe, we are dust; but on the scale of consciousness, we are the universe itself.',
+        author: '原创 / Original',
+      },
+      {
+        zh: '夜空不是空无，而是无数光年外的问候。',
+        en: 'The night sky is not emptiness, but greetings from countless light-years away.',
+        author: '原创 / Original',
+      },
+      {
+        zh: '当我们仰望星空时，星空也在仰望我们。',
+        en: 'When we gaze at the stars, the stars gaze back at us.',
+        author: '原创 / Original',
+      },
+      {
         zh: '我们都在阴沟里，但仍有人仰望星空。',
         en: 'We are all in the gutter, but some of us are looking at the stars.',
         author: '王尔德 / Oscar Wilde',
@@ -50,21 +65,6 @@ export const contemplationThemes: Theme[] = [
       {
         zh: '每一颗星星都是一面镜子，映照着我们未曾说出口的话。',
         en: 'Every star is a mirror, reflecting the words we never spoke.',
-        author: '原创 / Original',
-      },
-      {
-        zh: '在宇宙的尺度上，我们渺小如尘；但在意识的尺度上，我们就是宇宙本身。',
-        en: 'On the scale of the universe, we are dust; but on the scale of consciousness, we are the universe itself.',
-        author: '原创 / Original',
-      },
-      {
-        zh: '夜空不是空无，而是无数光年外的问候。',
-        en: 'The night sky is not emptiness, but greetings from countless light-years away.',
-        author: '原创 / Original',
-      },
-      {
-        zh: '当我们仰望星空时，星空也在仰望我们。',
-        en: 'When we gaze at the stars, the stars gaze back at us.',
         author: '原创 / Original',
       },
     ],
@@ -132,13 +132,13 @@ export const contemplationThemes: Theme[] = [
     name: { zh: '数字世界', en: 'Digital World' },
     quotes: [
       {
-        zh: '代码是新的咒语，程序员是现代的巫师。',
-        en: 'Code is the new magic, and programmers are the modern wizards.',
+        zh: '在 0 和 1 之间，藏着整个宇宙的可能性。',
+        en: 'Between 0 and 1 lies the possibility of an entire universe.',
         author: '原创 / Original',
       },
       {
-        zh: '在 0 和 1 之间，藏着整个宇宙的可能性。',
-        en: 'Between 0 and 1 lies the possibility of an entire universe.',
+        zh: '代码是新的咒语，程序员是现代的巫师。',
+        en: 'Code is the new magic, and programmers are the modern wizards.',
         author: '原创 / Original',
       },
       {
