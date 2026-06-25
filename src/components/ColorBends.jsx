@@ -61,8 +61,11 @@ void main() {
   vec2 uv = vUv - 0.5;
   float aspect = uResolution.x / uResolution.y;
   // contain模式:保证内容在任何屏幕比例下完整显示
-  float s = max(aspect, 1.0 / aspect);
-  uv /= s;
+  if (aspect > 1.0) {
+    uv.y *= aspect;
+  } else {
+    uv.x /= aspect;
+  }
   uv = rotate2d(uRotation * 0.0174533) * uv;
   uv *= uScale;
 
