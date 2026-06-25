@@ -120,6 +120,7 @@ export default function Divination({ onBack }: DivinationProps) {
           radial-gradient(ellipse 90% 40% at 85% 85%, rgba(61,40,23,0.1) 0%, transparent 50%),
           linear-gradient(180deg, #ece4d4 0%, #ddd5c5 35%, #c8c0a8 70%, #b8b098 100%)
         `,
+        minHeight: '100dvh',
       }}
     >
       {/* ===== 背景层：水墨山水 + 庭院竹林 ===== */}
@@ -159,7 +160,7 @@ export default function Divination({ onBack }: DivinationProps) {
         <div
           className="flex items-end justify-center flex-shrink-0 transition-all duration-500"
           style={{
-            height: phase === 'revealed' || phase === 'revealing' ? '20vh' : '30vh',
+            height: phase === 'revealed' || phase === 'revealing' ? '20dvh' : '30dvh',
             minHeight: phase === 'revealed' || phase === 'revealing' ? '120px' : '170px',
           }}
         >
