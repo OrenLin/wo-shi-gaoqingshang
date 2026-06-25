@@ -23,6 +23,18 @@ export default defineConfig({
   })(),
   build: {
     sourcemap: 'hidden',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 核心框架
+          'vendor-react': ['react', 'react-dom'],
+          // 状态管理
+          'vendor-state': ['zustand'],
+          // WebGL 渲染
+          'vendor-webgl': ['ogl'],
+        },
+      },
+    },
   },
   plugins: [
     react({

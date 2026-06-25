@@ -1,14 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useI18n } from '../i18n';
 import { useGameStore } from '../store/gameStore';
 import { audioManager } from '../utils/audioManager';
-import PhilosophyInsight from '../components/tools/PhilosophyInsight';
-import AnxietyQuiz from '../components/profile/AnxietyQuiz';
-import WoodfishZen from '../components/profile/WoodfishZen';
-import DebateSkills from '../components/tools/DebateSkills';
-import Divination from '../components/tools/Divination';
-import Contemplation from '../components/tools/Contemplation';
 import PageHeader from '../components/ui/PageHeader';
+
+// 动态导入工具组件，实现代码分割
+const Divination = lazy(() => import('../components/tools/Divination'));
+const Contemplation = lazy(() => import('../components/tools/Contemplation'));
+const PhilosophyInsight = lazy(() => import('../components/tools/PhilosophyInsight'));
+const AnxietyQuiz = lazy(() => import('../components/profile/AnxietyQuiz'));
+const WoodfishZen = lazy(() => import('../components/profile/WoodfishZen'));
+const DebateSkills = lazy(() => import('../components/tools/DebateSkills'));
+
+// 加载占位符
+function LoadingFallback() {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white mb-4"></div>
+        <div className="text-white text-lg font-bold">加载中...</div>
+      </div>
+    </div>
+  );
+}
 
 type ToolKey = 'divination' | 'contemplation' | 'philosophy' | 'anxiety' | 'woodfish' | 'debate';
 
@@ -42,16 +56,48 @@ export default function Tools() {
 
   // 抽签工具全屏沉浸式渲染，不走 ToolWrapper
   // 传入 onBack 回调，由 Tools 控制 activeTool 状态（修复返回按钮无效）
-  if (activeTool === 'divination') return <Divination onBack={handleBack} />;
+  if (activeTool === 'divination') return (
+    <Suspense fallback={<LoadingFallback />}>
+      <Divination onBack={handleBack} />
+    </Suspense>
+  );
   
   // 沉思工具全屏沉浸式渲染
-  if (activeTool === 'contemplation') return <Contemplation onBack={handleBack} />;
+  if (activeTool === 'contemplation') return (
+    <Suspense fallback={<LoadingFallback />}>
+      <Contemplation onBack={handleBack} />
+    </Suspense>
+  );
 
   // 渲染具体工具页面
-  if (activeTool === 'philosophy') return <ToolWrapper title={zh ? '🧠 哲学思辨' : '🧠 Philosophy'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><PhilosophyInsight /></ToolWrapper>;
-  if (activeTool === 'anxiety') return <ToolWrapper title={zh ? '🧘 焦虑急救' : '🧘 Anxiety First-Aid'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><AnxietyQuiz /></ToolWrapper>;
-  if (activeTool === 'woodfish') return <ToolWrapper title={zh ? '🪘 敲木鱼' : '🪘 Woodfish Zen'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><WoodfishZen /></ToolWrapper>;
-  if (activeTool === 'debate') return <ToolWrapper title={zh ? '🎯 辩论技巧' : '🎯 Debate Skills'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}><DebateSkills /></ToolWrapper>;
+  if (activeTool === 'philosophy') return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ToolWrapper title={zh ? '🧠 哲学思辨' : '🧠 Philosophy'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}>
+        <PhilosophyInsight />
+      </ToolWrapper>
+    </Suspense>
+  );
+  if (activeTool === 'anxiety') return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ToolWrapper title={zh ? '🧘 焦虑急救' : '🧘 Anxiety First-Aid'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}>
+        <AnxietyQuiz />
+      </ToolWrapper>
+    </Suspense>
+  );
+  if (activeTool === 'woodfish') return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ToolWrapper title={zh ? '🪘 敲木鱼' : '🪘 Woodfish Zen'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}>
+        <WoodfishZen />
+      </ToolWrapper>
+    </Suspense>
+  );
+  if (activeTool === 'debate') return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ToolWrapper title={zh ? '🎯 辩论技巧' : '🎯 Debate Skills'} backLabel={zh ? '工具箱' : 'Tools'} onBack={handleBack}>
+        <DebateSkills />
+      </ToolWrapper>
+    </Suspense>
+  );
 
   // ===== 工具列表页 =====
   // 特色工具（抽签）— 全宽卡片
