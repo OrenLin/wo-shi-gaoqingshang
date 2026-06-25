@@ -182,12 +182,26 @@ export default function Balatro({
       const y = 1.0 - (e.clientY - rect.top) / rect.height;
       program.uniforms.uMouse.value = [x, y];
     }
+
+    // 触摸事件支持（手机端）
+    function handleTouchMove(e) {
+      if (!mouseInteraction || e.touches.length === 0) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = container.getBoundingClientRect();
+      const x = (touch.clientX - rect.left) / rect.width;
+      const y = 1.0 - (touch.clientY - rect.top) / rect.height;
+      program.uniforms.uMouse.value = [x, y];
+    }
+
     container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resize);
       container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('touchmove', handleTouchMove);
       container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
