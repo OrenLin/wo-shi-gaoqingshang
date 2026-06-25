@@ -12,6 +12,7 @@ import IridescenceBackground from './contemplation/IridescenceBackground';
 import ColorBendsBackground from './contemplation/ColorBendsBackground';
 import EvilEyeBackground from './contemplation/EvilEyeBackground';
 import HyperspeedBackground from './contemplation/HyperspeedBackground';
+import { isMobile } from '../../utils/device';
 
 interface Props {
   onBack: () => void;
@@ -30,9 +31,6 @@ const backgroundMap: Record<string, () => JSX.Element> = {
   chaos: EvilEyeBackground,
   time: HyperspeedBackground,
 };
-
-// 检测是否移动端
-const isMobile = () => window.innerWidth <= 768;
 
 export default function Contemplation({ onBack }: Props) {
   const language = useI18n((s) => s.language);
@@ -186,8 +184,7 @@ export default function Contemplation({ onBack }: Props) {
     return <Bg />;
   };
 
-  // 移动端背景缩放
-  const bgScale = isMobile() ? 0.7 : 1;
+  // 移动端不再统一缩放，由各背景组件自行适配
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black" style={{ height: '100dvh' }}>
@@ -199,8 +196,6 @@ export default function Contemplation({ onBack }: Props) {
         style={{
           pointerEvents: quoteExpanded ? 'none' : 'auto',
           touchAction: 'none',
-          transform: `scale(${bgScale})`,
-          transformOrigin: 'center center',
         }}
       >
         {renderBackground()}
