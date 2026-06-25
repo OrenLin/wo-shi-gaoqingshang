@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useI18n } from '../../i18n';
 import { audioManager } from '../../utils/audioManager';
 import { contemplationThemes } from './contemplation/quotes';
@@ -20,22 +20,26 @@ export default function Contemplation({ onBack }: Props) {
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [quoteVisible, setQuoteVisible] = useState(true);
+  const [quoteExpanded, setQuoteExpanded] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const currentTheme = contemplationThemes[currentThemeIndex];
   const currentQuote = currentTheme.quotes[currentQuoteIndex];
 
-  // 语录自动轮播（8秒）
+  // 语录自动轮播（12秒）
   useEffect(() => {
+    if (!quoteExpanded) return; // 折叠时不自动轮播
+
     const timer = setInterval(() => {
       setQuoteVisible(false);
       setTimeout(() => {
         setCurrentQuoteIndex((prev) => (prev + 1) % currentTheme.quotes.length);
         setQuoteVisible(true);
       }, 500);
-    }, 8000);
+    }, 12000);
 
     return () => clearInterval(timer);
-  }, [currentTheme.quotes.length]);
+  }, [currentTheme.quotes.length, quoteExpanded]);
 
   // 主题切换
   const handleThemeSwitch = useCallback(
@@ -58,6 +62,25 @@ export default function Contemplation({ onBack }: Props) {
     },
     [currentThemeIndex, isTransitioning]
   );
+
+  // 语录点击切换下一条
+  const handleQuoteClick = useCallback(() => {
+    if (isTransitioning) return;
+    audioManager.userTapped();
+    audioManager.play('click');
+    setQuoteVisible(false);
+    setTimeout(() => {
+      setCurrentQuoteIndex((prev) => (prev + 1) % currentTheme.quotes.length);
+      setQuoteVisible(true);
+    }, 500);
+  }, [isTransitioning, currentTheme.quotes.length]);
+
+  // 切换语录展开/折叠
+  const toggleQuoteExpand = useCallback(() => {
+    audioManager.userTapped();
+    audioManager.play('click');
+    setQuoteExpanded((prev) => !prev);
+  }, []);
 
   // 语言切换
   const handleLanguageSwitch = () => {
@@ -90,12 +113,17 @@ export default function Contemplation({ onBack }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ height: '100dvh' }}>
-      {/* 特效背景层 */}
+    <div
+      ref={containerRef}
+      className="fixed inset-0 overflow-hidden"
+      style={{ height: '100dvh', touchAction: 'none' }}
+    >
+      {/* 特效背景层 - 支持触摸交互 */}
       <div
         className={`absolute inset-0 transition-opacity duration-500 ${
           isTransitioning ? 'opacity-0' : 'opacity-100'
         }`}
+        style={{ pointerEvents: quoteExpanded ? 'none' : 'auto' }}
       >
         {renderBackground()}
       </div>
@@ -120,11 +148,11 @@ export default function Contemplation({ onBack }: Props) {
         <span>{zh ? '返回' : 'Back'}</span>
       </button>
 
-      {/* 语言切换（右上角） */}
+      {/* 语言切换（左上角，返回按钮下方） */}
       <button
         onClick={handleLanguageSwitch}
         aria-label={zh ? '切换到英文' : 'Switch to Chinese'}
-        className="absolute top-4 right-4 z-20 px-4 py-2 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/30 text-white font-black text-sm hover:bg-white/25 active:scale-95 transition-all"
+        className="absolute top-20 left-4 z-20 px-4 py-2 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/30 text-white font-black text-sm hover:bg-white/25 active:scale-95 transition-all"
         style={{ paddingTop: 'calc(0.5rem + env(safe-area-inset-top))' }}
       >
         {language === 'zh' ? 'EN' : '中文'}
@@ -135,9 +163,12 @@ export default function Contemplation({ onBack }: Props) {
         <div
           className={`w-[85%] max-w-[340px] transition-all duration-500 ${
             quoteVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}
+          } ${quoteExpanded ? '' : 'pointer-events-none'}`}
         >
-          <div className="relative bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-3xl p-6 shadow-2xl">
+          <div
+            className="relative bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-3xl p-6 shadow-2xl cursor-pointer"
+            onClick={handleQuoteClick}
+          >
             {/* 主题标签 + 进度 */}
             <div className="text-center mb-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/70 text-xs font-bold">
@@ -160,8 +191,8 @@ export default function Contemplation({ onBack }: Props) {
               </div>
             </div>
 
-            {/* 进度条（6个点） */}
-            <div className="flex justify-center gap-1.5">
+            {/* 进度条 */}
+            <div className="flex justify-center gap-1.5 mb-3">
               {currentTheme.quotes.map((_, idx) => (
                 <div
                   key={idx}
@@ -173,8 +204,41 @@ export default function Contemplation({ onBack }: Props) {
                 />
               ))}
             </div>
+
+            {/* 折叠/展开按钮 */}
+            <div className="text-center">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleQuoteExpand();
+                }}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/60 text-xs font-bold hover:bg-white/20 active:scale-95 transition-all"
+              >
+                {quoteExpanded ? (
+                  <>
+                    <span>▼</span>
+                    <span>{zh ? '收起卡片' : 'Collapse'}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>▲</span>
+                    <span>{zh ? '展开卡片' : 'Expand'}</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* 折叠状态下的展开按钮 */}
+        {!quoteExpanded && (
+          <button
+            onClick={toggleQuoteExpand}
+            className="absolute bottom-32 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/30 text-white font-black text-sm hover:bg-white/25 active:scale-95 transition-all animate-pulse"
+          >
+            {zh ? '🧘 展开语录' : '🧘 Expand Quotes'}
+          </button>
+        )}
       </div>
 
       {/* 底部主题切换栏 */}
