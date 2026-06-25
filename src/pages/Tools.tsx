@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useI18n } from '../i18n';
 import { useGameStore } from '../store/gameStore';
 import { audioManager } from '../utils/audioManager';
@@ -12,11 +12,23 @@ import PageHeader from '../components/ui/PageHeader';
 
 type ToolKey = 'divination' | 'contemplation' | 'philosophy' | 'anxiety' | 'woodfish' | 'debate';
 
+// URL 路径 → 工具映射（支持直接通过 URL 进入工具）
+const pathToolMap: Record<string, ToolKey> = {
+  '/contemplation': 'contemplation',
+  '/divination': 'divination',
+  '/philosophy': 'philosophy',
+  '/anxiety': 'anxiety',
+  '/woodfish': 'woodfish',
+  '/debate': 'debate',
+};
+
 export default function Tools() {
   const language = useI18n((s) => s.language);
   const setPage = useGameStore((s) => s.setPage);
   const zh = language === 'zh';
-  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(() => {
+    return pathToolMap[window.location.pathname] ?? null;
+  });
 
   const handleBack = () => {
     audioManager.userTapped();

@@ -16,10 +16,29 @@ import BottomNav from './components/ui/BottomNav';
 import { AccessibilityProvider } from './components/a11y/AccessibilityProvider';
 import A11yControlPanel from './components/a11y/A11yControlPanel';
 
+// URL 路径 → 页面映射（支持直接通过 URL 进入工具）
+const pathPageMap: Record<string, 'tools'> = {
+  '/contemplation': 'tools',
+  '/divination': 'tools',
+  '/philosophy': 'tools',
+  '/anxiety': 'tools',
+  '/woodfish': 'tools',
+  '/debate': 'tools',
+};
+
 export default function App() {
-  const { currentPage } = useGameStore();
+  const { currentPage, setPage } = useGameStore();
   const language = useI18n((s) => s.language);
   const t = useI18n((s) => s.t);
+
+  // 初始化时根据 URL 路径设置页面
+  useEffect(() => {
+    const path = window.location.pathname;
+    const targetPage = pathPageMap[path];
+    if (targetPage && currentPage !== targetPage) {
+      setPage(targetPage);
+    }
+  }, []);
 
   // 订阅音频管理器状态变化（用于刷新按钮图标）
   const [audioTick, setAudioTick] = useState(0);
