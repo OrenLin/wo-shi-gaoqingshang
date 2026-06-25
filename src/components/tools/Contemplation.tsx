@@ -44,6 +44,7 @@ export default function Contemplation({ onBack }: Props) {
   const [quoteExpanded, setQuoteExpanded] = useState(true);
   const [hintVisible, setHintVisible] = useState(false);
   const [isCollapsing, setIsCollapsing] = useState(false);
+  const [guideVisible, setGuideVisible] = useState(false);
 
   // 滑动相关
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -63,6 +64,19 @@ export default function Contemplation({ onBack }: Props) {
       return () => clearTimeout(timer);
     }
   }, [quoteExpanded]);
+
+  // 新手引导：首次访问时显示
+  useEffect(() => {
+    const hasSeenGuide = localStorage.getItem('contemplation-guide-seen');
+    if (!hasSeenGuide) {
+      setGuideVisible(true);
+    }
+  }, []);
+
+  const dismissGuide = useCallback(() => {
+    setGuideVisible(false);
+    localStorage.setItem('contemplation-guide-seen', 'true');
+  }, []);
 
   // 语录自动轮播（12秒）— 仅在展开时
   useEffect(() => {
@@ -238,48 +252,67 @@ export default function Contemplation({ onBack }: Props) {
       <div className="absolute inset-0 z-20 flex items-center justify-center px-4 pointer-events-none">
         <div
           ref={cardRef}
-          className={`w-[85%] max-w-[340px] transition-all duration-500 ${
+          className={`w-[80%] max-w-[300px] transition-all duration-500 ${
             cardVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
           } ${cardVisible ? 'pointer-events-auto' : ''}`}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
           <div
-            className="relative rounded-3xl p-6 shadow-2xl cursor-pointer select-none border border-white/30"
+            className="relative rounded-3xl p-5 shadow-2xl select-none border border-white/30"
             style={{
               backgroundColor: 'rgba(20,20,40,0.4)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
             }}
-            onClick={() => switchQuote('next')}
           >
+            {/* 左箭头 */}
+            <button
+              onClick={(e) => { e.stopPropagation(); switchQuote('prev'); }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center opacity-30 hover:opacity-70 active:scale-90 transition-all"
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))' }}
+              aria-label={zh ? '上一条' : 'Previous'}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2.5L4 6L7.5 9.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+
+            {/* 右箭头 */}
+            <button
+              onClick={(e) => { e.stopPropagation(); switchQuote('next'); }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center opacity-30 hover:opacity-70 active:scale-90 transition-all"
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15))' }}
+              aria-label={zh ? '下一条' : 'Next'}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+
             {/* 主题标签 */}
-            <div className="text-center mb-4">
+            <div className="text-center mb-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 text-white/70 text-xs font-bold"
                 style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
               >
-                <span className="text-base">{currentTheme.emoji}</span>
+                <span className="text-sm">{currentTheme.emoji}</span>
                 <span>{zh ? currentTheme.name.zh : currentTheme.name.en}</span>
               </div>
             </div>
 
             {/* 语录正文 */}
-            <div className="text-center mb-5 min-h-[120px] flex flex-col justify-center">
-              <div className="text-white text-lg font-bold leading-relaxed mb-3">
+            <div className="text-center mb-4 min-h-[100px] flex flex-col justify-center">
+              <div className="text-white text-base font-bold leading-relaxed mb-2.5">
                 "{zh ? currentQuote.zh : currentQuote.en}"
               </div>
-              <div className="text-white/50 text-xs font-medium">
+              <div className="text-white/40 text-[11px] font-medium">
                 — {currentQuote.author}
               </div>
             </div>
 
             {/* 收起按钮 — 呼吸感圆形图标 */}
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-3">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleQuoteExpand();
                 }}
-                className="group relative w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+                className="group relative w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90"
                 aria-label={zh ? '收起语录' : 'Collapse quotes'}
               >
                 {/* 呼吸光环 */}
@@ -292,11 +325,11 @@ export default function Contemplation({ onBack }: Props) {
                 />
                 {/* 内圆 */}
                 <span
-                  className="relative w-8 h-8 rounded-full flex items-center justify-center border border-white/30 transition-all group-hover:border-white/50"
+                  className="relative w-7 h-7 rounded-full flex items-center justify-center border border-white/30 transition-all group-hover:border-white/50"
                   style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white/70 group-hover:text-white/90 transition-colors">
-                    <path d="M3 5 L7 9 L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/70 group-hover:text-white/90 transition-colors">
+                    <path d="M2.5 4.5 L6 7.5 L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
               </button>
@@ -374,6 +407,102 @@ export default function Contemplation({ onBack }: Props) {
           {currentTheme.emoji} {zh ? currentTheme.name.zh : currentTheme.name.en}
         </div>
       </div>
+
+      {/* === 新手引导 === */}
+      {guideVisible && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
+          onClick={dismissGuide}
+        >
+          <div className="w-[90%] max-w-[360px] p-6 rounded-3xl border border-white/20"
+            style={{ backgroundColor: 'rgba(30,30,50,0.95)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 标题 */}
+            <div className="text-center mb-5">
+              <div className="text-3xl mb-2">✨</div>
+              <div className="text-white text-lg font-bold">
+                {zh ? '沉思空间' : 'Contemplation Space'}
+              </div>
+              <div className="text-white/50 text-xs font-medium mt-1">
+                {zh ? '探索内心的宁静角落' : 'Explore your inner peace'}
+              </div>
+            </div>
+
+            {/* 引导项 */}
+            <div className="space-y-3 mb-5">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-400/40 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm">🎨</span>
+                </div>
+                <div className="flex-1 pt-1">
+                  <div className="text-white text-sm font-bold mb-0.5">
+                    {zh ? '主题切换' : 'Theme Switch'}
+                  </div>
+                  <div className="text-white/60 text-xs">
+                    {zh ? '左侧图标点击切换不同主题背景' : 'Tap left icons to switch themes'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-400/40 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm">←→</span>
+                </div>
+                <div className="flex-1 pt-1">
+                  <div className="text-white text-sm font-bold mb-0.5">
+                    {zh ? '语录切换' : 'Quote Switch'}
+                  </div>
+                  <div className="text-white/60 text-xs">
+                    {zh ? '左右滑动或点击箭头切换语录' : 'Swipe or tap arrows to switch quotes'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-pink-500/20 border border-pink-400/40 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm">⬇️</span>
+                </div>
+                <div className="flex-1 pt-1">
+                  <div className="text-white text-sm font-bold mb-0.5">
+                    {zh ? '折叠展开' : 'Collapse & Expand'}
+                  </div>
+                  <div className="text-white/60 text-xs">
+                    {zh ? '点击下方按钮折叠语录卡片' : 'Tap button to collapse quote card'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-green-500/20 border border-green-400/40 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm">👆</span>
+                </div>
+                <div className="flex-1 pt-1">
+                  <div className="text-white text-sm font-bold mb-0.5">
+                    {zh ? '互动特效' : 'Interactive Effects'}
+                  </div>
+                  <div className="text-white/60 text-xs">
+                    {zh ? '折叠后滑动屏幕，让画面动起来' : 'Swipe screen to animate effects'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 确认按钮 */}
+            <button
+              onClick={dismissGuide}
+              className="w-full py-3 rounded-2xl text-white font-bold text-sm transition-all active:scale-95"
+              style={{
+                background: 'linear-gradient(135deg, rgba(168,85,247,0.6), rgba(236,72,153,0.6))',
+                border: '1px solid rgba(255,255,255,0.2)',
+              }}
+            >
+              {zh ? '我知道了' : 'Got it'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
