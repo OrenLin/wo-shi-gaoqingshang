@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useI18n } from '../i18n';
 import { useGameStore } from '../store/gameStore';
 import { audioManager } from '../utils/audioManager';
@@ -10,7 +10,10 @@ import EQPlan from '../components/profile/EQPlan';
 import SurveyLink from '../components/ui/SurveyLink';
 import PageHeader from '../components/ui/PageHeader';
 
-type Tab = 'history' | 'trajectory' | 'plan';
+// 动态导入藏品查看器（代码分割）
+const CollectionViewer = lazy(() => import('../components/profile/CollectionViewer'));
+
+type Tab = 'history' | 'trajectory' | 'plan' | 'collection';
 
 export default function Profile() {
   const language = useI18n((s) => s.language);
@@ -29,6 +32,7 @@ export default function Profile() {
     { key: 'history', emoji: '📊', label: zh ? '报告' : 'Reports' },
     { key: 'trajectory', emoji: '📈', label: zh ? '轨迹' : 'Trajectory' },
     { key: 'plan', emoji: '📚', label: zh ? '计划' : 'Plan' },
+    { key: 'collection', emoji: '🏛️', label: zh ? '藏品' : 'Collection' },
   ];
 
   // 成长等级判定
@@ -105,9 +109,9 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Tab 切换 —— 3 Tab + 弹簧动画 */}
-        <div className="mb-4 bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[3px_3px_0_0_#1a1a2e] p-1.5">
-          <div className="grid grid-cols-3 gap-1" role="tablist">
+        {/* Tab 切换 */}
+        <div className="mb-4 bg-white rounded-2xl border-[3px] border-[#1a1a2e] shadow-[4px_4px_0_0_#1a1a2e] p-1.5">
+          <div className="grid grid-cols-4 gap-1" role="tablist">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -146,6 +150,11 @@ export default function Profile() {
           {activeTab === 'history' && <ReportHistory />}
           {activeTab === 'trajectory' && <EQTrajectory />}
           {activeTab === 'plan' && <EQPlan />}
+          {activeTab === 'collection' && (
+            <Suspense fallback={<div className="text-center py-8 text-gray-500">加载中...</div>}>
+              <CollectionViewer />
+            </Suspense>
+          )}
         </div>
 
         {/* 问卷链接 */}
