@@ -161,6 +161,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 #learn.collapsed{transform:translateY(calc(100% - 40px))}
 #learn-head{display:flex;align-items:center;justify-content:space-between;height:40px;padding:0 16px;cursor:pointer;user-select:none}
 #learn-head .en{font-family:var(--font-display);font-size:9px;letter-spacing:.3em;color:var(--accent-cyan);text-transform:uppercase}
+#learn-head .head-cn{display:none} /* 桌面端隐藏，仅移动端显示 */
 #learn-head .toggle{font-family:var(--font-display);color:var(--text-dim);font-size:14px;transition:transform .4s}
 #learn.collapsed #learn-head .toggle{transform:rotate(180deg)}
 #learn-body{padding:4px 18px 18px}
@@ -231,18 +232,32 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   #settings-btn{top:56px;right:10px;width:32px;height:32px;font-size:14px}
   #settings-panel{top:94px;right:10px;width:190px}
 
-  #console{top:auto;bottom:0;left:0;right:0;width:100%;height:auto;max-height:55vh;border-left:none;border-top:1px solid var(--line);border-radius:14px 14px 0 0;transform:translateY(calc(100% - 46px));overflow-y:auto}
+  /* 控制台：移动端底部抽屉，缩小高度避免遮挡 3D 场景 */
+  #console{top:auto;bottom:0;left:0;right:0;width:100%;height:auto;max-height:48vh;border-left:none;border-top:1px solid var(--line-hi);border-radius:16px 16px 0 0;transform:translateY(calc(100% - 56px));overflow-y:auto;background:rgba(10,16,26,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 -8px 32px rgba(0,0,0,.45)}
   #console.open{transform:translateY(0)}
-  #console-handle{display:flex;align-items:center;justify-content:center;height:46px;cursor:pointer;user-select:none;border-bottom:1px solid var(--line);background:rgba(10,16,26,.6)}
-  #console-handle::before{content:"";width:36px;height:4px;border-radius:2px;background:var(--text-dim);opacity:.5}
+  /* 抽屉拉手：文字 + 图标 + 视觉强调，明确告知可点击 */
+  #console-handle{display:flex;align-items:center;justify-content:center;gap:10px;height:56px;cursor:pointer;user-select:none;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(16,26,44,.55),rgba(10,16,26,.85));position:relative;padding:0 16px}
+  #console-handle .grip{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:2px;background:var(--accent-cyan);opacity:.55;transition:opacity .2s}
+  #console-handle .label{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1;margin-top:6px}
+  #console-handle .label-cn{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-hi);letter-spacing:.12em}
+  #console-handle .label-en{font-family:var(--font-display);font-size:8.5px;letter-spacing:.3em;color:var(--accent-cyan);text-transform:uppercase;opacity:.85}
+  #console-handle .chev{position:absolute;right:18px;top:50%;transform:translateY(-25%);font-size:14px;color:var(--accent-cyan);transition:transform .35s;line-height:1}
+  #console.open #console-handle .chev{transform:translateY(-75%) rotate(180deg)}
+  #console-handle:active .grip{opacity:.9}
   .panel-head{padding:12px 16px 8px}
   .ctrl{padding:12px 16px}
   #presets{padding:12px 16px}
   #preset-note{padding:10px 16px}
 
-  #learn{width:100%;bottom:auto;top:48px;z-index:9;border-right:none;border-bottom:1px solid var(--line);transform:translateY(calc(-100% + 40px))}
+  /* 学习面板：移动端顶部条，避免与 HUD 重叠，增强可读性 */
+  #learn{width:100%;bottom:auto;top:calc(env(safe-area-inset-top, 0px) + 48px);z-index:9;border-right:none;border-bottom:1px solid var(--line);transform:translateY(calc(-100% + 44px));background:rgba(10,16,26,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   #learn.collapsed{transform:translateY(0)}
-  #learn-head{height:40px}
+  #learn-head{height:44px;padding:0 14px;gap:8px}
+  #learn-head .en{font-size:10px;letter-spacing:.28em}
+  #learn-head .head-cn{display:inline-flex;align-items:center;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-hi);letter-spacing:.1em;margin-left:auto}
+  #learn:not(.collapsed) #learn-head .head-cn::before{content:"收起 "}
+  #learn.collapsed #learn-head .head-cn::before{content:"展开 "}
+  #learn-head .toggle{font-size:16px;color:var(--accent-cyan)}
 
   #bg-grid{background-size:40px 40px}
 }
@@ -275,6 +290,19 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   #back-btn .back-label { display: none; }
   #settings-btn { top: calc(env(safe-area-inset-top, 0px) + 8px) !important; right: 8px !important; min-width: 40px; min-height: 40px; }
   #console { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important; }
+  /* 标注详情卡片：移动端紧凑化 */
+  #info-card { padding: 18px 16px !important; }
+  #info-card h3 { font-size: 17px !important; }
+  #info-card .desc { font-size: 12.5px !important; line-height: 1.8 !important; }
+  #info-card .fact { font-size: 11.5px !important; padding: 10px 12px !important; }
+  #info-card .live { flex-wrap: wrap; gap: 10px 14px !important; padding-top: 10px !important; }
+  #info-card .live .lv { font-size: 13px !important; }
+  /* 引导卡片：移动端紧凑化 */
+  .ob-card { padding: 22px 18px !important; }
+  .ob-card h2 { font-size: 20px !important; }
+  .ob-card p { font-size: 13px !important; line-height: 1.75 !important; }
+  .ob-card .key { font-size: 11px !important; padding: 6px 10px !important; }
+  .ob-card button { padding: 10px 26px !important; font-size: 11px !important; }
 }
 
 @media (max-width: 480px) {
@@ -285,6 +313,11 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   #console .ctrl .row label { font-size: 12px !important; }
   #console .ctrl .hint { font-size: 10px !important; }
   .preset { font-size: 11px !important; padding: 8px 6px !important; }
+  /* 极小屏：进一步紧凑 info/onboard */
+  #info-card { padding: 14px 12px !important; }
+  #info-card h3 { font-size: 15px !important; }
+  .ob-card { padding: 18px 14px !important; }
+  .ob-card h2 { font-size: 18px !important; }
 }
 
 /* ========== 极小屏 ========== */
@@ -343,7 +376,11 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 </div>
 
 <aside id="console">
-  <div id="console-handle"></div>
+  <div id="console-handle">
+    <span class="grip"></span>
+    <span class="label"><span class="label-cn">操控面板</span><span class="label-en">CONSOLE</span></span>
+    <span class="chev">⌄</span>
+  </div>
   <div class="panel-head">
     <div class="en">Control Console</div>
     <h2>反应堆控制台</h2>
@@ -390,6 +427,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 <aside id="learn" class="collapsed">
   <div id="learn-head">
     <div class="en">Reactor 101</div>
+    <span class="head-cn">操控说明</span>
     <div class="toggle">▾</div>
   </div>
   <div id="learn-body">
@@ -697,8 +735,8 @@ if(isMobile){
   controls.zoomSpeed=0.8;
   controls.panSpeed=0.6;
   controls.enablePan=false;  // 移动端禁用平移，避免误触
-  // 移动端相机初始位置：拉近、抬高，让反应堆主体更突出
-  camera.position.set(18,14,22);
+  // 移动端相机初始位置：略偏 +x 抬高，让反应堆主体突出，同时背景大机器人在视野右后方入镜
+  camera.position.set(22,15,24);
 } else {
   camera.position.set(22,18,28);
 }
@@ -2284,7 +2322,8 @@ document.querySelectorAll('.preset').forEach(btn=>{
     const p=PRESETS[btn.dataset.preset];
     setTarget({rodDepth:p.rodDepth,flow:p.flow,enrich:p.enrich,mod:p.mod},btn.dataset.preset);
     syncSliders();
-    if(p.cam)targetCamera(p.cam);
+    // 桌面端切预设相机视角；移动端保持当前视角，避免丢失背景大机器人远景
+    if(p.cam && !isMobile)targetCamera(p.cam);
   });
 });
 
@@ -2320,11 +2359,19 @@ document.querySelectorAll('.q-btn').forEach(b=>b.addEventListener('click',()=>ap
 const consoleEl=document.getElementById('console');
 const consoleHandle=document.getElementById('console-handle');
 if(isMobile){
-  consoleHandle.addEventListener('click',()=>consoleEl.classList.toggle('open'));
+  consoleHandle.addEventListener('click',()=>{
+    const willOpen=!consoleEl.classList.contains('open');
+    consoleEl.classList.toggle('open',willOpen);
+    // 展开时相机抬高，让反应堆上半部分在抽屉上方可见；折叠时回到初始广角
+    targetCamera(willOpen?'mobile_console':'mobile_intro');
+  });
   // 点击控制台内部不关闭
   consoleEl.addEventListener('click',e=>{if(e.target===consoleEl)consoleEl.classList.remove('open');});
   // 打开标注或信息时收起抽屉
-  document.querySelectorAll('.lbl').forEach(l=>l.addEventListener('click',()=>consoleEl.classList.remove('open')));
+  document.querySelectorAll('.lbl').forEach(l=>l.addEventListener('click',()=>{
+    consoleEl.classList.remove('open');
+    targetCamera('mobile_intro');
+  }));
 }
 
 /* ========== 10 视觉映射 ========== */
@@ -2656,6 +2703,10 @@ const CAM_PRESETS={
   front:{pos:new THREE.Vector3(0,8,26),target:new THREE.Vector3(0,6,0)},
   top:{pos:new THREE.Vector3(0,28,12),target:new THREE.Vector3(0,4,0)},
   orbit:{pos:new THREE.Vector3(18,14,22),target:new THREE.Vector3(0,6,0)},
+  // 移动端操控视图：相机抬高，让反应堆上半部分在抽屉上方可见，背景大机器人入镜
+  mobile_console:{pos:new THREE.Vector3(14,22,18),target:new THREE.Vector3(0,11,0)},
+  // 移动端初始广角：略偏 +x，让远景大机器人(55,0,-55)在视野右后方入镜
+  mobile_intro:{pos:new THREE.Vector3(22,15,24),target:new THREE.Vector3(0,6,0)},
 };
 let camTarget=null;
 function targetCamera(name){
