@@ -14,9 +14,6 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet"></noscript>
-<!-- 预加载 three.js 核心模块，提升首屏访问速度 -->
-<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js">
-<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js">
 <style>
 /* ========== 设计系统 ========== */
 :root{
@@ -354,15 +351,22 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 (function(){
   // 标记 module 是否成功启动
   window.__reactorReady = false;
-  // 12 秒后若 module 未就绪，显示加载失败兜底页
-  window.__loadTimer = setTimeout(function(){
-    if(!window.__reactorReady){
-      var loader = document.getElementById('loader');
-      var fb = document.getElementById('load-fallback');
-      if(loader) loader.style.display = 'none';
-      if(fb) fb.style.display = 'flex';
-    }
-  }, 12000);
+  // 15 秒后若 module 未就绪，显示加载失败兜底页（等 DOM 解析后再设超时）
+  function startWatch(){
+    window.__loadTimer = setTimeout(function(){
+      if(!window.__reactorReady){
+        var loader = document.getElementById('loader');
+        var fb = document.getElementById('load-fallback');
+        if(loader) loader.style.display = 'none';
+        if(fb) fb.style.display = 'flex';
+      }
+    }, 15000);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', startWatch);
+  } else {
+    startWatch();
+  }
   // 重试按钮
   document.addEventListener('click', function(e){
     if(e.target && e.target.id === 'retry-btn'){
