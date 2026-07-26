@@ -5,6 +5,7 @@
     { "source": "/philosophy", "destination": "/index.html" },
     { "source": "/anxiety", "destination": "/index.html" },
     { "source": "/woodfish", "destination": "/index.html" },
-    { "source": "/debate", "destination": "/index.html" }
+    { "source": "/debate", "destination": "/index.html" },
+    { "source": "/gravity", "destination": "/gravity/index.html" }
   ]
 }
