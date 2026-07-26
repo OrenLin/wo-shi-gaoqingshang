@@ -348,6 +348,29 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   }
 }
 </script>
+
+<!-- 加载超时检测：独立普通脚本，不依赖 module，确保即使 three.js 加载失败也能提示用户 -->
+<script>
+(function(){
+  // 标记 module 是否成功启动
+  window.__reactorReady = false;
+  // 12 秒后若 module 未就绪，显示加载失败兜底页
+  window.__loadTimer = setTimeout(function(){
+    if(!window.__reactorReady){
+      var loader = document.getElementById('loader');
+      var fb = document.getElementById('load-fallback');
+      if(loader) loader.style.display = 'none';
+      if(fb) fb.style.display = 'flex';
+    }
+  }, 12000);
+  // 重试按钮
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.id === 'retry-btn'){
+      window.location.reload();
+    }
+  });
+})();
+</script>
 </head>
 <body>
 
@@ -359,6 +382,14 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 <div id="bg-grid"></div>
 
 <div id="loader"><div class="ring"></div><span>LOADING REACTOR CORE</span></div>
+
+<!-- 加载失败兜底：module 加载超时或失败时显示，不依赖任何外部库 -->
+<div id="load-fallback" style="display:none;position:fixed;inset:0;z-index:50;background:var(--bg-deep);align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center">
+  <div style="font-size:40px">⚠️</div>
+  <div style="font-family:var(--font-display);font-size:14px;letter-spacing:.2em;color:var(--accent-amber);text-transform:uppercase">加载失败</div>
+  <div style="font-size:13px;color:var(--text-mid);line-height:1.7;max-width:340px">3D 模块加载超时，可能是网络不稳定或 CDN 被拦截。</div>
+  <button id="retry-btn" style="margin-top:8px;background:none;border:1px solid var(--accent-cyan);color:var(--accent-cyan);padding:10px 28px;font-family:var(--font-display);font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:4px">重新加载</button>
+</div>
 
 <div id="scene-container"></div>
 <div id="css2d-layer"></div>
@@ -528,15 +559,15 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 
 /* ========== 00 设备检测与画质分级 ========== */
 const isMobile=window.matchMedia('(pointer: coarse)').matches||window.innerWidth<820;
-// 画质分级：移动端默认中画质（level 1），仅极低端设备（≤2 核 / 内存 ≤2GB）才降为低画质
+// 画质分级：保守策略，移动端默认低画质（level 0）保证流畅；桌面端中画质；平板可上探中画质
+// 用户可手动通过设置面板提升画质
 const hwCores=navigator.hardwareConcurrency||4;
 const hwMem=navigator.deviceMemory||4; // GB，近似值
 const isLowPower=isMobile||(hwCores<=2)||(hwMem<=2);
-// 大屏移动端（平板）可上探到高画质
 const isTablet=isMobile&&window.innerWidth>=768;
 
 const PERF={
-  level:isMobile?(isTablet?2:1):2,
+  level:isMobile?0:(isTablet?1:2),
   bloom:false, shadows:false, flowShader:false, flowParticles:true, steam:true, flashes:true, neutrons=true,
   antialias:false, pixelRatio:1, maxNeutrons:80, maxFlashes:25, maxFlow:24, maxSteam:30,
   physicsHz:30, updateInterval:2, tubeDetail:24, segDetail:16
@@ -2777,6 +2808,9 @@ window.addEventListener('resize',resizeAll);
 setTimeout(()=>{
   document.getElementById('loader').style.display='none';
   animate();
+  // 通知超时检测脚本：已成功启动
+  window.__reactorReady = true;
+  if(window.__loadTimer){ clearTimeout(window.__loadTimer); window.__loadTimer = null; }
 },700);
 
 // 引导层
