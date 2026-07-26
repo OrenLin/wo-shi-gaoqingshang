@@ -6,6 +6,8 @@
     { "source": "/anxiety", "destination": "/index.html" },
     { "source": "/woodfish", "destination": "/index.html" },
     { "source": "/debate", "destination": "/index.html" },
-    { "source": "/gravity", "destination": "/gravity/index.html" }
+    { "source": "/gravity", "destination": "/gravity/index.html" },
+    { "source": "/gravity/blackhole", "destination": "/gravity/blackhole.html" },
+    { "source": "/gravity/reactor", "destination": "/gravity/reactor.html" }
   ]
 }

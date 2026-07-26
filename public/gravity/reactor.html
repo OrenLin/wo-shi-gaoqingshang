@@ -31,7 +31,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-deep)}
-body{font-family:var(--font-body);color:var(--text-hi);-webkit-font-smoothing:antialiased;touch-action:none}
+body{font-family:var(--font-body);color:var(--text-hi);-webkit-font-smoothing:antialiased;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* ========== 天空背景层（末日废土） ========== */
@@ -678,9 +678,16 @@ scene.background=skyTex;
 scene.fog=new THREE.FogExp2(0x8a5a35,0.0045);
 
 const camera=new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,0.1,400);
-camera.position.set(22,18,28);
+// camera.position 在 controls 配置后设置（移动端/桌面端不同）
 
 let renderer, composer, bloomPass, labelRenderer;
+
+
+// 移动端默认折叠 learn 面板，避免遮挡 3D 画面
+if(isMobile){
+  const learn=document.getElementById('learn');
+  if(learn)learn.classList.add('collapsed');
+}
 
 function initRenderer(){
   renderer=new THREE.WebGLRenderer({antialias:PERF.antialias,powerPreference:isMobile?'low-power':'high-performance',alpha:false});
@@ -717,14 +724,20 @@ pmrem.dispose();
 const controls=new OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true;
 controls.dampingFactor=0.08;
-controls.minDistance=5;controls.maxDistance=180;
-controls.minPolarAngle=0.1;
-controls.maxPolarAngle=Math.PI/2+0.12; // 禁止俯视到地下，仅保留地面以上视角
+controls.minDistance=8;controls.maxDistance=120;
+controls.minPolarAngle=0.15;
+// 视角锁定：禁止俯视到地下，移动端更严格
+controls.maxPolarAngle=isMobile?Math.PI/2-0.02:Math.PI/2+0.08;
 controls.target.set(0,6,0);
 if(isMobile){
   controls.rotateSpeed=0.7;
   controls.zoomSpeed=0.8;
   controls.panSpeed=0.6;
+  controls.enablePan=false;  // 移动端禁用平移，避免误触
+  // 移动端相机初始位置：拉近、抬高，让反应堆主体更突出
+  camera.position.set(18,14,22);
+} else {
+  camera.position.set(22,18,28);
 }
 
 // 末日废土光照：暖橙主调 + 冷色微弱补光
@@ -2054,7 +2067,8 @@ function createBackgroundReactor(variant){
 }
 
 // 放置 12-14 座背景反应堆，环形散布在 65-140 单位远处
-const BG_REACTOR_COUNT=PERF.level>=2?14:(PERF.level>=1?12:8);
+// 移动端低端机减少背景反应堆数量（避免卡顿）
+const BG_REACTOR_COUNT=PERF.level>=2?14:(PERF.level>=1?12:(isMobile?6:8));
 W.bgReactors=[];
 for(let i=0;i<BG_REACTOR_COUNT;i++){
   const variant=i%3;
