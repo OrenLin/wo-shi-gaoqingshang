@@ -14,7 +14,7 @@ import type { SceneModule } from '../data/types';
 import { getOptionLevel } from '../data/levels';
 import { scoreCustomInput, scorePresetOption, type ScoringResult } from '../utils/scoring';
 
-export type PageName = 'home' | 'modules' | 'select' | 'game' | 'result' | 'report' | 'profile' | 'tools';
+export type PageName = 'home' | 'modules' | 'select' | 'game' | 'result' | 'report' | 'profile' | 'tools' | 'gravity';
 
 // 每一次答题的记录
 export interface AnswerRecord {

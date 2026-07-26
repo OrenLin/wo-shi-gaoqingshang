@@ -2,7 +2,7 @@ import { useGameStore, type PageName } from '../../store/gameStore';
 import { useI18n } from '../../i18n';
 import { audioManager } from '../../utils/audioManager';
 
-type TabKey = 'home' | 'scenes' | 'tools' | 'profile';
+type TabKey = 'home' | 'scenes' | 'tools' | 'profile' | 'gravity';
 
 export default function BottomNav() {
   const currentPage = useGameStore((s) => s.currentPage);
@@ -15,6 +15,7 @@ export default function BottomNav() {
     if (currentPage === 'home') return 'home';
     if (currentPage === 'profile') return 'profile';
     if (currentPage === 'tools') return 'tools';
+    if (currentPage === 'gravity') return 'gravity';
     return 'scenes'; // modules, select, game, result, report
   };
 
@@ -26,6 +27,11 @@ export default function BottomNav() {
     if (tab === 'home') setPage('home');
     else if (tab === 'scenes') setPage('modules');
     else if (tab === 'tools') setPage('tools');
+    else if (tab === 'gravity') {
+      // 跳转到万有引力黑洞工具 (独立页面)
+      window.location.href = '/gravity';
+      return;
+    }
     else setPage('profile');
   };
 
@@ -34,6 +40,7 @@ export default function BottomNav() {
     { key: 'scenes', icon: '🎯', label: zh ? '场景' : 'Scenes', target: 'modules' },
     { key: 'tools', icon: '🧰', label: zh ? '工具' : 'Tools', target: 'tools' },
     { key: 'profile', icon: '👤', label: zh ? '我的' : 'Me', target: 'profile' },
+    { key: 'gravity', icon: '🪐', label: zh ? '引力' : 'Gravity', target: 'gravity' },
   ];
 
   return (
@@ -42,7 +49,7 @@ export default function BottomNav() {
       role="navigation"
       aria-label={zh ? '主导航' : 'Main navigation'}
     >
-      <div className="grid grid-cols-4 gap-1 max-w-md mx-auto px-2 py-1"
+      <div className="grid grid-cols-5 gap-1 max-w-md mx-auto px-2 py-1"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {tabs.map((tab) => {
