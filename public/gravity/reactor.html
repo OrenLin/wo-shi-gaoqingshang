@@ -109,6 +109,12 @@ button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparen
   background:var(--panel);border:1px solid var(--line);color:var(--text-hi);display:flex;align-items:center;justify-content:center;
   font-size:16px;transition:border-color .2s,background .2s}
 #settings-btn:hover{border-color:var(--line-hi);background:rgba(8,18,30,.9)}
+/* 原理解析按钮：紧邻 settings-btn 左侧 */
+#learn-btn{position:fixed;top:66px;right:60px;z-index:12;width:36px;height:36px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line);color:var(--text-hi);display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s,background .2s}
+#learn-btn:hover{border-color:var(--line-hi);background:rgba(8,18,30,.9)}
+#learn-btn.active{border-color:var(--accent-cyan);color:var(--accent-cyan);background:rgba(56,240,255,.08)}
 #settings-panel{position:fixed;top:108px;right:16px;z-index:12;width:220px;background:var(--panel-solid);
   border:1px solid var(--line);border-radius:6px;padding:14px;transform:translateY(-10px);opacity:0;pointer-events:none;transition:all .2s}
 #settings-panel.show{transform:translateY(0);opacity:1;pointer-events:auto}
@@ -158,18 +164,21 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   min-height:52px;font-style:normal}
 #preset-note em{color:var(--accent-cyan);font-style:normal}
 
-/* ========== 左下学习面板 ========== */
-#learn{position:fixed;left:0;bottom:0;width:380px;z-index:10;background:var(--panel);backdrop-filter:blur(14px);
-  border-top:1px solid var(--line);border-right:1px solid var(--line);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
-#learn.collapsed{transform:translateY(calc(100% - 40px))}
-#learn-head{display:flex;align-items:center;justify-content:space-between;height:40px;padding:0 16px;cursor:pointer;user-select:none}
-#learn-head .en{font-family:var(--font-display);font-size:9px;letter-spacing:.3em;color:var(--accent-cyan);text-transform:uppercase}
-#learn-head .head-cn{display:none} /* 桌面端隐藏，仅移动端显示 */
-#learn-head .toggle{font-family:var(--font-display);color:var(--text-dim);font-size:14px;transition:transform .4s}
-#learn.collapsed #learn-head .toggle{transform:rotate(180deg)}
-#learn-body{padding:4px 18px 18px}
+/* ========== 原理解析浮层（桌面+移动统一） ========== */
+#learn{position:fixed;inset:0;z-index:20;background:rgba(5,7,13,.55);display:none;align-items:center;justify-content:center;padding:20px}
+#learn:not(.collapsed){display:flex}
+#learn.collapsed{display:none}
+#learn-layer{width:100%;max-width:460px;max-height:88vh;overflow-y:auto;background:var(--panel-solid);border:1px solid var(--line-hi);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55);animation:slideUp .35s cubic-bezier(.2,.8,.2,1);position:relative}
+#learn-card{padding:24px 22px}
+#learn-card .close{position:absolute;top:12px;right:14px;width:30px;height:30px;border:none;background:none;color:var(--text-mid);font-size:20px;cursor:pointer}
+#learn-card .close:hover{color:var(--accent-cyan)}
+#learn-head{display:flex;align-items:center;gap:10px;padding-right:36px;margin-bottom:14px;cursor:default;user-select:none}
+#learn-head .en{font-family:var(--font-display);font-size:10px;letter-spacing:.3em;color:var(--accent-cyan);text-transform:uppercase}
+#learn-head .head-cn{font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text-hi);letter-spacing:.08em}
+#learn-head .toggle{display:none}
+#learn-body{padding:0}
 #learn-body h2{font-size:16px;font-weight:600;margin-bottom:10px}
-#learn-body p{font-size:12px;color:var(--text-mid);line-height:1.9;margin-bottom:12px}
+#learn-body p{font-size:12.5px;color:var(--text-mid);line-height:1.9;margin-bottom:12px}
 #learn-body p b{color:var(--accent-cyan);font-weight:600}
 /* 链式反应 SVG 图解 */
 #chain-svg{width:100%;height:auto;display:block;margin-bottom:12px}
@@ -233,10 +242,13 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   #brand .sub{display:none}
 
   #settings-btn{top:56px;right:10px;width:32px;height:32px;font-size:14px}
+  #learn-btn{top:56px;right:50px;width:32px;height:32px}
   #settings-panel{top:94px;right:10px;width:190px}
 
   /* 控制台：移动端底部抽屉，缩小高度避免遮挡 3D 场景 */
-  #console{top:auto;bottom:0;left:0;right:0;width:100%;height:auto;max-height:48vh;border-left:none;border-top:1px solid var(--line-hi);border-radius:16px 16px 0 0;transform:translateY(calc(100% - 56px));overflow-y:auto;background:rgba(10,16,26,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 -8px 32px rgba(0,0,0,.45)}
+  #console-scrim{position:fixed;inset:0;z-index:8;background:rgba(5,7,13,.45);opacity:0;pointer-events:none;transition:opacity .3s}
+  #console-scrim.show{opacity:1;pointer-events:auto}
+  #console{top:auto;bottom:0;left:0;right:0;width:100%;height:auto;max-height:48vh;border-left:none;border-top:1px solid var(--line-hi);border-radius:16px 16px 0 0;transform:translateY(calc(100% - 56px));overflow-y:auto;background:rgba(10,16,26,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 -8px 32px rgba(0,0,0,.45);z-index:11}
   #console.open{transform:translateY(0)}
   /* 抽屉拉手：文字 + 图标 + 视觉强调，明确告知可点击 */
   #console-handle{display:flex;align-items:center;justify-content:center;gap:10px;height:56px;cursor:pointer;user-select:none;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(16,26,44,.55),rgba(10,16,26,.85));position:relative;padding:0 16px}
@@ -246,6 +258,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   #console-handle .label-en{font-family:var(--font-display);font-size:8.5px;letter-spacing:.3em;color:var(--accent-cyan);text-transform:uppercase;opacity:.85}
   #console-handle .chev{position:absolute;right:18px;top:50%;transform:translateY(-25%);font-size:14px;color:var(--accent-cyan);transition:transform .35s;line-height:1}
   #console.open #console-handle .chev{transform:translateY(-75%) rotate(180deg)}
+  #console.open #console-handle .label-cn::before{content:"收起"}
+  #console:not(.open) #console-handle .label-cn::before{content:"展开"}
+  #console #console-handle .label-cn{display:inline-flex}
+  #console #console-handle .label-cn::before{margin-right:2px}
   #console-handle:active .grip{opacity:.9}
   /* 引导高亮：onboard 关闭后吸引注意力到拉手 */
   @keyframes handleAttention{
@@ -260,15 +276,12 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   #presets{padding:12px 16px}
   #preset-note{padding:10px 16px}
 
-  /* 学习面板：移动端顶部条，避免与 HUD 重叠，增强可读性 */
-  #learn{width:100%;bottom:auto;top:calc(env(safe-area-inset-top, 0px) + 48px);z-index:9;border-right:none;border-bottom:1px solid var(--line);transform:translateY(calc(-100% + 44px));background:rgba(10,16,26,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-  #learn.collapsed{transform:translateY(0)}
-  #learn-head{height:44px;padding:0 14px;gap:8px}
-  #learn-head .en{font-size:10px;letter-spacing:.28em}
-  #learn-head .head-cn{display:inline-flex;align-items:center;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text-hi);letter-spacing:.1em;margin-left:auto}
-  #learn:not(.collapsed) #learn-head .head-cn::before{content:"收起 "}
-  #learn.collapsed #learn-head .head-cn::before{content:"展开 "}
-  #learn-head .toggle{font-size:16px;color:var(--accent-cyan)}
+  /* 学习面板：移动端浮层（与桌面统一），更紧凑的内边距 */
+  #learn-layer{max-width:92vw;max-height:80vh}
+  #learn-card{padding:20px 18px}
+  #learn-head .head-cn{font-size:13px}
+  #learn-body h2{font-size:15px}
+  #learn-body p{font-size:12px;line-height:1.85}
 
   #bg-grid{background-size:40px 40px}
 }
@@ -417,6 +430,9 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 </header>
 
 <button id="settings-btn" title="画质与性能">⚙</button>
+<button id="learn-btn" title="原理解析" aria-label="原理解析">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+</button>
 <div id="settings-panel">
   <div class="st-row"><span>画质 Quality</span><div class="q-btns"><button class="q-btn" data-q="0">低</button><button class="q-btn" data-q="1">中</button><button class="q-btn" data-q="2">高</button></div></div>
   <div class="st-row"><span>性能 Performance</span><span id="fps-counter">-- FPS</span></div>
@@ -424,6 +440,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   <div class="st-row"><span>粒子 Particles</span><span id="stat-particle">--</span></div>
 </div>
 
+<div id="console-scrim"></div>
 <aside id="console">
   <div id="console-handle">
     <span class="grip"></span>
@@ -474,13 +491,15 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 </aside>
 
 <aside id="learn" class="collapsed">
-  <div id="learn-head">
-    <div class="en">Reactor 101</div>
-    <span class="head-cn">操控说明</span>
-    <div class="toggle">▾</div>
-  </div>
-  <div id="learn-body">
-    <h2>链式反应 101</h2>
+  <div id="learn-layer">
+    <div id="learn-card">
+      <button class="close" id="learn-close">×</button>
+      <div id="learn-head">
+        <div class="en">Reactor 101</div>
+        <span class="head-cn">原理解析</span>
+      </div>
+      <div id="learn-body">
+        <h2>链式反应 101</h2>
     <svg id="chain-svg" viewBox="0 0 360 110" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <radialGradient id="gU"><stop offset="0%" stop-color="#38f0ff" stop-opacity=".9"/><stop offset="100%" stop-color="#38f0ff" stop-opacity="0"/></radialGradient>
@@ -521,6 +540,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="ef-node on" data-ef="thermal"><div class="n-dot"></div><div class="n-label">热能</div><div class="n-en">THERMAL</div></div>
       <div class="ef-node" data-ef="steam"><div class="n-dot"></div><div class="n-label">蒸汽</div><div class="n-en">STEAM</div></div>
       <div class="ef-node" data-ef="electric"><div class="n-dot"></div><div class="n-label">电能</div><div class="n-en">ELECTRIC</div></div>
+    </div>
+      </div>
     </div>
   </div>
 </aside>
@@ -654,8 +675,8 @@ const PRESETS={
 
 const ONBOARD=[
   {title:'欢迎来到临界',body:'这是一个可交互的 3D 压水反应堆教学模型。你将亲手调节控制棒、冷却剂流量等参数，观察链式反应与能量流动的变化。',keys:['🖱 拖拽旋转 / 单指','⚲ 滚轮缩放 / 双指']},
-  {title:'动手控制反应堆',body:'右侧面板有 4 个关键参数。试着拔出控制棒：你会看到功率上升、中子变密、辉光增强。',keys:['↕ 控制棒插入深度','⟐ 冷却剂流量']},
-  {title:'探索每个部件',body:'点击场景中的发光标注，查看压力容器、蒸汽发生器、主泵等部件的功能与实时数据。',keys:['⬤ 点击标注']},
+  {title:'动手控制反应堆',body:isMobile?'点击底部的「操控面板」拉手展开抽屉，里面有 4 个关键参数。试着拔出控制棒：你会看到功率上升、中子变密、辉光增强。':'右侧面板有 4 个关键参数。试着拔出控制棒：你会看到功率上升、中子变密、辉光增强。',keys:['↕ 控制棒插入深度','⟐ 冷却剂流量']},
+  {title:'探索每个部件',body:'点击场景中的发光标注，查看压力容器、蒸汽发生器、主泵等部件的功能与实时数据。点右上角 ⓘ 可查看原理解析。',keys:['⬤ 点击标注','ⓘ 原理解析']},
 ];
 
 /* ========== 02 初始化 ========== */
@@ -2385,8 +2406,25 @@ document.querySelectorAll('.preset').forEach(btn=>{
   });
 });
 
-// 学习面板折叠
-document.getElementById('learn-head').addEventListener('click',()=>document.getElementById('learn').classList.toggle('collapsed'));
+// 原理解析浮层：learn-btn 切换显示，close 按钮/遮罩收起
+const learnEl=document.getElementById('learn');
+const learnBtn=document.getElementById('learn-btn');
+learnBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  learnEl.classList.toggle('collapsed');
+  learnBtn.classList.toggle('active',!learnEl.classList.contains('collapsed'));
+});
+document.getElementById('learn-close').addEventListener('click',()=>{
+  learnEl.classList.add('collapsed');
+  learnBtn.classList.remove('active');
+});
+learnEl.addEventListener('click',e=>{if(e.target===learnEl)learnEl.classList.add('collapsed')});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#learn')&&!e.target.closest('#learn-btn')){
+    learnEl.classList.add('collapsed');
+    learnBtn.classList.remove('active');
+  }
+});
 
 // 标注详情
 const infoLayer=document.getElementById('info-layer');
@@ -2416,19 +2454,25 @@ document.querySelectorAll('.q-btn').forEach(b=>b.addEventListener('click',()=>ap
 // 移动端抽屉
 const consoleEl=document.getElementById('console');
 const consoleHandle=document.getElementById('console-handle');
+const consoleScrim=document.getElementById('console-scrim');
+function closeConsoleMobile(){
+  consoleEl.classList.remove('open');
+  consoleScrim.classList.remove('show');
+  if(isMobile)targetCamera('mobile_intro');
+}
 if(isMobile){
   consoleHandle.addEventListener('click',()=>{
     const willOpen=!consoleEl.classList.contains('open');
     consoleEl.classList.toggle('open',willOpen);
+    consoleScrim.classList.toggle('show',willOpen);
     // 展开时相机抬高，让反应堆上半部分在抽屉上方可见；折叠时回到初始广角
     targetCamera(willOpen?'mobile_console':'mobile_intro');
   });
-  // 点击控制台内部不关闭
-  consoleEl.addEventListener('click',e=>{if(e.target===consoleEl)consoleEl.classList.remove('open');});
+  // 点击遮罩收起抽屉
+  consoleScrim.addEventListener('click',closeConsoleMobile);
   // 打开标注或信息时收起抽屉
   document.querySelectorAll('.lbl').forEach(l=>l.addEventListener('click',()=>{
-    consoleEl.classList.remove('open');
-    targetCamera('mobile_intro');
+    closeConsoleMobile();
   }));
 }
 
