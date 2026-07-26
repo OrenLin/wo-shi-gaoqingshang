@@ -109,12 +109,19 @@ button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparen
   background:var(--panel);border:1px solid var(--line);color:var(--text-hi);display:flex;align-items:center;justify-content:center;
   font-size:16px;transition:border-color .2s,background .2s}
 #settings-btn:hover{border-color:var(--line-hi);background:rgba(8,18,30,.9)}
-/* 原理解析按钮：紧邻 settings-btn 左侧 */
-#learn-btn{position:fixed;top:66px;right:60px;z-index:12;width:36px;height:36px;border-radius:50%;
-  background:var(--panel);border:1px solid var(--line);color:var(--text-hi);display:flex;align-items:center;justify-content:center;
-  transition:border-color .2s,background .2s}
-#learn-btn:hover{border-color:var(--line-hi);background:rgba(8,18,30,.9)}
-#learn-btn.active{border-color:var(--accent-cyan);color:var(--accent-cyan);background:rgba(56,240,255,.08)}
+/* 原理解析按钮：紧邻 settings-btn 左侧（图标+文字胶囊，新用户易识别） */
+#learn-btn{position:fixed;top:66px;right:60px;z-index:12;height:32px;padding:0 11px 0 9px;border-radius:16px;
+  background:var(--panel);border:1px solid var(--line);color:var(--text-hi);
+  display:flex;align-items:center;gap:5px;font-size:12px;letter-spacing:.05em;font-family:var(--font-display);
+  transition:border-color .2s,background .2s,box-shadow .2s}
+#learn-btn svg{flex-shrink:0;opacity:.9}
+#learn-btn .lbl{white-space:nowrap}
+#learn-btn:hover{border-color:var(--line-hi);background:rgba(8,18,30,.9);box-shadow:0 0 12px rgba(56,240,255,.15)}
+#learn-btn.active{border-color:var(--accent-cyan);color:var(--accent-cyan);background:rgba(56,240,255,.1);box-shadow:0 0 14px rgba(56,240,255,.25)}
+@media(max-width:768px){
+  #learn-btn{right:60px;top:64px;padding:0 10px 0 8px;font-size:11px;letter-spacing:.04em}
+  #learn-btn .lbl{display:inline} /* 移动端保留文字，避免新用户看不懂 */
+}
 #settings-panel{position:fixed;top:108px;right:16px;z-index:12;width:220px;background:var(--panel-solid);
   border:1px solid var(--line);border-radius:6px;padding:14px;transform:translateY(-10px);opacity:0;pointer-events:none;transition:all .2s}
 #settings-panel.show{transform:translateY(0);opacity:1;pointer-events:auto}
@@ -431,7 +438,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 
 <button id="settings-btn" title="画质与性能">⚙</button>
 <button id="learn-btn" title="原理解析" aria-label="原理解析">
-  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+  <span class="lbl">原理解析</span>
 </button>
 <div id="settings-panel">
   <div class="st-row"><span>画质 Quality</span><div class="q-btns"><button class="q-btn" data-q="0">低</button><button class="q-btn" data-q="1">中</button><button class="q-btn" data-q="2">高</button></div></div>
@@ -814,8 +822,12 @@ if(isMobile){
   controls.zoomSpeed=0.8;
   controls.panSpeed=0.6;
   controls.enablePan=false;  // 移动端禁用平移，避免误触
-  // 移动端相机初始位置：略偏 +x 抬高，让反应堆主体突出，同时背景大机器人在视野右后方入镜
-  camera.position.set(22,15,24);
+  // 移动端相机初始位置：与 mobile_intro 一致，让左前方拾荒机器人+无人机+右后方大机器人同时入镜
+  camera.position.set(26,17,30);
+  controls.target.set(-4,8,-6); // 与 mobile_intro target 同步
+  camera.fov=58; // 移动端略放宽 FOV 让更多背景元素入镜
+  camera.updateProjectionMatrix();
+  controls.update();
 } else {
   camera.position.set(22,18,28);
 }
@@ -1495,20 +1507,29 @@ function createSpaceship(){
   // 存储引擎引用以供脉冲动画使用
   g.userData.engines=[engineCoreL,engineCoreR,engineGlowL,engineGlowR,haloL,haloR];
 
-  // 引擎点光源（双光源 + 脉冲）
-  const light=new THREE.PointLight(0xff8c40,3.0,25);light.position.set(0,0,-3.0);g.add(light);
-  const lightL=new THREE.PointLight(0xffaa60,1.5,12);lightL.position.set(-1.0,0,-2.5);g.add(lightL);
-  const lightR=new THREE.PointLight(0xffaa60,1.5,12);lightR.position.set(1.0,0,-2.5);g.add(lightR);
+  // 引擎点光源（柔化：降低强度+增大半径+冷色辅光平衡橙红，避免"硬闪"）
+  const light=new THREE.PointLight(0xff8c40,1.6,40,2.0);light.position.set(0,0,-3.0);g.add(light); // 主光源：强度减半，半径加大，decay=2 物理衰减
+  const lightL=new THREE.PointLight(0xffaa60,0.9,18,2.0);lightL.position.set(-1.0,0,-2.5);g.add(lightL);
+  const lightR=new THREE.PointLight(0xffaa60,0.9,18,2.0);lightR.position.set(1.0,0,-2.5);g.add(lightR);
+  // 冷色环境辅光：抵消橙红过曝，让金属机身有冷暖对比
+  const coolLight=new THREE.PointLight(0x6699ff,0.5,30,2.0);coolLight.position.set(0,1.0,-1.0);g.add(coolLight);
   g.userData.engineLights=[light,lightL,lightR];
-  // 引擎拖尾光柱（多层渐变 + 动态长度）
-  const trailL=new THREE.Sprite(new THREE.SpriteMaterial({map:shipTrailTex,transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
+  // 外层柔光晕（更大半径+更低透明度，模拟大气散射）
+  const softHaloMat=new THREE.MeshBasicMaterial({color:0xff7a40,transparent:true,opacity:0.18,blending:THREE.AdditiveBlending,fog:false,depthWrite:false});
+  const softHalo=new THREE.Mesh(new THREE.SphereGeometry(1.6,16,12),softHaloMat);softHalo.position.set(0,0,-2.4);softHalo.scale.z=0.5;g.add(softHalo);
+  g.userData.softHalo=softHalo;
+  // 引擎拖尾光柱（多层渐变 + 动态长度 + 外层大半径柔光）
+  const trailL=new THREE.Sprite(new THREE.SpriteMaterial({map:shipTrailTex,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
   trailL.scale.set(0.8,7,1);trailL.position.set(-1.0,0,-5.8);g.add(trailL);
-  const trailR=new THREE.Sprite(new THREE.SpriteMaterial({map:shipTrailTex,transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
+  const trailR=new THREE.Sprite(new THREE.SpriteMaterial({map:shipTrailTex,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
   trailR.scale.set(0.8,7,1);trailR.position.set(1.0,0,-5.8);g.add(trailR);
   // 中心拖尾（更亮更长）
-  const trailC=new THREE.Sprite(new THREE.SpriteMaterial({map:shipTrailTex,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
+  const trailC=new THREE.Sprite(new THREE.SpriteMaterial({map:shipTrailTex,transparent:true,opacity:0.4,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
   trailC.scale.set(1.5,9,1);trailC.position.set(0,0,-6.5);g.add(trailC);
-  g.userData.trails=[trailL,trailR,trailC];
+  // 外层超大柔光拖尾（增加大气感，避免线条过硬）
+  const trailSoft=new THREE.Sprite(new THREE.SpriteMaterial({map:shipTrailTex,transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
+  trailSoft.scale.set(3.0,11,1);trailSoft.position.set(0,0,-7.5);g.add(trailSoft);
+  g.userData.trails=[trailL,trailR,trailC,trailSoft];
 
   // 翼尖导航灯（红左绿右）
   const navL=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8),new THREE.MeshBasicMaterial({color:0xff0000,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,fog:false}));
@@ -1701,8 +1722,21 @@ function createGiantRobot(){
   const chestPlate2=new THREE.Mesh(new THREE.BoxGeometry(4.5,3,1),armorMat);chestPlate2.position.set(0,22.5,3.7);g.add(chestPlate2);
   // 胸口反应堆核心
   const core=new THREE.Mesh(new THREE.SphereGeometry(1.5,20,20),glowCoreMat);core.position.set(0,22.5,4.3);g.add(core);
+  // 核心外圈金属护环（八边形环，让核心有"嵌入"感）
+  const coreRing=new THREE.Mesh(new THREE.TorusGeometry(1.9,0.25,8,16),
+    new THREE.MeshStandardMaterial({color:0x4a2818,metalness:0.7,roughness:0.5}));
+  coreRing.position.set(0,22.5,4.3);g.add(coreRing);
+  // 4 根能量导管（从核心向外辐射，连接到肩部/腰部）
+  const conduitMat=new THREE.MeshStandardMaterial({color:0x1a0a04,metalness:0.4,roughness:0.7,emissive:0x661004,emissiveIntensity:0.4});
+  const conduitGeo=new THREE.CylinderGeometry(0.12,0.12,5,6);
+  const cd1=new THREE.Mesh(conduitGeo,conduitMat);cd1.position.set(-2.0,24,3.6);cd1.rotation.z=0.8;g.add(cd1);
+  const cd2=new THREE.Mesh(conduitGeo,conduitMat);cd2.position.set(2.0,24,3.6);cd2.rotation.z=-0.8;g.add(cd2);
+  const cd3=new THREE.Mesh(conduitGeo,conduitMat);cd3.position.set(-1.8,21,3.6);cd3.rotation.z=0.5;g.add(cd3);
+  const cd4=new THREE.Mesh(conduitGeo,conduitMat);cd4.position.set(1.8,21,3.6);cd4.rotation.z=-0.5;g.add(cd4);
   const coreLight=new THREE.PointLight(0xff2a1a,3.5,35);coreLight.position.set(0,22.5,5.5);g.add(coreLight);
   g.userData.glowCore=core;
+  // 核心导管脉冲发光（4 根同步呼吸）
+  g.userData.glowConduits=[cd1,cd2,cd3,cd4];
   // 腹部散热格栅
   for(let i=0;i<5;i++){
     const grill=new THREE.Mesh(new THREE.BoxGeometry(4,0.35,0.8),darkMat);grill.position.set(0,18-i*0.9,2.6);g.add(grill);
@@ -1724,9 +1758,28 @@ function createGiantRobot(){
 
   // 头部：更厚重的头盔
   const neck=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.5,2,8),darkMat);neck.position.y=27;g.add(neck);
+  // 颈部双液压杆（左右对称，连接头盔与躯干）
+  const neckHydL=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,2.4,8),armorMat);neckHydL.position.set(-0.9,27,1.0);neckHydL.rotation.z=0.15;g.add(neckHydL);
+  const neckHydR=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,2.4,8),armorMat);neckHydR.position.set(0.9,27,1.0);neckHydR.rotation.z=-0.15;g.add(neckHydR);
   const head=new THREE.Mesh(new THREE.BoxGeometry(3.8,3.6,4.2),darkMat);head.position.y=29.5;g.add(head);
   const helmTop=new THREE.Mesh(new THREE.BoxGeometry(4.6,1.2,4.8),armorMat);helmTop.position.y=31.2;g.add(helmTop);
   const helmVisor=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.8,0.5),rustMat);helmVisor.position.set(0,30.4,2.2);g.add(helmVisor);
+  // 额前观察缝（细长凹陷，独眼上方）
+  const browSlit=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.18,0.3),new THREE.MeshStandardMaterial({color:0x050302,metalness:0.2,roughness:1.0}));
+  browSlit.position.set(0,30.2,2.18);g.add(browSlit);
+  // 头盔铆钉阵列（4x2，沿额前分布）
+  const rivetMat=new THREE.MeshStandardMaterial({color:0x6a4828,metalness:0.85,roughness:0.4});
+  for(let rx=-1.5;rx<=1.5;rx+=1.0){
+    for(let rz=0;rz<2;rz++){
+      const rivet=new THREE.Mesh(new THREE.SphereGeometry(0.16,8,6),rivetMat);
+      rivet.position.set(rx,30.9+rz*0.05,2.25);g.add(rivet);
+    }
+  }
+  // 头顶散热鳍片（3 片，纵向排列）
+  for(let i=0;i<3;i++){
+    const fin=new THREE.Mesh(new THREE.BoxGeometry(0.4,1.6,2.4),armorMat);
+    fin.position.set(-0.8+i*0.8,32.2,0);g.add(fin);
+  }
   // 独眼
   const eye=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.45,0.5),glowMat);eye.position.set(0,29.5,2.25);g.add(eye);
   const eyeLight=new THREE.PointLight(0xff2a1a,1.8,16);eyeLight.position.set(0,29.5,3.2);g.add(eyeLight);
@@ -1734,12 +1787,26 @@ function createGiantRobot(){
   // 头部两侧天线
   const antL=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.12,5,6),rustMat);antL.position.set(-2.2,32.5,0);g.add(antL);
   const antR=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.12,5,6),rustMat);antR.position.set(2.2,32.5,0);g.add(antR);
+  // 天线顶端红色信号灯
+  const antTipL=new THREE.Mesh(new THREE.SphereGeometry(0.18,8,6),glowMat);antTipL.position.set(-2.2,35.2,0);g.add(antTipL);
+  const antTipR=new THREE.Mesh(new THREE.SphereGeometry(0.18,8,6),glowMat);antTipR.position.set(2.2,35.2,0);g.add(antTipR);
 
   // 肩部：厚重外扩护甲
   const shoulderPadL=new THREE.Mesh(new THREE.BoxGeometry(4.5,5,5),rustMat);shoulderPadL.position.set(-6.5,25.5,0);shoulderPadL.rotation.z=0.25;g.add(shoulderPadL);
   const shoulderPadR=new THREE.Mesh(new THREE.BoxGeometry(4.5,5,5),rustMat);shoulderPadR.position.set(6.5,25.5,0);shoulderPadR.rotation.z=-0.25;g.add(shoulderPadR);
+  // 肩部尖刺底座（六边形加固基座）
+  const spikeBaseL=new THREE.Mesh(new THREE.CylinderGeometry(1.6,2.0,1.2,6),darkMat);spikeBaseL.position.set(-7.6,26.8,0);spikeBaseL.rotation.z=0.6;g.add(spikeBaseL);
+  const spikeBaseR=new THREE.Mesh(new THREE.CylinderGeometry(1.6,2.0,1.2,6),darkMat);spikeBaseR.position.set(7.6,26.8,0);spikeBaseR.rotation.z=-0.6;g.add(spikeBaseR);
+  // 警告条纹贴片（肩甲正面）
+  const shoulderStripeL=new THREE.Mesh(new THREE.BoxGeometry(0.1,2.4,1.8),sideArmorMat);shoulderStripeL.position.set(-6.7,26,2.4);g.add(shoulderStripeL);
+  const shoulderStripeR=new THREE.Mesh(new THREE.BoxGeometry(0.1,2.4,1.8),sideArmorMat);shoulderStripeR.position.set(6.7,26,2.4);g.add(shoulderStripeR);
   const shoulderSpikeL=new THREE.Mesh(new THREE.ConeGeometry(1.8,6,6),armorMat);shoulderSpikeL.position.set(-8,27.5,0);shoulderSpikeL.rotation.z=0.6;g.add(shoulderSpikeL);
   const shoulderSpikeR=new THREE.Mesh(new THREE.ConeGeometry(1.8,6,6),armorMat);shoulderSpikeR.position.set(8,27.5,0);shoulderSpikeR.rotation.z=-0.6;g.add(shoulderSpikeR);
+  // 肩部铆钉（每肩 3 颗）
+  for(let i=0;i<3;i++){
+    const rL=new THREE.Mesh(new THREE.SphereGeometry(0.22,8,6),rivetMat);rL.position.set(-6.7,24+i*1.5,2.5);g.add(rL);
+    const rR=new THREE.Mesh(new THREE.SphereGeometry(0.22,8,6),rivetMat);rR.position.set(6.7,24+i*1.5,2.5);g.add(rR);
+  }
 
   // 左臂：自然下垂
   const upperArmL=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.4,9,8),armorMat);upperArmL.position.set(-8.5,21.5,0);upperArmL.rotation.z=0.12;g.add(upperArmL);
@@ -1754,9 +1821,52 @@ function createGiantRobot(){
   // 巨型链锯/战锤武器
   const weaponHandle=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,10,8),darkMat);weaponHandle.position.set(11,8,9);weaponHandle.rotation.x=1.1;g.add(weaponHandle);
   const weaponHead=new THREE.Mesh(new THREE.BoxGeometry(2.2,8,3),rustMat);weaponHead.position.set(11,5,14);weaponHead.rotation.x=1.1;g.add(weaponHead);
+  // 武器末端排气口（圆形 + 内部红光，独立材质避免与 glowMat 共享 opacity）
+  const exhaust=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.8,1.2,10),armorMat);
+  exhaust.position.set(11,9,8.4);exhaust.rotation.x=1.1;g.add(exhaust);
+  const exhaustGlow=new THREE.Mesh(new THREE.CircleGeometry(0.4,12),
+    new THREE.MeshBasicMaterial({color:0xff2a1a,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,fog:false}));
+  exhaustGlow.position.set(11,8.5,8.0);exhaustGlow.rotation.x=-Math.PI/2+1.1;g.add(exhaustGlow);
   for(let i=0;i<6;i++){
     const tooth=new THREE.Mesh(new THREE.ConeGeometry(0.25,0.9,4),glowMat);tooth.position.set(11,3+i*1.1,15.5+i*0.3);tooth.rotation.x=1.1;g.add(tooth);
   }
+  // 武器链锯齿基座（带发光纹路）
+  const toothBase=new THREE.Mesh(new THREE.BoxGeometry(0.4,8,1.5),
+    new THREE.MeshStandardMaterial({color:0x2a1a10,metalness:0.6,roughness:0.6,emissive:0x440804,emissiveIntensity:0.5}));
+  toothBase.position.set(11.6,5,15);toothBase.rotation.x=1.1;g.add(toothBase);
+  g.userData.weaponGlow=exhaustGlow;
+
+  // 背部喷气背包（2 个排气口 + 缓慢冒烟）
+  const packBody=new THREE.Mesh(new THREE.BoxGeometry(5,6,2),armorMat);packBody.position.set(0,22,-3.5);g.add(packBody);
+  const packTop=new THREE.Mesh(new THREE.BoxGeometry(5.4,0.6,2.4),darkMat);packTop.position.set(0,25,-3.6);g.add(packTop);
+  // 双排气口
+  const exhaustMat=new THREE.MeshStandardMaterial({color:0x1a0e08,metalness:0.7,roughness:0.4,emissive:0x331002,emissiveIntensity:0.5});
+  const exL=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.8,1.5,10),exhaustMat);exL.position.set(-1.5,20,-4.6);exL.rotation.x=Math.PI/2;g.add(exL);
+  const exR=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.8,1.5,10),exhaustMat);exR.position.set(1.5,20,-4.6);exR.rotation.x=Math.PI/2;g.add(exR);
+  // 排气口内部发光
+  const exGlowMat=new THREE.MeshBasicMaterial({color:0xff6a30,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,fog:false});
+  const exGlowL=new THREE.Mesh(new THREE.CircleGeometry(0.45,12),exGlowMat);exGlowL.position.set(-1.5,20,-5.4);exGlowL.rotation.y=Math.PI;g.add(exGlowL);
+  const exGlowR=new THREE.Mesh(new THREE.CircleGeometry(0.45,12),exGlowMat);exGlowR.position.set(1.5,20,-5.4);exGlowR.rotation.y=Math.PI;g.add(exGlowR);
+  // 背包顶部的散热管（2 根弯曲管道）
+  const pipeGeo=new THREE.CylinderGeometry(0.18,0.18,3.5,6);
+  const pipeL=new THREE.Mesh(pipeGeo,rustMat);pipeL.position.set(-1.8,24,-3.8);pipeL.rotation.z=0.3;g.add(pipeL);
+  const pipeR=new THREE.Mesh(pipeGeo,rustMat);pipeR.position.set(1.8,24,-3.8);pipeR.rotation.z=-0.3;g.add(pipeR);
+  // 烟雾粒子（缓慢上升，循环复用）
+  const smokeCount=24;
+  const smokePos=new Float32Array(smokeCount*3);
+  const smokeLife=new Float32Array(smokeCount);
+  for(let i=0;i<smokeCount;i++){
+    smokePos[i*3]=-1.5+(i%2)*3+(Math.random()-0.5)*0.4;
+    smokePos[i*3+1]=20+Math.random()*4;
+    smokePos[i*3+2]=-5.6-Math.random()*1.0;
+    smokeLife[i]=Math.random();
+  }
+  const smokeGeo=new THREE.BufferGeometry();
+  smokeGeo.setAttribute('position',new THREE.Float32BufferAttribute(smokePos,3));
+  const smokeMat=new THREE.PointsMaterial({color:0x6a5a4a,size:0.8,transparent:true,opacity:0.35,depthWrite:false,sizeAttenuation:true,fog:false});
+  const smokeSys=new THREE.Points(smokeGeo,smokeMat);g.add(smokeSys);
+  g.userData.smoke={sys:smokeSys,pos:smokePos,life:smokeLife,count:smokeCount,next:0};
+  g.userData.exhaustGlows=[exGlowL,exGlowR];
 
   // 腿部：粗壮液压杆造型（分组以便行走动画）
   const legHipY=14; // 髋关节高度
@@ -1843,6 +1953,298 @@ function createFloorLights(){
   return g;
 }
 envGroup.add(createFloorLights());
+
+/* ========== 路人 & 周围装置（废土工业 + 监测点） ========== */
+
+// 地面拾荒小机器人（1.5m 高，缓慢游荡 + 偶尔弯腰"搜寻"）
+function createScavengerBot(){
+  const g=new THREE.Group();
+  const bodyMat=new THREE.MeshStandardMaterial({color:0x3a2a1c,metalness:0.55,roughness:0.8});
+  const rustMat=new THREE.MeshStandardMaterial({color:0x4a2818,metalness:0.4,roughness:0.9});
+  const darkMat=new THREE.MeshStandardMaterial({color:0x1a0e08,metalness:0.3,roughness:0.95});
+  const glowMat=new THREE.MeshBasicMaterial({color:0xffaa44,transparent:true,opacity:0.95,blending:THREE.AdditiveBlending,fog:false});
+  // 躯干
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.8,0.5),bodyMat);torso.position.y=0.95;g.add(torso);
+  const chest=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.4,0.55),rustMat);chest.position.set(0,1.05,0.05);g.add(chest);
+  // 背包（搜寻到的"零件"）
+  const pack=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.5,0.3),darkMat);pack.position.set(0,0.95,-0.35);g.add(pack);
+  // 头部：独眼
+  const head=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.35,0.4),darkMat);head.position.y=1.55;g.add(head);
+  const eye=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.08,0.05),glowMat);eye.position.set(0,1.55,0.22);g.add(eye);
+  const eyeLight=new THREE.PointLight(0xffaa44,0.6,5);eyeLight.position.set(0,1.55,0.4);g.add(eyeLight);
+  // 双臂（前伸拾取姿态）
+  const armL=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.08,0.7,6),rustMat);armL.position.set(-0.42,1.05,0.15);armL.rotation.x=0.9;g.add(armL);
+  const armR=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.08,0.7,6),rustMat);armR.position.set(0.42,1.05,0.15);armR.rotation.x=0.9;g.add(armR);
+  const handL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.18,0.18),darkMat);handL.position.set(-0.42,0.72,0.55);g.add(handL);
+  const handR=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.18,0.18),darkMat);handR.position.set(0.42,0.72,0.55);g.add(handR);
+  // 双腿（独立分组以做摆动）
+  const legL=new THREE.Group();legL.position.set(-0.18,0.7,0);g.add(legL);
+  const legR=new THREE.Group();legR.position.set(0.18,0.7,0);g.add(legR);
+  const thighL=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.11,0.55,6),bodyMat);thighL.position.y=-0.27;legL.add(thighL);
+  const thighR=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.11,0.55,6),bodyMat);thighR.position.y=-0.27;legR.add(thighR);
+  const footL=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.12,0.35),darkMat);footL.position.set(0,-0.55,0.08);legL.add(footL);
+  const footR=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.12,0.35),darkMat);footR.position.set(0,-0.55,0.08);legR.add(footR);
+  g.userData.glowEye=eye;
+  return {mesh:g,legL,legR,torso,head};
+}
+// 创建 2 个拾荒机器人，分别放置在视野左前/右前
+const scavengers=[];
+const scavSpecs=[
+  {pos:[-18,0,12],ry:0.6,phase:0},
+  {pos:[16,0,18],ry:-0.4,phase:1.5},
+];
+for(const s of scavSpecs){
+  const bot=createScavengerBot();
+  bot.mesh.position.set(...s.pos);
+  bot.mesh.rotation.y=s.ry;
+  bot.walkPhase=s.phase;
+  bot.baseY=0;
+  bot.searchTimer=Math.random()*4;
+  scene.add(bot.mesh);
+  scavengers.push(bot);
+  W.scavengers=scavengers;
+}
+
+// 空中巡逻无人机（球形主体 + 4 旋翼 + 蓝色拖尾）
+function createDrone(color){
+  const g=new THREE.Group();
+  const bodyMat=new THREE.MeshStandardMaterial({color:0x1a2030,metalness:0.7,roughness:0.4});
+  const glowMat=new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,fog:false});
+  // 球形主体
+  const body=new THREE.Mesh(new THREE.SphereGeometry(0.35,12,10),bodyMat);g.add(body);
+  // 4 旋翼臂
+  const armMat=new THREE.MeshStandardMaterial({color:0x2a3040,metalness:0.6,roughness:0.5});
+  for(let i=0;i<4;i++){
+    const a=i/4*Math.PI*2;
+    const arm=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.6,5),armMat);
+    arm.position.set(Math.cos(a)*0.3,0,Math.sin(a)*0.3);
+    arm.rotation.z=Math.PI/2;
+    arm.rotation.y=a;
+    g.add(arm);
+    // 旋翼（半透明圆盘，旋转模糊感）
+    const rotor=new THREE.Mesh(new THREE.CircleGeometry(0.22,12),
+      new THREE.MeshBasicMaterial({color:0x88aacc,transparent:true,opacity:0.18,side:THREE.DoubleSide,depthWrite:false}));
+    rotor.position.set(Math.cos(a)*0.55,0.05,Math.sin(a)*0.55);
+    rotor.rotation.x=-Math.PI/2;
+    g.add(rotor);
+    g.userData['rotor'+i]=rotor;
+  }
+  // 蓝色发光眼
+  const eye=new THREE.Mesh(new THREE.SphereGeometry(0.12,10,8),glowMat);eye.position.set(0,0,0.3);g.add(eye);
+  const eyeLight=new THREE.PointLight(color,0.5,5);eyeLight.position.set(0,0,0.4);g.add(eyeLight);
+  g.userData.glowEye=eye;
+  return {mesh:g};
+}
+// 创建 3 架无人机，盘旋高度 8-13m
+const drones=[];
+const droneSpecs=[
+  {pos:[-12,10,8],color:0x44ddff,radius:3,speed:0.4,phase:0},
+  {pos:[8,13,14],color:0x66ffcc,radius:4,speed:0.3,phase:2.1},
+  {pos:[20,9,5],color:0x4488ff,radius:3.5,speed:0.45,phase:4.0},
+];
+for(const d of droneSpecs){
+  const dr=createDrone(d.color);
+  dr.mesh.position.set(...d.pos);
+  dr.base=d.pos.slice();
+  dr.radius=d.radius;
+  dr.speed=d.speed;
+  dr.phase=d.phase;
+  scene.add(dr.mesh);
+  drones.push(dr);
+  W.drones=drones;
+}
+
+// 废弃集装箱堆（锈蚀程序纹理 + 错落堆叠）
+function createContainerStack(px,pz,rot,count){
+  const g=new THREE.Group();
+  g.position.set(px,0,pz);
+  g.rotation.y=rot;
+  // 程序锈蚀纹理（共享缓存）
+  if(!createContainerStack.rustTex){
+    const c=document.createElement('canvas');c.width=256;c.height=256;
+    const x=c.getContext('2d');
+    // 底色：暗橙红锈
+    x.fillStyle='#5a2a14';x.fillRect(0,0,256,256);
+    // 横向条纹（集装箱棱）
+    for(let i=0;i<8;i++){x.fillStyle=i%2?'#6a3318':'#4a200e';x.fillRect(0,i*32,256,4);}
+    // 锈斑
+    for(let i=0;i<80;i++){
+      const rx=Math.random()*256,ry=Math.random()*256,rr=2+Math.random()*8;
+      x.fillStyle=`rgba(${60+Math.random()*60|0},${20+Math.random()*30|0},${10+Math.random()*15|0},${0.3+Math.random()*0.5})`;
+      x.beginPath();x.arc(rx,ry,rr,0,Math.PI*2);x.fill();
+    }
+    // 划痕/掉漆
+    for(let i=0;i<25;i++){
+      x.strokeStyle=`rgba(${20+Math.random()*40|0},${10},${5},${0.5+Math.random()*0.4})`;
+      x.lineWidth=0.5+Math.random();
+      x.beginPath();const x1=Math.random()*256,y1=Math.random()*256;
+      x.moveTo(x1,y1);x.lineTo(x1+(Math.random()-0.5)*40,y1+(Math.random()-0.5)*40);x.stroke();
+    }
+    const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.wrapT=THREE.RepeatWrapping;
+    createContainerStack.rustTex=t;
+  }
+  const mat=new THREE.MeshStandardMaterial({color:0x6a3818,metalness:0.4,roughness:0.85,map:createContainerStack.rustTex});
+  const darkMat=new THREE.MeshStandardMaterial({color:0x2a1810,metalness:0.3,roughness:0.9});
+  const stack=[
+    {x:0,z:0,y:1.2,w:5,h:2.4,d:2.2},
+    {x:0.3,z:-0.2,y:3.6,w:5,h:2.4,d:2.2},
+    {x:-0.2,z:0.4,y:6.0,w:4.8,h:2.4,d:2.2},
+  ];
+  for(let i=0;i<Math.min(count,stack.length);i++){
+    const s=stack[i];
+    const box=new THREE.Mesh(new THREE.BoxGeometry(s.w,s.h,s.d),mat);
+    box.position.set(s.x,s.y,s.z);g.add(box);
+    // 顶部金属框
+    const top=new THREE.Mesh(new THREE.BoxGeometry(s.w+0.1,0.15,s.d+0.1),darkMat);
+    top.position.set(s.x,s.y+s.h/2+0.07,s.z);g.add(top);
+    // 门把手
+    const handle=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.6,0.1),darkMat);
+    handle.position.set(s.x+s.w/2-0.4,s.y,s.z+s.d/2+0.05);g.add(handle);
+  }
+  return g;
+}
+envGroup.add(createContainerStack(-25,5,0.4,3));
+envGroup.add(createContainerStack(28,-10,-0.6,2));
+envGroup.add(createContainerStack(-32,-18,1.2,2));
+
+// 输油管道（弯曲多段 + 阀门 + 支架）
+function createPipeline(){
+  const g=new THREE.Group();
+  const pipeMat=new THREE.MeshStandardMaterial({color:0x3a2818,metalness:0.5,roughness:0.7});
+  const rustMat=new THREE.MeshStandardMaterial({color:0x4a2010,metalness:0.4,roughness:0.85});
+  const valveMat=new THREE.MeshStandardMaterial({color:0x6a3010,metalness:0.6,roughness:0.6});
+  // 路径点（从远处装置接入反应堆基座）
+  const pts=[
+    new THREE.Vector3(-30,1.8,-5),
+    new THREE.Vector3(-25,1.8,2),
+    new THREE.Vector3(-20,1.8,5),
+    new THREE.Vector3(-15,2.4,8),
+    new THREE.Vector3(-12,3.0,10),
+    new THREE.Vector3(-10,3.4,11),
+  ];
+  // 用 CatmullRom 曲线生成管路
+  const curve=new THREE.CatmullRomCurve3(pts);
+  const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,40,0.35,8,false),pipeMat);
+  g.add(tube);
+  // 第二根并行管（更细）
+  const pts2=pts.map(p=>new THREE.Vector3(p.x+0.7,p.y-0.1,p.z));
+  const curve2=new THREE.CatmullRomCurve3(pts2);
+  const tube2=new THREE.Mesh(new THREE.TubeGeometry(curve2,40,0.18,6,false),rustMat);
+  g.add(tube2);
+  // 阀门（弯曲中点位置）
+  const valvePos=pts[2];
+  const valveBase=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.5,10),valveMat);
+  valveBase.position.copy(valvePos);valveBase.position.y+=0.3;g.add(valveBase);
+  const valveWheel=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.06,6,12),rustMat);
+  valveWheel.position.copy(valvePos);valveWheel.position.y+=0.7;
+  valveWheel.rotation.x=Math.PI/2;g.add(valveWheel);
+  // 支架（每段一个）
+  for(let i=0;i<pts.length-1;i+=2){
+    const p=pts[i];
+    const sup=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.1,p.y,6),rustMat);
+    sup.position.set(p.x,p.y/2,p.z);g.add(sup);
+  }
+  // 滴漏发光（小光斑）
+  const dripMat=new THREE.MeshBasicMaterial({color:0xff6622,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,fog:false});
+  for(let i=0;i<3;i++){
+    const drip=new THREE.Mesh(new THREE.SphereGeometry(0.08,6,5),dripMat);
+    drip.position.set(pts[i+1].x,pts[i+1].y-0.4,pts[i+1].z);
+    drip.userData.phase=i*2;
+    g.add(drip);
+    if(!g.userData.drips)g.userData.drips=[];
+    g.userData.drips.push(drip);
+  }
+  return g;
+}
+envGroup.add(createPipeline());
+
+// 警示灯柱（细长 + 顶部红光缓闪）
+function createWarningLight(px,pz){
+  const g=new THREE.Group();
+  g.position.set(px,0,pz);
+  const poleMat=new THREE.MeshStandardMaterial({color:0x2a1810,metalness:0.6,roughness:0.6});
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.16,6,8),poleMat);
+  pole.position.y=3;g.add(pole);
+  // 顶部灯罩
+  const lampMat=new THREE.MeshBasicMaterial({color:0xff2a1a,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,fog:false});
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.35,12,10),lampMat);
+  lamp.position.y=6.3;g.add(lamp);
+  // 外圈光晕
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(0.6,12,10),
+    new THREE.MeshBasicMaterial({color:0xff3a22,transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,fog:false,depthWrite:false}));
+  halo.position.y=6.3;g.add(halo);
+  const light=new THREE.PointLight(0xff2a1a,1.2,18);light.position.y=6.3;g.add(light);
+  // 底座
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.5,0.3,8),poleMat);
+  base.position.y=0.15;g.add(base);
+  g.userData.lamp=lamp;
+  g.userData.halo=halo;
+  g.userData.light=light;
+  g.userData.phase=Math.random()*Math.PI*2;
+  return g;
+}
+const warn1=createWarningLight(-22,18);
+const warn2=createWarningLight(25,12);
+envGroup.add(warn1,warn2);
+W.warnLights=[warn1,warn2];
+
+// 旋转雷达天线（底座 + 抛物面 + 缓慢扫描）
+function createRadarDish(px,pz){
+  const g=new THREE.Group();
+  g.position.set(px,0,pz);
+  const towerMat=new THREE.MeshStandardMaterial({color:0x1f242c,metalness:0.6,roughness:0.5});
+  const dishMat=new THREE.MeshStandardMaterial({color:0x3a4250,metalness:0.7,roughness:0.4,side:THREE.DoubleSide});
+  const glowMat=new THREE.MeshBasicMaterial({color:0x44ddff,transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,fog:false});
+  // 塔架（4 段桁架式）
+  for(let i=0;i<3;i++){
+    const seg=new THREE.Mesh(new THREE.CylinderGeometry(0.25-i*0.04,0.3-i*0.04,2,6),towerMat);
+    seg.position.y=1+i*2;g.add(seg);
+  }
+  // 顶端旋转部分（独立分组）
+  const head=new THREE.Group();head.position.y=7;g.add(head);
+  // 抛物面
+  const dish=new THREE.Mesh(new THREE.SphereGeometry(1.4,16,8,0,Math.PI*2,0,Math.PI/2.4),dishMat);
+  dish.rotation.x=-Math.PI/2.4;head.add(dish);
+  // 信号发射器
+  const emitter=new THREE.Mesh(new THREE.SphereGeometry(0.18,8,6),glowMat);
+  emitter.position.set(0,0,1.0);head.add(emitter);
+  const eLight=new THREE.PointLight(0x44ddff,0.6,6);eLight.position.set(0,0,1.0);head.add(eLight);
+  // 横轴
+  const shaft=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,1.6,6),towerMat);
+  shaft.rotation.z=Math.PI/2;head.add(shaft);
+  g.userData.head=head;
+  g.userData.emitter=emitter;
+  return g;
+}
+const radar=createRadarDish(30,-15);
+envGroup.add(radar);
+W.radar=radar;
+
+// 半埋断裂电缆/废铁（地面散落细节）
+function createScrap(px,pz){
+  const g=new THREE.Group();
+  g.position.set(px,0,pz);
+  const rustMat=new THREE.MeshStandardMaterial({color:0x3a1f10,metalness:0.4,roughness:0.9});
+  const darkMat=new THREE.MeshStandardMaterial({color:0x1a0e08,metalness:0.3,roughness:0.95});
+  // 几段弯曲钢筋
+  for(let i=0;i<3;i++){
+    const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,2+Math.random()*1.5,5),rustMat);
+    bar.position.set((Math.random()-0.5)*1.5,0.1,(Math.random()-0.5)*1.5);
+    bar.rotation.set(Math.random()*0.3,Math.random()*Math.PI*2,Math.PI/2+Math.random()*0.4);
+    g.add(bar);
+  }
+  // 破碎混凝土块
+  for(let i=0;i<2;i++){
+    const chunk=new THREE.Mesh(new THREE.BoxGeometry(0.4+Math.random()*0.3,0.25,0.4+Math.random()*0.3),darkMat);
+    chunk.position.set((Math.random()-0.5)*1.8,0.12,(Math.random()-0.5)*1.8);
+    chunk.rotation.y=Math.random()*Math.PI;
+    g.add(chunk);
+  }
+  return g;
+}
+for(const p of [[-20,10],[14,22],[-28,-8],[22,-22],[-10,28]]){
+  envGroup.add(createScrap(p[0],p[1]));
+}
 
 const starGeo=new THREE.BufferGeometry();
 const starPos=[];for(let i=0;i<200;i++){const r=75+Math.random()*55,a=Math.random()*Math.PI*2,b=Math.random()*Math.PI/3+0.2;
@@ -2660,20 +3062,31 @@ function updateVisuals(dt){
         ud.engines[5].material.opacity=0.3*(0.6+pulse*0.4); // haloR
       }
       if(ud.engineLights){
-        const lp=0.7+Math.sin(time*4.0+i*1.3)*0.3;
-        ud.engineLights[0].intensity=3.0*lp;
-        ud.engineLights[1].intensity=1.5*lp;
-        ud.engineLights[2].intensity=1.5*lp;
+        // 柔化脉冲：幅度从 0.7-1.0 收窄到 0.88-1.0，避免"硬闪"感
+        const lp=0.94+Math.sin(time*3.2+i*1.3)*0.06;
+        ud.engineLights[0].intensity=1.6*lp;
+        ud.engineLights[1].intensity=0.9*lp;
+        ud.engineLights[2].intensity=0.9*lp;
       }
-      // 拖尾动态：长度和透明度随引擎脉冲变化
+      // 外层柔光晕呼吸
+      if(ud.softHalo){
+        const hp=0.85+Math.sin(time*2.0+i)*0.15;
+        ud.softHalo.material.opacity=0.18*hp;
+        ud.softHalo.scale.set(1+hp*0.06,1+hp*0.06,0.5);
+      }
+      // 拖尾动态：长度和透明度随引擎脉冲变化（柔化）
       if(ud.trails){
-        const tp=0.7+Math.sin(time*3.5+i)*0.3;
-        ud.trails[0].scale.y=7+tp*1.5;
-        ud.trails[0].material.opacity=0.85*tp;
-        ud.trails[1].scale.y=7+tp*1.5;
-        ud.trails[1].material.opacity=0.85*tp;
-        ud.trails[2].scale.y=9+tp*2.0;
-        ud.trails[2].material.opacity=0.5*tp;
+        const tp=0.85+Math.sin(time*2.8+i)*0.12;
+        ud.trails[0].scale.y=7+tp*1.2;
+        ud.trails[0].material.opacity=0.7*tp;
+        ud.trails[1].scale.y=7+tp*1.2;
+        ud.trails[1].material.opacity=0.7*tp;
+        ud.trails[2].scale.y=9+tp*1.5;
+        ud.trails[2].material.opacity=0.4*tp;
+        if(ud.trails[3]){ // 外层超大柔光拖尾
+          ud.trails[3].scale.y=11+tp*2.0;
+          ud.trails[3].material.opacity=0.22*tp;
+        }
       }
       // 翼尖导航灯闪烁（红左绿右，交替）
       if(ud.navLights){
@@ -2774,6 +3187,124 @@ function updateVisuals(dt){
       }
       dGeo.attributes.position.needsUpdate=true;
     }
+    // 能量导管脉冲（与核心脉冲同步）
+    if(ud.glowConduits){
+      const cp=0.4+Math.sin(time*2.8)*0.25;
+      for(const cd of ud.glowConduits)cd.material.emissiveIntensity=cp;
+    }
+    // 武器排气口发光（缓慢呼吸）
+    if(ud.weaponGlow){
+      ud.weaponGlow.material.opacity=0.6+Math.sin(time*2.4)*0.2;
+    }
+    // 背包排气口发光 + 烟雾粒子上升
+    if(ud.exhaustGlows){
+      const ep=0.7+Math.sin(time*1.8)*0.15;
+      ud.exhaustGlows[0].material.opacity=ep;
+      ud.exhaustGlows[1].material.opacity=ep;
+    }
+    if(ud.smoke){
+      const sp=ud.smoke.pos,sl=ud.smoke.life;
+      for(let i=0;i<ud.smoke.count;i++){
+        if(sl[i]<=0){
+          // 重生：从背包排气口冒出
+          sp[i*3]=((i%2)*2-1)*1.5+(Math.random()-0.5)*0.3;
+          sp[i*3+1]=20+Math.random()*0.4;
+          sp[i*3+2]=-5.4-Math.random()*0.5;
+          sl[i]=1.0;
+        }
+        sl[i]-=dt*0.18; // 烟雾存活 ~5.5 秒
+        sp[i*3+1]+=dt*1.2; // 上升速度
+        sp[i*3]+=(Math.random()-0.5)*dt*0.4; // 横向漂移
+        sp[i*3+2]-=dt*0.3; // 略向后飘
+      }
+      ud.smoke.sys.geometry.attributes.position.needsUpdate=true;
+    }
+  }
+
+  // 地面拾荒机器人：缓慢游荡 + 偶尔弯腰"搜寻" + 双腿摆动
+  if(W.scavengers){
+    for(const bot of W.scavengers){
+      const m=bot.mesh;
+      // 缓慢转向往复行走（在小范围内来回）
+      bot.walkPhase+=dt*1.2;
+      const walkAmount=Math.sin(bot.walkPhase)*0.6; // -0.6 ~ +0.6
+      const baseRY=m.userData.baseRY!==undefined?m.userData.baseRY:(m.userData.baseRY=m.rotation.y);
+      m.rotation.y=baseRY+walkAmount*0.3;
+      // 前后位移（小幅）
+      const fwd=new THREE.Vector3(Math.sin(m.rotation.y),0,Math.cos(m.rotation.y));
+      if(!m.userData.basePos)m.userData.basePos=m.position.clone();
+      m.position.x=m.userData.basePos.x+fwd.x*walkAmount*2;
+      m.position.z=m.userData.basePos.z+fwd.z*walkAmount*2;
+      // 双腿摆动
+      const legSwing=Math.sin(bot.walkPhase*3)*0.4*Math.abs(walkAmount)*2;
+      if(bot.legL)bot.legL.rotation.x=legSwing;
+      if(bot.legR)bot.legR.rotation.x=-legSwing;
+      // 拾荒姿态：周期性弯腰（前倾 + 微下蹲）
+      bot.searchTimer-=dt;
+      let bend=0;
+      if(bot.searchTimer<1.2){ // 最后 1.2 秒做弯腰动作
+        const t=1.2-bot.searchTimer;
+        bend=Math.sin(t/1.2*Math.PI)*0.5; // 0 → 0.5 → 0 平滑曲线
+      }
+      if(bot.searchTimer<=0)bot.searchTimer=4+Math.random()*3; // 4-7 秒一个拾荒循环
+      if(bot.torso)bot.torso.rotation.x=0.15+bend*0.5; // 弯腰时身体前倾
+      if(bot.head)bot.head.position.y=1.55-bend*0.15; // 头部稍低
+      // 眼睛脉冲
+      const ud=m.userData;
+      if(ud.glowEye){
+        ud.glowEye.material.opacity=0.85+Math.sin(time*4+bot.walkPhase)*0.12;
+      }
+    }
+  }
+
+  // 空中无人机：圆周盘旋 + 旋翼旋转 + 高度浮动
+  if(W.drones){
+    for(const d of W.drones){
+      const m=d.mesh;
+      d.phase+=dt*d.speed;
+      // 圆周盘旋
+      m.position.x=d.base[0]+Math.cos(d.phase)*d.radius;
+      m.position.z=d.base[2]+Math.sin(d.phase)*d.radius;
+      // 高度浮动（小幅度上下）
+      m.position.y=d.base[1]+Math.sin(d.phase*2)*0.6;
+      // 朝向飞行方向（切线）
+      m.rotation.y=-d.phase+Math.PI/2;
+      // 旋翼旋转（每帧 30 度，使用 userData 引用）
+      const spin=time*30;
+      for(let i=0;i<4;i++){
+        const r=m.userData['rotor'+i];
+        if(r)r.rotation.z=spin;
+      }
+      // 眼睛脉冲
+      if(m.userData.glowEye){
+        m.userData.glowEye.material.opacity=0.85+Math.sin(time*5+d.phase)*0.12;
+      }
+    }
+  }
+
+  // 警示灯柱：缓慢红光闪烁（异相）
+  if(W.warnLights){
+    for(const w of W.warnLights){
+      const p=0.5+Math.sin(time*1.5+w.userData.phase)*0.5; // 0~1 平滑闪烁
+      const intensity=0.3+p*0.9; // 0.3 ~ 1.2
+      if(w.userData.lamp)w.userData.lamp.material.opacity=0.4+p*0.55;
+      if(w.userData.halo){
+        w.userData.halo.material.opacity=0.15+p*0.25;
+        w.userData.halo.scale.set(1+p*0.2,1+p*0.2,1);
+      }
+      if(w.userData.light)w.userData.light.intensity=intensity;
+    }
+  }
+
+  // 旋转雷达天线：缓慢扫描 + 信号脉冲
+  if(W.radar){
+    const r=W.radar;
+    if(r.userData.head)r.userData.head.rotation.y=time*0.5; // 缓慢旋转
+    if(r.userData.emitter){
+      r.userData.emitter.material.opacity=0.6+Math.sin(time*3)*0.25;
+      const es=1+Math.sin(time*3)*0.1;
+      r.userData.emitter.scale.set(es,es,es);
+    }
   }
 
   // 背景反应堆：堆芯微弱脉冲 + 蒸汽云呼吸
@@ -2807,8 +3338,8 @@ const CAM_PRESETS={
   orbit:{pos:new THREE.Vector3(18,14,22),target:new THREE.Vector3(0,6,0)},
   // 移动端操控视图：相机抬高，让反应堆上半部分在抽屉上方可见，背景大机器人入镜
   mobile_console:{pos:new THREE.Vector3(14,22,18),target:new THREE.Vector3(0,11,0)},
-  // 移动端初始广角：略偏 +x，让远景大机器人(55,0,-55)在视野右后方入镜
-  mobile_intro:{pos:new THREE.Vector3(22,15,24),target:new THREE.Vector3(0,6,0)},
+  // 移动端初始广角：抬高相机 + 略左偏，让左前方地面拾荒机器人(-18,0,12)、空中无人机(-12,10,8)、右后方大机器人(55,0,-55) 同时入镜
+  mobile_intro:{pos:new THREE.Vector3(26,17,30),target:new THREE.Vector3(-4,8,-6)},
 };
 let camTarget=null;
 function targetCamera(name){
