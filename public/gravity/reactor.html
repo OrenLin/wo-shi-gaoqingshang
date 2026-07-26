@@ -300,43 +300,6 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
   }
 }
-
-// ========== 引力工具集：返回按钮 ==========
-document.getElementById('back-btn')?.addEventListener('click', () => {
-  window.location.href = '/gravity/';
-});
-
-// ========== 性能守卫：页面隐藏暂停渲染 ==========
-let __rafId = null;
-const __origRAF = window.requestAnimationFrame;
-const __origCancel = window.cancelAnimationFrame;
-let __hidden = false;
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    __hidden = true;
-    console.log('[gravity-reactor] 页面隐藏，暂停渲染');
-  } else if (__hidden) {
-    __hidden = false;
-    console.log('[gravity-reactor] 页面恢复，继续渲染');
-  }
-});
-
-// ========== 低电量自动降级 ==========
-if (navigator.getBattery) {
-  navigator.getBattery().then(battery => {
-    const checkBattery = () => {
-      if (!battery.charging && battery.level < 0.2) {
-        const curLevel = typeof PERF !== 'undefined' ? PERF.level : 1;
-        if (curLevel > 0) {
-          setQuality(0);
-          console.log('[gravity-reactor] 低电量，自动降级到低画质');
-        }
-      }
-    };
-    checkBattery();
-    battery.addEventListener('levelchange', checkBattery);
-  }).catch(() => {});
-}
 </script>
 </head>
 <body>
@@ -2792,7 +2755,7 @@ if (navigator.getBattery) {
       if (!battery.charging && battery.level < 0.2) {
         const curLevel = typeof PERF !== 'undefined' ? PERF.level : 1;
         if (curLevel > 0) {
-          setQuality(0);
+          applyQuality(0);
           console.log('[gravity-reactor] 低电量，自动降级到低画质');
         }
       }
