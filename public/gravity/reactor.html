@@ -572,10 +572,14 @@ const isTablet=isMobile&&window.innerWidth>=768;
 
 const PERF={
   level:isMobile?0:(isTablet?1:2),
-  bloom:false, shadows:false, flowShader:false, flowParticles:true, steam:true, flashes:true, neutrons=true,
+  bloom:false, shadows:false, flowShader:false, flowParticles:true, steam:true, flashes:true, neutrons:true,
   antialias:false, pixelRatio:1, maxNeutrons:80, maxFlashes:25, maxFlow:24, maxSteam:30,
   physicsHz:30, updateInterval:2, tubeDetail:24, segDetail:16
 };
+// 程序纹理分辨率按画质分级：移动端用小纹理，避免 2048² 同步生成阻塞主线程
+const TEX_SIZE = PERF.level>=2 ? 2048 : (PERF.level>=1 ? 1024 : 512);
+const TEX_SKY_W = PERF.level>=2 ? 2048 : (PERF.level>=1 ? 1024 : 512);
+const TEX_SKY_H = PERF.level>=2 ? 1024 : (PERF.level>=1 ? 512 : 256);
 
 // 粒子系统变量前置声明（供 applyQuality 在初始化前调用）
 let NEUTRON_COUNT,nGeo,nPos,nVel,nLife,nActive,nMat;
@@ -663,7 +667,7 @@ const scene=new THREE.Scene();
 // ========== 电影级废土天空（疯狂的麦克斯风格） ==========
 // 天空渐变纹理：2:1 等距柱状映射，从天顶到地平线的色彩层次
 function createWastelandSkyTexture(){
-  const W=2048,H=1024;
+  const W=TEX_SKY_W,H=TEX_SKY_H;
   const c=document.createElement('canvas');c.width=W;c.height=H;
   const x=c.getContext('2d');
   const g=x.createLinearGradient(0,0,0,H);
@@ -836,7 +840,7 @@ function fractalNoise2D(width,height,octaves,persistence,seedFn){
   return grid;
 }
 function createWastelandFloorTexture(){
-  const S=2048;
+  const S=TEX_SIZE;
   const c=document.createElement('canvas');c.width=S;c.height=S;
   const x=c.getContext('2d');
   const noise=fractalNoise2D(S,S,6,0.55);
@@ -928,7 +932,7 @@ function createWastelandFloorTexture(){
 }
 // 废土地面高度图（沙丘/龟裂起伏，高分辨率）
 function createWastelandHeightTexture(){
-  const S=1024;
+  const S=PERF.level>=1 ? 1024 : 512;
   const c=document.createElement('canvas');c.width=S;c.height=S;
   const x=c.getContext('2d');
   const noise=fractalNoise2D(S,S,7,0.5);
