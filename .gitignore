@@ -21,5 +21,11 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?wo-shi-gaoqingshang/
+*.sw?
 wo-shi-gaoqingshang/
+
+# 内部文档（不入公开仓库）
+.trae/
+.superpowers/
+HANDOVER.md
+docs/
